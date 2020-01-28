@@ -251,23 +251,23 @@ void Matrix::addBox(double x, double y, double z, double w, double h, double d)
     double y1 = y - h;
     double z1 = z - d;
 
-    //addTriangle(x, y, z, x1, y, z, x, y, z1);
-    //addTriangle(x1, y ,z, x1, y, z1, x, y, z1);
+    addTriangle(x, y, z, x1, y, z, x, y, z1);
+    addTriangle(x1, y ,z, x1, y, z1, x, y, z1);
 
-    //addTriangle(x, y, z, x, y1, z, x1, y1, z);
+    addTriangle(x, y, z, x, y1, z, x1, y1, z);
     addTriangle(x, y, z, x1, y1, z, x1, y, z);
 
-    //addTriangle(x, y, z, x, y1, z1, x, y1, z);
-    //addTriangle(x, y, z, x, y, z1, x, y1, z1);
+    addTriangle(x, y, z, x, y1, z1, x, y1, z);
+    addTriangle(x, y, z, x, y, z1, x, y1, z1);
 
-    //addTriangle(x, y1, z, x, y1, z1, x1, y1, z);
-    //addTriangle(x1, y1, z, x, y1, z1, x1, y1, z1);
+    addTriangle(x, y1, z, x, y1, z1, x1, y1, z);
+    addTriangle(x1, y1, z, x, y1, z1, x1, y1, z1);
 
-    //addTriangle(x1, y, z, x1, y1, z, x1, y1, z1);
-    //addTriangle(x1, y, z, x1, y1, z1, x1, y, z1);
+    addTriangle(x1, y, z, x1, y1, z, x1, y1, z1);
+    addTriangle(x1, y, z, x1, y1, z1, x1, y, z1);
 
-    //addTriangle(x, y, z1, x1, y1, z1, x, y1, z1);
-    //addTriangle(x, y, z1, x1, y, z1, x1, y1, z1);
+    addTriangle(x, y, z1, x1, y1, z1, x, y1, z1);
+    addTriangle(x, y, z1, x1, y, z1, x1, y1, z1);
 }
 
 void Matrix::addBox(Vec v, double w, double h, double d)
