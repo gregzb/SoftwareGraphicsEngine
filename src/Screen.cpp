@@ -2,7 +2,9 @@
 #include "Screen.hpp"
 #include "PixelGrid.hpp"
 
-Screen::Screen(int width, int height) : PixelGrid(width, height), zbuffer(width, height), graphics(*this) {}
+Screen::Screen(int width, int height) : PixelGrid(width, height), zbuffer(width, height), graphics(*this) {
+    clearZbuf();
+}
 
 void Screen::toFile(std::string fileName)
 {
@@ -30,7 +32,8 @@ void Screen::toFileExtension(std::string fileName)
 
     FILE *f = popen(command.c_str(), "w");
     fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
-    for (int y = height - 1; y >= 0; y--)
+    //for (int y = height - 1; y >= 0; y--)
+    for (int y = 0; y < height; y++)
     {
         for (int x = 0; x < width; x++)
         {
@@ -61,10 +64,23 @@ void Screen::display()
     pclose(f);
 }
 
-PixelGrid<double> &Screen::zbuf() {
+PixelGrid<double> &Screen::zbuf()
+{
     return zbuffer;
 }
 
-double &Screen::zbuf(int row, int col) {
+double &Screen::zbuf(int row, int col)
+{
     return zbuffer(row, col);
+}
+
+void Screen::clearZbuf(double value)
+{
+    for (int row = 0; row < zbuf().getHeight(); row++)
+    {
+        for (int col = 0; col < zbuf().getWidth(); col++)
+        {
+            zbuf(row, col) = value;
+        }
+    }
 }

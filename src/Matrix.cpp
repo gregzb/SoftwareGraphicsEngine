@@ -59,7 +59,7 @@ void Matrix::identity()
     }
 }
 
-void Matrix::transpose()
+Matrix Matrix::transpose()
 {
     Matrix temp(getColumns(), getRows());
     for (int row = 0; row < getRows(); row++)
@@ -70,9 +70,7 @@ void Matrix::transpose()
         }
     }
 
-    rows = temp.rows;
-    cols = temp.cols;
-    m = temp.m;
+    return temp;
 }
 
 void Matrix::clear()
@@ -84,12 +82,12 @@ void Matrix::clear()
     cols = 0;
 }
 
-void Matrix::multiply(const Matrix &matrix)
+Matrix Matrix::multiply(const Matrix &matrix)
 {
     if (getColumns() != matrix.getRows())
     {
         std::cout << "Illegal matrix multiplication!" << std::endl;
-        return;
+        return *this;
     }
 
     Matrix result(getRows(), matrix.getColumns());
@@ -104,9 +102,8 @@ void Matrix::multiply(const Matrix &matrix)
             }
         }
     }
-    m = result.m;
-    rows = result.rows;
-    cols = result.cols;
+    
+    return result;
 }
 
 void Matrix::addPoint(double x, double y, double z)

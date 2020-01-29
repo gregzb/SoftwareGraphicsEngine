@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <limits>
 #include "Utils.hpp"
 #include "PixelGrid.hpp"
 #include "Graphics.hpp"
@@ -20,4 +21,5 @@ public:
     void display();
     PixelGrid<double> &zbuf();
     double &zbuf(int row, int col);
+    void clearZbuf(double value = -std::numeric_limits<double>::infinity());
 };

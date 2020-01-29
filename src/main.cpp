@@ -33,9 +33,7 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             iss >> x0 >> y0 >> z0 >> x1 >> y1 >> z1;
             edges.addEdge(x0, y0, z0, x1, y1, z1);
 
-            Matrix topCopy = coordSystems.back();
-            topCopy.multiply(edges);
-            edges = topCopy;
+            edges = coordSystems.back().multiply(edges);
             screen.graphics.drawEdges(edges, {255, 255, 255, 255});
             edges.clear();
         }
@@ -48,9 +46,7 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             iss >> x0 >> y0 >> z0 >> x1 >> y1 >> z1 >> x2 >> y2 >> z2;
             triangles.addTriangle(x0, y0, z0, x1, y1, z1, x2, y2, z2);
 
-            Matrix topCopy = coordSystems.back();
-            topCopy.multiply(triangles);
-            triangles = topCopy;
+            triangles = coordSystems.back().multiply(triangles);
             screen.graphics.drawTriangles(triangles, {255, 255, 255, 255});
             triangles.clear();
         }
@@ -73,7 +69,7 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             Matrix temp = Matrix::scale(x, y, z);
             // temp.multiply(coordSystems.back());
             // coordSystems.back() = temp;
-            coordSystems.back().multiply(temp);
+            coordSystems.back() = coordSystems.back().multiply(temp);
         }
         else if (line == "move" || line == "translate")
         {
@@ -85,7 +81,7 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             Matrix temp = Matrix::translate(x, y, z);
             // temp.multiply(coordSystems.back());
             // coordSystems.back() = temp;
-            coordSystems.back().multiply(temp);
+            coordSystems.back() = coordSystems.back().multiply(temp);
         }
         else if (line == "rotate")
         {
@@ -115,34 +111,16 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             }
             //temp.multiply(coordSystems.back());
             //coordSystems.back() = temp;
-            coordSystems.back().multiply(temp);
+            coordSystems.back() = coordSystems.back().multiply(temp);
         }
         else if (line == "display")
         {
-            // screen.graphics.clear({0, 0, 0, 255});
-            // screen.graphics.drawEdges(edges, {255, 255, 255, 255});
-            // Matrix copy = triangles;
-            // for (int row = 0; row < 3; row++) {
-            //     for (int thing = 0; thing < copy[row].size(); thing++) {
-            //         copy[row][thing] += offset[row];
-            //     }
-            // }
-            // screen.graphics.drawTriangles(copy, {255, 0, 255, 255});
             screen.display();
             std::cout << std::endl;
         }
         else if (line == "save")
         {
             std::getline(infile, line);
-            // screen.graphics.clear({0, 0, 0, 255});
-            // screen.graphics.drawEdges(edges, {255, 255, 255, 255});
-            // Matrix copy = triangles;
-            // for (int row = 0; row < 3; row++) {
-            //     for (int thing = 0; thing < copy[row].size(); thing++) {
-            //         copy[row][thing] += offset[row];
-            //     }
-            // }
-            // screen.graphics.drawTriangles(copy, {255, 0, 255, 255});
             screen.toFileExtension(line);
         }
         else if (line == "circle")
@@ -154,9 +132,7 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             iss >> x >> y >> z >> r;
             edges.addCircle(x, y, z, r, 100);
 
-            Matrix topCopy = coordSystems.back();
-            topCopy.multiply(edges);
-            edges = topCopy;
+            edges = coordSystems.back().multiply(edges);
             screen.graphics.drawEdges(edges, {255, 255, 255, 255});
             edges.clear();
         }
@@ -169,9 +145,7 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             iss >> x0 >> y0 >> x1 >> y1 >> rx0 >> ry0 >> rx1 >> ry1;
             edges.addCurve(x0, y0, x1, y1, rx0, ry0, rx1, ry1, 20, CurveType::Hermite);
 
-            Matrix topCopy = coordSystems.back();
-            topCopy.multiply(edges);
-            edges = topCopy;
+            edges = coordSystems.back().multiply(edges);
             screen.graphics.drawEdges(edges, {255, 255, 255, 255});
             edges.clear();
         }
@@ -184,9 +158,7 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             iss >> x0 >> y0 >> x1 >> y1 >> x2 >> y2 >> x3 >> y3;
             edges.addCurve(x0, y0, x1, y1, x2, y2, x3, y3, 20, CurveType::Bezier);
 
-            Matrix topCopy = coordSystems.back();
-            topCopy.multiply(edges);
-            edges = topCopy;
+            edges = coordSystems.back().multiply(edges);
             screen.graphics.drawEdges(edges, {255, 255, 255, 255});
             edges.clear();
             //edges.addCurve(x0, y0, x3, y3, 3*(x1-x0), 3*(y1-y0), 3*(x3-x2), 3*(y3-y2), 50, CurveType::Hermite);
@@ -200,9 +172,7 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             iss >> x >> y >> z >> w >> h >> d;
             triangles.addBox(x, y, z, w, h, d);
 
-            Matrix topCopy = coordSystems.back();
-            topCopy.multiply(triangles);
-            triangles = topCopy;
+            triangles = coordSystems.back().multiply(triangles);
             screen.graphics.drawTriangles(triangles, {255, 255, 255, 255});
             triangles.clear();
         }
@@ -216,23 +186,9 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
 
             triangles.addSphere(x, y, z, r, 30, 15);
 
-            Matrix topCopy = coordSystems.back();
-            topCopy.multiply(triangles);
-            triangles = topCopy;
-            Matrix copy = triangles;
-            for (int row = 0; row < 3; row++)
-            {
-                for (int thing = 0; thing < copy[row].size(); thing++)
-                {
-                    copy[row][thing] += offset[row];
-                }
-            }
-            screen.graphics.drawTriangles(copy, {255, 0, 255, 255});
-            //screen.graphics.drawTriangles(zbuffer, triangles, {255, 255, 255, 255});
+            triangles = coordSystems.back().multiply(triangles);
+            screen.graphics.drawTriangles(triangles, {255, 0, 255, 255});
             triangles.clear();
-
-            //edges.addCurve(x0, y0, x1, y1, x2, y2, x3, y3, 20, CurveType::Bezier);
-            //edges.addCurve(x0, y0, x3, y3, 3*(x1-x0), 3*(y1-y0), 3*(x3-x2), 3*(y3-y2), 50, CurveType::Hermite);
         }
         else if (line == "torus")
         {
@@ -244,23 +200,9 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
 
             triangles.addTorus(x, y, z, r1, r2, 30, 12);
 
-            Matrix topCopy = coordSystems.back();
-            topCopy.multiply(triangles);
-            triangles = topCopy;
-            Matrix copy = triangles;
-            for (int row = 0; row < 3; row++)
-            {
-                for (int thing = 0; thing < copy[row].size(); thing++)
-                {
-                    copy[row][thing] += offset[row];
-                }
-            }
-            screen.graphics.drawTriangles(copy, {255, 0, 255, 255});
-            //screen.graphics.drawTriangles(zbuffer, triangles, {255, 255, 255, 255});
+            triangles = coordSystems.back().multiply(triangles);
+            screen.graphics.drawTriangles(triangles, {255, 0, 255, 255});
             triangles.clear();
-
-            //edges.addCurve(x0, y0, x1, y1, x2, y2, x3, y3, 20, CurveType::Bezier);
-            //edges.addCurve(x0, y0, x3, y3, 3*(x1-x0), 3*(y1-y0), 3*(x3-x2), 3*(y3-y2), 50, CurveType::Hermite);
         }
         else if (line == "push")
         {
@@ -274,13 +216,7 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
         else if (line == "clear")
         {
             screen.graphics.clear({0, 0, 0, 255});
-            for (int row = 0; row < screen.zbuf().getHeight(); row++)
-            {
-                for (int col = 0; col < screen.zbuf().getWidth(); col++)
-                {
-                    screen.zbuf(row, col) = -std::numeric_limits<double>::infinity();
-                }
-            }
+            screen.clearZbuf();
         }
         else
         {
@@ -299,14 +235,6 @@ int main()
     coordSystems[0].identity();
 
     Screen screen(500, 500);
-
-    for (int row = 0; row < screen.zbuf().getHeight(); row++)
-    {
-        for (int col = 0; col < screen.zbuf().getWidth(); col++)
-        {
-            screen.zbuf(row, col) = -std::numeric_limits<double>::infinity();
-        }
-    }
 
     parse("script", screen, edges, triangles, coordSystems);
 
