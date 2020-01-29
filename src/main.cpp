@@ -11,11 +11,6 @@
 #include "PixelGrid.hpp"
 #include "Screen.hpp"
 
-// int lerp(double a, double b, double t)
-// {
-//     return (1 - t) * a + t * b;
-// }
-
 void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangles, std::vector<Matrix> &coordSystems)
 {
     std::ifstream infile(fileName);

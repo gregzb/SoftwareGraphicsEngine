@@ -15,8 +15,12 @@ class Vec
     double magnitude();
     double dot(Vec other);
     Vec normalize();
-    Vec scale(double a);
+    Vec negate();
     Vec cross(Vec other);
+    Vec scale(Vec other);
+    Vec scale(double other);
     Vec add(Vec other);
+    Vec add (double other);
     Vec sub(Vec other);
+    Vec sub(double other);
 };

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <limits>
 #include "Vec.hpp"
 
 Vec::Vec(int size)
@@ -37,8 +38,20 @@ Vec Vec::normalize()
 {
     Vec copy(values);
     double mag = magnitude();
+    if (std::abs(mag) < std::numeric_limits<double>::epsilon() * 10) {
+        return Vec(dimensions());
+    }
     for (int i = 0; i < dimensions(); i++) {
         copy[i] /= mag;
+    }
+    return copy;
+}
+
+Vec Vec::negate()
+{
+    Vec copy(values);
+    for (int i = 0; i < dimensions(); i++) {
+        copy[i] -= -values[i];
     }
     return copy;
 }
@@ -71,6 +84,20 @@ Vec Vec::cross(Vec other)
              values[0] * other[1] - values[1] * other[0]}};
 }
 
+Vec Vec::scale(Vec a) {
+    if (dimensions() != a.dimensions())
+    {
+        std::cout << "Vector size must be same for add." << std::endl;
+        return *this;
+    }
+
+    Vec temp(dimensions());
+    for (int i = 0; i < dimensions(); i++) {
+        temp[i] = values[i] * a[i];
+    }
+    return temp;
+}
+
 Vec Vec::scale(double a) {
     Vec temp(dimensions());
     for (int i = 0; i < dimensions(); i++) {
@@ -94,6 +121,15 @@ Vec Vec::add(Vec other)
     return temp;
 }
 
+Vec Vec::add(double other)
+{
+    Vec temp(dimensions());
+    for (int i = 0; i < dimensions(); i++) {
+        temp[i] = values[i] + other;
+    }
+    return temp;
+}
+
 Vec Vec::sub(Vec other)
 {
     if (dimensions() != other.dimensions())
@@ -105,6 +141,15 @@ Vec Vec::sub(Vec other)
     Vec temp(dimensions());
     for (int i = 0; i < dimensions(); i++) {
         temp[i] = values[i] - other[i];
+    }
+    return temp;
+}
+
+Vec Vec::sub(double other)
+{
+    Vec temp(dimensions());
+    for (int i = 0; i < dimensions(); i++) {
+        temp[i] = values[i] - other;
     }
     return temp;
 }
