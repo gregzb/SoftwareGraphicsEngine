@@ -15,12 +15,8 @@ void Graphics::drawLine(double x0, double y0, double z0, double x1, double y1, d
 
     if (x1 < x0)
     {
-        drawLine(x1, y1, z1, x0, y0, z0, color);
-        return;
+        return drawLine(x1, y1, z1, x0, y0, z0, color);
     }
-
-    double deltaX = x1 - x0;
-    int xDir = Utils::sign(deltaX);
 
     long x0Rounded = std::lround(x0);
     long x1Rounded = std::lround(x1);
@@ -28,30 +24,18 @@ void Graphics::drawLine(double x0, double y0, double z0, double x1, double y1, d
     long y1Rounded = std::lround(y1);
 
     double deltaY = y1 - y0;
+    double deltaX = x1 - x0;
+
     int direction = Utils::sign(deltaY);
 
     double totalDist = std::sqrt(std::pow(deltaX, 2) + std::pow(deltaY, 2));
 
     double deltaError = std::abs(deltaY / deltaX);
-    //double error = (x0 - x0Rounded) * deltaError;
     double error = 0;
-    // if (y1 < y0)
-    // {
-    //     error -= deltaError;
-    // }
-    // if (deltaY > deltaX)
-    // {
-    //     error = std::max(error, 0.5 - deltaError + std::numeric_limits<double>::epsilon() * 100);
-    // }
-    // error = std::max(error, 0.5-deltaError + std::numeric_limits<double>::epsilon() * 100);
-    if (std::isinf(deltaError))
-    {
-        error = deltaError;
-    }
 
     int y = y0Rounded;
 
-    for (int x = x0Rounded; x - x1Rounded != xDir || xDir == 0; x += xDir)
+    for (int x = x0Rounded; x <= x1Rounded; x++)
     {
 
         double currentDist = std::sqrt(std::pow(x - x0, 2) + std::pow(y - y0, 2));
@@ -79,24 +63,6 @@ void Graphics::drawLine(double x0, double y0, double z0, double x1, double y1, d
                     screen.zbuf(y, x) = z;
                     screen(y, x) = color;
                 }
-            }
-        }
-        if (xDir == 0)
-            break;
-    }
-    while (error >= 0.5 && y != y1Rounded)
-    {
-        y += direction;
-        error -= 1;
-        if (error >= 0.5)
-        {
-            double currentDist = std::sqrt(std::pow(x1Rounded - x0, 2) + std::pow(y - y0, 2));
-            double zT = Utils::inverseLerp(0, totalDist, currentDist);
-            double z = Utils::lerp(z0, z1, zT);
-            if (screen.zbuf(y, x1Rounded) < z)
-            {
-                screen.zbuf(y, x1Rounded) = z;
-                screen(y, x1Rounded) = color;
             }
         }
     }
@@ -128,16 +94,16 @@ void Graphics::drawTriangles(Matrix &matrix, Color color) const
 
         Color randColor{col % 255, (col + 50) % 255, (col + 100) % 255, 255};
 
-        //fillTriangle(verts, randColor);
+        fillTriangle(verts, randColor);
 
         randColor = {255, 255, 255, 255};
 
         for (int i = 0; i < 3; i++)
         {
-            drawLine(verts[i][0], verts[i][1], verts[i][2], verts[(i + 1) % 3][0], verts[(i + 1) % 3][1], verts[(i + 1) % 3][2], randColor);
-            // std::cout << "drawing from/to" << std::endl;
-            // std::cout << verts[i][0] << " " << verts[i][1] << " " << verts[i][2] << std::endl;
-            // std::cout << verts[(i + 1) % 3][0] << " " << verts[(i + 1) % 3][1] << " " << verts[(i + 1) % 3][2] << std::endl;
+            drawLine(verts[i][0], verts[i][1], verts[i][2]+1, verts[(i + 1) % 3][0], verts[(i + 1) % 3][1], verts[(i + 1) % 3][2]+1, randColor);
+            std::cout << "drawing from/to" << std::endl;
+            std::cout << verts[i][0] << " " << verts[i][1] << " " << verts[i][2] << std::endl;
+            std::cout << verts[(i + 1) % 3][0] << " " << verts[(i + 1) % 3][1] << " " << verts[(i + 1) % 3][2] << std::endl;
         }
 
         // drawLine(verts[0][0], verts[0][1], verts[0][2], verts[1][0], verts[1][1], verts[1][2], randColor);
@@ -159,15 +125,18 @@ void Graphics::fillTriangle(std::vector<Vec> &verts, Color color) const
 
     auto side1 = Utils::getFillVals(verts[2], verts[0]);
 
+    std::cout << verts[2][0] << " " << verts[2][1] << " " << verts[2][2] << std::endl;
+
     //std::cout << "side2" << std::endl;
     auto side2 = Utils::getFillVals(verts[2], verts[1]);
 
     //std::cout << "side3" << std::endl;
     auto side3 = Utils::getFillVals(verts[1], verts[0]);
+
+    std::cout << "sizes: " << side1.size() << " " << side2.size() << " " << side3.size() << std::endl;
+
     int remove = side2.size() + side3.size() > side1.size();
     side2.insert(side2.end(), side3.begin() + remove, side3.end());
-
-    //std::cout << "sizes: " << side1.size() << " " << side2.size() << std::endl;
 
     int topY = std::lround(verts[2][1]);
     int bottomY = std::lround(verts[0][1]);
@@ -178,10 +147,10 @@ void Graphics::fillTriangle(std::vector<Vec> &verts, Color color) const
 
     for (int y = topY; y >= bottomY; y--, counter++)
     {
-        // std::cout << "drawing at y = " << y << ", counter = " << counter << std::endl;
-        // std::cout << side1[counter].first << " " << side1[counter].second << std::endl;
-        // std::cout << side2[counter].first << " " << side2[counter].second << std::endl;
-        // std::cout << side2.size() << std::endl;
+        std::cout << "drawing at y = " << y << ", counter = " << counter << std::endl;
+        std::cout << side1[counter].first << " " << side1[counter].second << std::endl;
+        std::cout << side2[counter].first << " " << side2[counter].second << std::endl;
+        std::cout << side2.size() << std::endl;
         drawLine(side1[counter].first, y, side1[counter].second, side2[counter].first, y, side2[counter].second, color);
     }
 

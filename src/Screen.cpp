@@ -32,8 +32,8 @@ void Screen::toFileExtension(std::string fileName)
 
     FILE *f = popen(command.c_str(), "w");
     fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
-    //for (int y = height - 1; y >= 0; y--)
-    for (int y = 0; y < height; y++)
+    for (int y = height - 1; y >= 0; y--)
+    //for (int y = 0; y < height; y++)
     {
         for (int x = 0; x < width; x++)
         {

@@ -2,6 +2,7 @@
 #include "Vec.hpp"
 #include <cmath>
 #include <vector>
+#include <algorithm>
 
 Color::Color(){};
 Color::Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a) : r(r), g(g), b(b), a(a){};
@@ -32,9 +33,12 @@ std::vector<std::pair<int, double>> Utils::getFillVals(double x0, double y0, dou
 {
     std::vector<std::pair<int, double>> temp;
 
-    double totalDist = std::sqrt(std::pow(x1 - x0, 2) + std::pow(y1 - y0, 2));
-
-    int xDir = Utils::sign(x1 - x0);
+    if (x1 < x0)
+    {
+        temp = Utils::getFillVals(x1, y1, z1, x0, y0, z0);
+        std::reverse(temp.begin(), temp.end());
+        return temp;
+    }
 
     long x0Rounded = std::lround(x0);
     long x1Rounded = std::lround(x1);
@@ -42,14 +46,14 @@ std::vector<std::pair<int, double>> Utils::getFillVals(double x0, double y0, dou
     long y1Rounded = std::lround(y1);
 
     double deltaY = y1 - y0;
+    double deltaX = x1 - x0;
+
     int direction = Utils::sign(deltaY);
 
-    double deltaError = std::abs(deltaY / (x1 - x0));
-    double error = (x0 - x0Rounded) * deltaError;
-    if (std::isinf(deltaError))
-    {
-        error = deltaError;
-    }
+    double totalDist = std::sqrt(std::pow(deltaX, 2) + std::pow(deltaY, 2));
+
+    double deltaError = std::abs(deltaY / deltaX);
+    double error = 0;
 
     int y = y0Rounded;
 
@@ -59,7 +63,7 @@ std::vector<std::pair<int, double>> Utils::getFillVals(double x0, double y0, dou
 
     temp.push_back({x0Rounded, z});
 
-    for (int x = x0Rounded; x - x1Rounded != xDir || xDir == 0; x += xDir)
+    for (int x = x0Rounded; x <= x1Rounded; x++)
     {
         error += deltaError;
         while (error >= 0.5 && y != y1Rounded)
@@ -68,14 +72,13 @@ std::vector<std::pair<int, double>> Utils::getFillVals(double x0, double y0, dou
             error -= 1;
             // if (error >= 0.5)
             // {
-            currentDist = std::sqrt(std::pow(x0Rounded - x0, 2) + std::pow(y - y0, 2));
+            currentDist = std::sqrt(std::pow(x - x0, 2) + std::pow(y - y0, 2));
             zT = Utils::inverseLerp(0, totalDist, currentDist);
             z = Utils::lerp(z0, z1, zT);
+
             temp.push_back({x, z});
-            //}
+            // }
         }
-        if (xDir == 0)
-            break;
     }
     return temp;
 }
