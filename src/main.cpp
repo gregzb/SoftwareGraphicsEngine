@@ -5,21 +5,21 @@
 #include <sstream>
 #include <limits>
 
+#include <chrono>
+
 #include "Utils.hpp"
-#include "Matrix.hpp"
-#include "Vec.hpp"
 #include "PixelGrid.hpp"
 #include "Screen.hpp"
+#include "Mat4.hpp"
+#include "Vec3.hpp"
 
-void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangles, std::vector<Matrix> &coordSystems)
+void parse(std::string fileName, Screen &screen, Mat4 &edges, Mat4 &triangles, std::vector<Mat4> &coordSystems)
 {
     std::ifstream infile(fileName);
 
-    std::cout << infile.is_open() << std::endl;
-
     std::string line;
 
-    Vec offset;
+    Vec3 offset;
 
     while (std::getline(infile, line))
     {
@@ -29,11 +29,12 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             std::getline(infile, line);
             std::istringstream iss(line);
 
-            double x0, y0, z0, x1, y1, z1;
-            iss >> x0 >> y0 >> z0 >> x1 >> y1 >> z1;
-            edges.addEdge(x0, y0, z0, x1, y1, z1);
+            Vec3 v0, v1;
+            iss >> v0 >> v1;
+            edges.addEdge(v0, v1);
 
-            edges = coordSystems.back().multiply(edges);
+            //edges = coordSystems.back().multiply(edges);
+            edges.multiplyMutate(coordSystems.back());
             screen.graphics.drawEdges(edges, {255, 255, 255, 255});
             edges.clear();
         }
@@ -42,11 +43,12 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             std::getline(infile, line);
             std::istringstream iss(line);
 
-            double x0, y0, z0, x1, y1, z1, x2, y2, z2;
-            iss >> x0 >> y0 >> z0 >> x1 >> y1 >> z1 >> x2 >> y2 >> z2;
-            triangles.addTriangle(x0, y0, z0, x1, y1, z1, x2, y2, z2);
+            Vec3 v0, v1, v2;
+            iss >> v0 >> v1 >> v2;
+            triangles.addTriangle(v0, v1, v2);
 
-            triangles = coordSystems.back().multiply(triangles);
+            //triangles = coordSystems.back().multiply(triangles);
+            triangles.multiplyMutate(coordSystems.back());
             screen.graphics.drawTriangles(triangles, {255, 255, 255, 255});
             triangles.clear();
         }
@@ -57,16 +59,16 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
 
             double x, y, z;
             iss >> x >> y >> z;
-            offset = {{x, y, z}};
+            offset = {x, y, z};
         }
         else if (line == "scale")
         {
             std::getline(infile, line);
             std::istringstream iss(line);
 
-            double x, y, z;
-            iss >> x >> y >> z;
-            Matrix temp = Matrix::scale(x, y, z);
+            Vec3 v;
+            iss >> v;
+            Mat4 temp = Mat4::scale(v);
             // temp.multiply(coordSystems.back());
             // coordSystems.back() = temp;
             coordSystems.back() = coordSystems.back().multiply(temp);
@@ -76,9 +78,9 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             std::getline(infile, line);
             std::istringstream iss(line);
 
-            double x, y, z;
-            iss >> x >> y >> z;
-            Matrix temp = Matrix::translate(x, y, z);
+            Vec3 v;
+            iss >> v;
+            Mat4 temp = Mat4::translate(v);
             // temp.multiply(coordSystems.back());
             // coordSystems.back() = temp;
             coordSystems.back() = coordSystems.back().multiply(temp);
@@ -95,19 +97,19 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             double PI = std::atan(1) * 4;
 
             angle *= PI / 180;
-            Matrix temp(4, 4);
+            Mat4 temp(0);
             temp.identity();
             if (axis == 'x')
             {
-                temp = Matrix::rotX(angle);
+                temp = Mat4::rotX(angle);
             }
             else if (axis == 'y')
             {
-                temp = Matrix::rotY(angle);
+                temp = Mat4::rotY(angle);
             }
             else if (axis == 'z')
             {
-                temp = Matrix::rotZ(angle);
+                temp = Mat4::rotZ(angle);
             }
             //temp.multiply(coordSystems.back());
             //coordSystems.back() = temp;
@@ -129,11 +131,13 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             std::getline(infile, line);
             std::istringstream iss(line);
 
-            double x, y, z, r;
-            iss >> x >> y >> z >> r;
-            edges.addCircle(x, y, z, r, 100);
+            Vec3 v;
+            double r;
+            iss >> v >> r;
+            edges.addCircle(v, r, 100);
 
-            edges = coordSystems.back().multiply(edges);
+            //edges = coordSystems.back().multiply(edges);
+            edges.multiplyMutate(coordSystems.back());
             screen.graphics.drawEdges(edges, {255, 255, 255, 255});
             edges.clear();
         }
@@ -146,7 +150,8 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             iss >> x0 >> y0 >> x1 >> y1 >> rx0 >> ry0 >> rx1 >> ry1;
             edges.addCurve(x0, y0, x1, y1, rx0, ry0, rx1, ry1, 20, CurveType::Hermite);
 
-            edges = coordSystems.back().multiply(edges);
+            //edges = coordSystems.back().multiply(edges);
+            edges.multiplyMutate(coordSystems.back());
             screen.graphics.drawEdges(edges, {255, 255, 255, 255});
             edges.clear();
         }
@@ -159,7 +164,8 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             iss >> x0 >> y0 >> x1 >> y1 >> x2 >> y2 >> x3 >> y3;
             edges.addCurve(x0, y0, x1, y1, x2, y2, x3, y3, 20, CurveType::Bezier);
 
-            edges = coordSystems.back().multiply(edges);
+            //edges = coordSystems.back().multiply(edges);
+            edges.multiplyMutate(coordSystems.back());
             screen.graphics.drawEdges(edges, {255, 255, 255, 255});
             edges.clear();
             //edges.addCurve(x0, y0, x3, y3, 3*(x1-x0), 3*(y1-y0), 3*(x3-x2), 3*(y3-y2), 50, CurveType::Hermite);
@@ -169,11 +175,12 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             std::getline(infile, line);
             std::istringstream iss(line);
 
-            double x, y, z, w, h, d;
-            iss >> x >> y >> z >> w >> h >> d;
-            triangles.addBox(x, y, z, w, h, d);
+            Vec3 v, dims;
+            iss >> v >> dims;
+            triangles.addBox(v, dims);
 
-            triangles = coordSystems.back().multiply(triangles);
+            //triangles = coordSystems.back().multiply(triangles);
+            triangles.multiplyMutate(coordSystems.back());
             screen.graphics.drawTriangles(triangles, {255, 255, 255, 255});
             triangles.clear();
         }
@@ -182,17 +189,17 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             std::getline(infile, line);
             std::istringstream iss(line);
 
-            double x, y, z, r;
-            iss >> x >> y >> z >> r;
+            Vec3 v;
+            double r;
+            iss >> v >> r;
 
-            triangles.addSphere(x, y, z, r, 10, 5);
+             triangles.addSphere(v, r, 30, 15);
+            // triangles.addSphere(v, r, 3000, 1500);
 
-            triangles = coordSystems.back().multiply(triangles);
-            for (int i = 0; i < triangles.getColumns(); i++) {
-              triangles[0][i] += offset[0];
-              triangles[1][i] += offset[1];
-              triangles[2][i] += offset[2];
-            }
+            //std::cout << triangles.getCols() << std::endl;
+
+            //triangles = coordSystems.back().multiply(triangles);
+            triangles.multiplyMutate(coordSystems.back());
             screen.graphics.drawTriangles(triangles, {255, 0, 255, 255});
             triangles.clear();
         }
@@ -201,23 +208,24 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             std::getline(infile, line);
             std::istringstream iss(line);
 
-            double x, y, z, r1, r2;
-            iss >> x >> y >> z >> r1 >> r2;
+            Vec3 v;
+            double r1, r2;
+            iss >> v >> r1 >> r2;
 
-            triangles.addTorus(x, y, z, r1, r2, 30, 12);
+            triangles.addTorus(v, r1, r2, 30, 12);
 
-            triangles = coordSystems.back().multiply(triangles);
-            for (int i = 0; i < triangles.getColumns(); i++) {
-              triangles[0][i] += offset[0];
-              triangles[1][i] += offset[1];
-              triangles[2][i] += offset[2];
+            //triangles = coordSystems.back().multiply(triangles);
+            triangles.multiplyMutate(coordSystems.back());
+            for (int i = 0; i < triangles.getCols(); i++) {
+              triangles[0][i] += offset.x;
+              triangles[1][i] += offset.y;
+              triangles[2][i] += offset.z;
             }
             screen.graphics.drawTriangles(triangles, {255, 0, 255, 255});
             triangles.clear();
         }
         else if (line == "push")
         {
-            //std::cout << "top changed!" << std::endl;
             coordSystems.push_back(coordSystems.back());
         }
         else if (line == "pop")
@@ -239,27 +247,12 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
 
 int main()
 {
-    Matrix edges(4, 0);
-    Matrix triangles(4, 0);
-    std::vector<Matrix> coordSystems;
-    coordSystems.push_back(Matrix(4, 4));
-    coordSystems[0].identity();
+    Mat4 edges(0);
+    Mat4 triangles(0);
+    std::vector<Mat4> coordSystems;
+    coordSystems.push_back(Mat4::identity());
 
     Screen screen(500, 500);
-
-    // int val = 32;
-    // for (int i = 0; i < val; i++) {
-    //     double angle = (i/static_cast<double>(val)) * (2 * M_PI);
-    //     double x = std::cos(angle) * 200 + 250;
-    //     double y = std::sin(angle) * 200 + 250;
-    //     screen.graphics.drawLine(250, 250, 0, x, y, 0, {255, 255, 255, 255});
-    // }
-
-    // screen.display();
-
-    //screen.graphics.drawLine(250, 250, 0, 300, 100, 0, {255, 255, 255, 255});
-
-    //screen.display();
 
     parse("script", screen, edges, triangles, coordSystems);
 

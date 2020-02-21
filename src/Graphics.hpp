@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Utils.hpp"
-#include "Matrix.hpp"
-#include "Vec.hpp"
+#include "Vec3.hpp"
+#include "Mat4.hpp"
 
 class Screen;
 
@@ -13,9 +13,9 @@ private:
 
 public:
     Graphics(Screen &screen);
-    void drawLine(double x0, double y0, double z0, double x1, double y1, double z1, Color color, bool debug = false) const;
-    void drawEdges(Matrix &matrix, Color color) const;
-    void drawTriangles(Matrix &matrix, Color color) const;
-    void fillTriangle(std::vector<Vec> &verts, Color color) const;
+    void drawLine(Vec3 a, Vec3 b, Color color, bool debug = false) const;
+    void drawEdges(Mat4 &matrix, Color color) const;
+    void drawTriangles(Mat4 &matrix, Color color) const;
+    void fillTriangle(std::vector<Vec3> &verts, Color color) const;
     void clear(Color color) const;
 };

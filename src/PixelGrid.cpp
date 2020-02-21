@@ -13,7 +13,7 @@ T &PixelGrid<T>::pixelAt(int row, int col)
     if (row >= height || row < 0 || col >= width || col < 0) {
         return pixelData[height * width];
     }
-    return pixelData[row * height + col];
+    return pixelData[row * width + col];
 }
 
 template <class T>

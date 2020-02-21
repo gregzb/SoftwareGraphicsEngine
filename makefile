@@ -13,15 +13,16 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 #$(pkg-config --cflags --libs sdl2)
 #-Wall
-LDFLAGS ?= -lm -std=gnu11
+LDFLAGS ?= -lm -std=c++17
 CFLAGS = -Wall
 #CXXFLAGS = -Wall -Wextra -Werror
-CXXFLAGS = -Wall
+CXXFLAGS = -Wall -std=c++17
 CC = g++
 CXX = g++
 
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CC) $(OBJS) -o $@ $(LDFLAGS)
+	./$(BUILD_DIR)/$(TARGET_EXEC)
 
 # assembly
 $(BUILD_DIR)/%.s.o: %.s
@@ -39,7 +40,7 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 
-.PHONY: clean run auto
+.PHONY: clean run auto $(BUILD_DIR)/$(TARGET_EXEC)
 
 clean:
 	-$(RM) -r $(BUILD_DIR)
@@ -47,10 +48,6 @@ clean:
 
 run:
 	./$(BUILD_DIR)/$(TARGET_EXEC)
-
-auto: $(BUILD_DIR)/$(TARGET_EXEC)
-	./$(BUILD_DIR)/$(TARGET_EXEC)
-#convert image.ppm image.png
 
 memcheck:
 	valgrind --leak-check=yes ./$(BUILD_DIR)/$(TARGET_EXEC)
