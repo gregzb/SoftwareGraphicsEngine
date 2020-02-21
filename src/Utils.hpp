@@ -20,7 +20,10 @@ namespace Utils
 {
 int sign(double x);
 double inverseLerp(double a, double b, double val);
-int lerp(double a, double b, double t);
-std::vector<std::pair<int, double>> getFillVals(double x0, double y0, double z0, double x1, double y1, double z1);
-std::vector<std::pair<int, double>> getFillVals(Vec a, Vec b);
+double lerp(double a, double b, double t);
+float clamp(double lower, double upper, double val);
+
+//std::vector<Vec> linePixels(double x0, double y0, double z0, double x1, double y1, double z1, bool flipped = false);
+std::vector<Vec> linePixels(double x0, double y0, double x1, double y1, bool flipped = false);
+std::vector<Vec> linePixels(Vec a, Vec b);
 } // namespace Utils

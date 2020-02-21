@@ -7,63 +7,119 @@
 #include <iostream>
 #include <algorithm>
 #include <limits>
+#include <tuple>
 
 Graphics::Graphics(Screen &screen) : screen(screen){};
 
-void Graphics::drawLine(double x0, double y0, double z0, double x1, double y1, double z1, Color color) const
+// void Graphics::drawLine(double x0, double y0, double z0, double x1, double y1, double z1, Color color, bool debug) const
+// {
+//     if (x1 < x0)
+//     {
+//         return drawLine(x1, y1, z1, x0, y0, z0, color, debug);
+//     }
+
+//     long x0Rounded = std::lround(x0);
+//     long x1Rounded = std::lround(x1);
+//     long y0Rounded = std::lround(y0);
+//     long y1Rounded = std::lround(y1);
+
+//     double deltaY = y1 - y0;
+//     double deltaX = x1 - x0;
+
+//     int direction = Utils::sign(deltaY);
+
+//     double totalDist = std::sqrt(std::pow(deltaX, 2) + std::pow(deltaY, 2));
+
+//     double deltaError = std::abs(deltaY / deltaX);
+//     double error = 0;
+
+//     int y = y0Rounded;
+
+//     for (int x = x0Rounded; x <= x1Rounded; x++)
+//     {
+
+//         double currentDist = std::sqrt(std::pow(x - x0, 2) + std::pow(y - y0, 2));
+//         double zT = Utils::inverseLerp(0, totalDist, currentDist);
+//         double z = Utils::lerp(z0, z1, zT);
+
+//         if (screen.zbuf(y, x) < z)
+//         {
+//             screen.zbuf(y, x) = z;
+//             screen(y, x) = color;
+//             if (debug)
+//                 std::cout << "Draw (" << screen.zbuf(y, x) << ")at " << x << " " << y << " " << z << std::endl;
+//         }
+//         else
+//         {
+//             if (debug)
+//                 std::cout << "Zbuff blocked (" << screen.zbuf(y, x) << ") at " << x << " " << y << " " << z << std::endl;
+//         }
+
+//         error += deltaError;
+//         while (error >= 0.5 && y != y1Rounded)
+//         {
+//             y += direction;
+//             error -= 1;
+//             if (error >= 0.5)
+//             {
+//                 currentDist = std::sqrt(std::pow(x - x0, 2) + std::pow(y - y0, 2));
+//                 zT = Utils::inverseLerp(0, totalDist, currentDist);
+//                 z = Utils::lerp(z0, z1, zT);
+//                 if (screen.zbuf(y, x) < z)
+//                 {
+//                     screen.zbuf(y, x) = z;
+//                     screen(y, x) = color;
+//                     if (debug)
+//                         std::cout << "Draw (" << screen.zbuf(y, x) << ")at " << x << " " << y << " " << z << std::endl;
+//                 }
+//                 else
+//                 {
+//                     if (debug)
+//                         std::cout << "Zbuff blocked (" << screen.zbuf(y, x) << ") at " << x << " " << y << " " << z << std::endl;
+//                 }
+//             }
+//         }
+//     }
+// }
+
+void Graphics::drawLine(double x0, double y0, double z0, double x1, double y1, double z1, Color color, bool debug) const
 {
+    std::cout << "drawing from ";
+    std::cout << x0 << " " << y0 << " " << z0;
+    std::cout << " to " << x1 << " " << y1 << " " << z1 << std::endl;
+    //std::cout << z0 << " " << z1 << std::endl;
+    std::vector<Vec> pixels = Utils::linePixels(x0, y0, x1, y1);
+    //std::cout << z0 << " " << z1 << std::endl;
+    //std::cout << "loop" << std::endl;
 
-    if (x1 < x0)
+    double total = std::sqrt(std::pow(x1 - x0, 2) + std::pow(y1 - y0, 2));
+
+    for (auto pixel : pixels)
     {
-        return drawLine(x1, y1, z1, x0, y0, z0, color);
-    }
+        //std::cout << z0 << " " << z1 << std::endl;
+        double x, y;
+        std::tie(x, y) = std::tie(pixel[0], pixel[1]);
 
-    long x0Rounded = std::lround(x0);
-    long x1Rounded = std::lround(x1);
-    long y0Rounded = std::lround(y0);
-    long y1Rounded = std::lround(y1);
+        double z = z0 + (std::sqrt(std::pow(x - x0, 2) + std::pow(y - y0, 2)) / total) * (z1 - z0);
 
-    double deltaY = y1 - y0;
-    double deltaX = x1 - x0;
-
-    int direction = Utils::sign(deltaY);
-
-    double totalDist = std::sqrt(std::pow(deltaX, 2) + std::pow(deltaY, 2));
-
-    double deltaError = std::abs(deltaY / deltaX);
-    double error = 0;
-
-    int y = y0Rounded;
-
-    for (int x = x0Rounded; x <= x1Rounded; x++)
-    {
-
-        double currentDist = std::sqrt(std::pow(x - x0, 2) + std::pow(y - y0, 2));
-        double zT = Utils::inverseLerp(0, totalDist, currentDist);
-        double z = Utils::lerp(z0, z1, zT);
+        //std::cout << x << " " << y << " " << z << ", " << z0 << " " << z1 << std::endl;
+        //if (screen.zbuf(y, x) <= std::ceil(z * 100000) / 100000)
+        //if (screen.zbuf(y, x) < std::round(z*1000)/1000)
 
         if (screen.zbuf(y, x) < z)
         {
+            double old = screen.zbuf(y, x);
+            //screen.zbuf(y, x) = std::round(z*1000)/1000;
             screen.zbuf(y, x) = z;
+            //screen.zbuf(y, x) = std::ceil(z * 100000) / 100000;
             screen(y, x) = color;
+            if (debug || 1 && !std::isinf(old))
+                std::cout << "Draw (" << old << ") at " << x << " " << y << " " << z << std::endl;
         }
-
-        error += deltaError;
-        while (error >= 0.5 && y != y1Rounded)
+        else
         {
-            y += direction;
-            error -= 1;
-            if (error >= 0.5)
-            {
-                currentDist = std::sqrt(std::pow(x - x0, 2) + std::pow(y - y0, 2));
-                zT = Utils::inverseLerp(0, totalDist, currentDist);
-                z = Utils::lerp(z0, z1, zT);
-                if (screen.zbuf(y, x) < z)
-                {
-                    screen.zbuf(y, x) = z;
-                    screen(y, x) = color;
-                }
-            }
+            if (debug || 1)
+                std::cout << "Zbuff blocked (" << screen.zbuf(y, x) << ") at " << x << " " << y << " " << z << std::endl;
         }
     }
 }
@@ -96,15 +152,28 @@ void Graphics::drawTriangles(Matrix &matrix, Color color) const
 
         fillTriangle(verts, randColor);
 
+        std::cout << std::endl;
+
+        // for (int i = 0; i < verts.size(); i++)
+        // {
+        //     std::cout << verts[i][0] << " " << verts[i][1] << " " << verts[i][2] << std::endl;
+        // }
+
         randColor = {255, 255, 255, 255};
 
-        for (int i = 0; i < 3; i++)
-        {
-            drawLine(verts[i][0], verts[i][1], verts[i][2]+1, verts[(i + 1) % 3][0], verts[(i + 1) % 3][1], verts[(i + 1) % 3][2]+1, randColor);
-            std::cout << "drawing from/to" << std::endl;
-            std::cout << verts[i][0] << " " << verts[i][1] << " " << verts[i][2] << std::endl;
-            std::cout << verts[(i + 1) % 3][0] << " " << verts[(i + 1) % 3][1] << " " << verts[(i + 1) % 3][2] << std::endl;
-        }
+        // for (int i = 0; i < 3; i++)
+        // {
+        //     std::cout << "drawing from/to" << std::endl;
+        //     std::cout << verts[i][0] << " " << verts[i][1] << " " << verts[i][2] << std::endl;
+        //     std::cout << verts[(i + 1) % 3][0] << " " << verts[(i + 1) % 3][1] << " " << verts[(i + 1) % 3][2] << std::endl;
+        //     drawLine(verts[i][0], verts[i][1], verts[i][2] + 0.5, verts[(i + 1) % 3][0], verts[(i + 1) % 3][1], verts[(i + 1) % 3][2] + 0.5, randColor, true);
+        // }
+
+        // bool debug = false;
+
+        // drawLine(verts[2][0], verts[2][1], verts[2][2] + 1, verts[0][0], verts[0][1], verts[0][2] + 1, randColor, debug);
+        // drawLine(verts[2][0], verts[2][1], verts[2][2] + 1, verts[1][0], verts[1][1], verts[1][2] + 1, randColor, debug);
+        // drawLine(verts[1][0], verts[1][1], verts[1][2] + 1, verts[0][0], verts[0][1], verts[0][2] + 1, randColor, debug);
 
         // drawLine(verts[0][0], verts[0][1], verts[0][2], verts[1][0], verts[1][1], verts[1][2], randColor);
         // drawLine(verts[1][0], verts[1][1], verts[1][2], verts[2][0], verts[2][1], verts[2][2], randColor);
@@ -121,38 +190,207 @@ void Graphics::fillTriangle(std::vector<Vec> &verts, Color color) const
     if (verts[0][1] > verts[1][1])
         std::swap(verts[0], verts[1]);
 
-    //std::cout << "side1" << std::endl;
-
-    auto side1 = Utils::getFillVals(verts[2], verts[0]);
-
-    std::cout << verts[2][0] << " " << verts[2][1] << " " << verts[2][2] << std::endl;
-
-    //std::cout << "side2" << std::endl;
-    auto side2 = Utils::getFillVals(verts[2], verts[1]);
-
-    //std::cout << "side3" << std::endl;
-    auto side3 = Utils::getFillVals(verts[1], verts[0]);
-
-    std::cout << "sizes: " << side1.size() << " " << side2.size() << " " << side3.size() << std::endl;
-
-    int remove = side2.size() + side3.size() > side1.size();
-    side2.insert(side2.end(), side3.begin() + remove, side3.end());
-
-    int topY = std::lround(verts[2][1]);
-    int bottomY = std::lround(verts[0][1]);
-
-    int counter = 0;
-
-    //std::cout << "about to draw" << std::endl;
-
-    for (int y = topY; y >= bottomY; y--, counter++)
+    for (int i = 0; i < verts.size(); i++)
     {
-        std::cout << "drawing at y = " << y << ", counter = " << counter << std::endl;
-        std::cout << side1[counter].first << " " << side1[counter].second << std::endl;
-        std::cout << side2[counter].first << " " << side2[counter].second << std::endl;
-        std::cout << side2.size() << std::endl;
-        drawLine(side1[counter].first, y, side1[counter].second, side2[counter].first, y, side2[counter].second, color);
+        std::cout << verts[i][0] << " " << verts[i][1] << " " << verts[i][2] << std::endl;
     }
+
+    std::vector<Vec> side1Pixels = Utils::linePixels(verts[2], verts[0]);
+    std::vector<Vec> side1;
+    side1.push_back(side1Pixels.front());
+    for (int i = 0; i < side1Pixels.size(); i++)
+    {
+        if (side1Pixels[i][1] != side1.back()[1])
+        {
+            side1.push_back(side1Pixels[i]);
+        }
+        else
+        {
+            //side1.back()[2] = std::min(side1.back()[2], side1Pixels[i][2]);
+            side1.back() = side1Pixels[i];
+        }
+    }
+
+    // std::cout << "2" << std::endl;
+
+    std::vector<Vec> side2Pixels = Utils::linePixels(verts[2], verts[1]);
+    std::vector<Vec> side3Pixels = Utils::linePixels(verts[1], verts[0]);
+    // std::cout << "from ";
+    // std::cout << verts[2][0] << " " << verts[2][1] << " " << verts[2][2];
+    // std::cout << " to ";
+    // std::cout << verts[1][0] << " " << verts[1][1] << " " << verts[1][2];
+    // std::cout << std::endl;
+    // for (auto pi : side2Pixels)
+    // {
+    //     std::cout << pi[0] << " " << pi[1] << " " << pi[2] << std::endl;
+    // }
+    // std::cout << std::endl;
+    // for (auto pi : side3Pixels)
+    // {
+    //     std::cout << pi[0] << " " << pi[1] << " " << pi[2] << std::endl;
+    // }
+    std::vector<Vec> side2;
+    side2.push_back(side2Pixels.front());
+    for (int i = 0; i < side2Pixels.size(); i++)
+    {
+        if (side2Pixels[i][1] != side2.back()[1])
+        {
+            side2.push_back(side2Pixels[i]);
+        }
+        else
+        {
+            side2.back() = side2Pixels[i];
+            //side2.back()[2] = std::min(side2.back()[2], side2Pixels[i][2]);
+        }
+    }
+    bool first = true;
+    for (int i = 0; i < side3Pixels.size(); i++)
+    {
+        if (side3Pixels[i][1] != side2.back()[1])
+        {
+            side2.push_back(side3Pixels[i]);
+            first = false;
+        }
+        else
+        {
+            // if (i >= 1) {
+
+            // }
+
+            /**
+             * I thought i should remove this????
+             */
+            if (!first)
+            {
+                //side2.back() = side3Pixels[i];
+                //side2.back()[2] = std::min(side2.back()[2], side3Pixels[i][2]);
+            }
+        }
+    }
+
+    // std::cout << "3" << std::endl;
+
+    // std::cout << side1.size() << " " << side2.size() << std::endl;
+
+    // double z2 = verts[2][2];
+    // double z1 = verts[1][2];
+    // double z0 = verts[0][2];
+
+    //std::cout << "here" << std::endl;
+
+    for (int i = 0; i < side1.size(); i++)
+    {
+        //std::cout << i << std::endl;
+        // std::cout << i << std::endl;
+        // std::cout << side1[i][0] << " " << side1[i][1] << " " << side1[i][2] << std::endl;
+        // std::cout << side2[i][0] << " " << side2[i][1] << " " << side2[i][2] << std::endl;
+
+        double y = side1[i][1];
+
+        double zA;
+        double zB;
+
+        //std::cout << "bonk" << std::endl;
+
+        zA = verts[2][2] - (verts[2][2] - verts[0][2]) * ((verts[2][1] - y) / (verts[2][1] - verts[0][1]));
+
+        if (y >= verts[1][1])
+        {
+            zB = verts[2][2] - (verts[2][2] - verts[1][2]) * ((verts[2][1] - y) / (verts[2][1] - verts[1][1]));
+            //std::cout << "chonk" << std::endl;
+        }
+        else
+        {
+            zB = verts[1][2] - (verts[1][2] - verts[0][2]) * ((verts[1][1] - y) / (verts[1][1] - verts[0][1]));
+            //std::cout << "lonk" << std::endl;
+        }
+
+        // zA = std::lround(verts[2][2]) - (std::lround(verts[2][2]) - std::lround(verts[0][2])) * ((std::lround(verts[2][1]) - y) / (std::lround(verts[2][1]) - std::lround(verts[0][1])));
+
+        // if (y >= std::lround(verts[1][1]))
+        // {
+        //     zB = std::lround(verts[2][2]) - (std::lround(verts[2][2]) - std::lround(verts[1][2])) * ((std::lround(verts[2][1]) - y) / (std::lround(verts[2][1]) - std::lround(verts[1][1])));
+        //     //std::cout << "chonk" << std::endl;
+        // }
+        // else
+        // {
+        //     zB = std::lround(verts[1][2]) - (std::lround(verts[1][2]) - std::lround(verts[0][2])) * ((std::lround(verts[1][1]) - y) / (std::lround(verts[1][1]) - std::lround(verts[0][1])));
+        //     //std::cout << "lonk" << std::endl;
+        // }
+
+        std::cout << "y: " << y << std::endl;
+        std::cout << "z's"
+                  << " " << zA << " " << zB << std::endl;
+                  std::cout << "x's"
+                  << " " << side1[i][0] << " " << side2[i][0] << std::endl;
+
+        //std::cout << "tonk" << std::endl;
+
+        //std::cout << side1[i][0] << " " << side2[i][0] << std::endl;
+
+        int dir = Utils::sign(side2[i][0] - side1[i][0]);
+
+        for (int x = side1[i][0]; x - side2[i][0] != dir; x += dir)
+        {
+            //std::cout << "cronk" << std::endl;
+            //double z = zB - (zB - zA) * ((side2[i][0] - x) / (std::abs(side1[i][0] - side2[i][0])));
+            double z = zA - (zA - zB) * ((side1[i][0] - x) / (std::abs(side2[i][0] - side1[i][0])));
+            //std::cout << "yonk" << std::endl;
+            std::cout << "z: " << screen.zbuf(y, x) << " " << z << std::endl;
+            if (screen.zbuf(y, x) < z)
+            {
+                //std::cout << "me draw :)" << std::endl;
+                //double old = screen.zbuf(y, x);
+                //screen.zbuf(y, x) = std::round(z*1000)/1000;
+                screen.zbuf(y, x) = z;
+                //screen.zbuf(y, x) = std::ceil(z * 100000) / 100000;
+                screen(y, x) = color;
+            }
+            else
+            {
+                //std::cout << "uh oh sinky" << std::endl;
+            }
+        }
+
+        //std::cout << "quack" << std::endl;
+
+        //drawLine(side1[i][0], side1[i][1], side1[i][2], side2[i][0], side2[i][1], side2[i][2], color);
+    }
+
+    // std::cout << "4" << std::endl;
+
+    // //std::cout << "side1" << std::endl;
+
+    // auto side1 = Utils::getFillVals(verts[2], verts[0]);
+
+    // std::cout << verts[2][0] << " " << verts[2][1] << " " << verts[2][2] << std::endl;
+
+    // //std::cout << "side2" << std::endl;
+    // auto side2 = Utils::getFillVals(verts[2], verts[1]);
+
+    // //std::cout << "side3" << std::endl;
+    // auto side3 = Utils::getFillVals(verts[1], verts[0]);
+
+    // std::cout << "sizes: " << side1.size() << " " << side2.size() << " " << side3.size() << std::endl;
+
+    // int remove = side2.size() + side3.size() > side1.size();
+    // side2.insert(side2.end(), side3.begin() + remove, side3.end());
+
+    // int topY = std::lround(verts[2][1]);
+    // int bottomY = std::lround(verts[0][1]);
+
+    // int counter = 0;
+
+    // //std::cout << "about to draw" << std::endl;
+
+    // for (int y = topY; y >= bottomY; y--, counter++)
+    // {
+    //     std::cout << "drawing at y = " << y << ", counter = " << counter << std::endl;
+    //     std::cout << side1[counter].first << " " << side1[counter].second << std::endl;
+    //     std::cout << side2[counter].first << " " << side2[counter].second << std::endl;
+    //     std::cout << side2.size() << std::endl;
+    //     drawLine(side1[counter].first, y, side1[counter].second, side2[counter].first, y, side2[counter].second, color);
+    // }
 
     //std::cout << "done drawing" << std::endl;
 

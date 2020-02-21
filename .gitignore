@@ -34,3 +34,5 @@
 out/
 *.png
 *.gif
+*.ppm
+

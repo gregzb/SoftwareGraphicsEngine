@@ -121,6 +121,7 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
         else if (line == "save")
         {
             std::getline(infile, line);
+            std::cout << "file name " << line << std::endl;
             screen.toFileExtension(line);
         }
         else if (line == "circle")
@@ -184,9 +185,14 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             double x, y, z, r;
             iss >> x >> y >> z >> r;
 
-            triangles.addSphere(x, y, z, r, 30, 15);
+            triangles.addSphere(x, y, z, r, 10, 5);
 
             triangles = coordSystems.back().multiply(triangles);
+            for (int i = 0; i < triangles.getColumns(); i++) {
+              triangles[0][i] += offset[0];
+              triangles[1][i] += offset[1];
+              triangles[2][i] += offset[2];
+            }
             screen.graphics.drawTriangles(triangles, {255, 0, 255, 255});
             triangles.clear();
         }
@@ -201,6 +207,11 @@ void parse(std::string fileName, Screen &screen, Matrix &edges, Matrix &triangle
             triangles.addTorus(x, y, z, r1, r2, 30, 12);
 
             triangles = coordSystems.back().multiply(triangles);
+            for (int i = 0; i < triangles.getColumns(); i++) {
+              triangles[0][i] += offset[0];
+              triangles[1][i] += offset[1];
+              triangles[2][i] += offset[2];
+            }
             screen.graphics.drawTriangles(triangles, {255, 0, 255, 255});
             triangles.clear();
         }
@@ -235,6 +246,20 @@ int main()
     coordSystems[0].identity();
 
     Screen screen(500, 500);
+
+    // int val = 32;
+    // for (int i = 0; i < val; i++) {
+    //     double angle = (i/static_cast<double>(val)) * (2 * M_PI);
+    //     double x = std::cos(angle) * 200 + 250;
+    //     double y = std::sin(angle) * 200 + 250;
+    //     screen.graphics.drawLine(250, 250, 0, x, y, 0, {255, 255, 255, 255});
+    // }
+
+    // screen.display();
+
+    //screen.graphics.drawLine(250, 250, 0, 300, 100, 0, {255, 255, 255, 255});
+
+    //screen.display();
 
     parse("script", screen, edges, triangles, coordSystems);
 

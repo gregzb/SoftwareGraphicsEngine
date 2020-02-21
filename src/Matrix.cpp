@@ -102,7 +102,7 @@ Matrix Matrix::multiply(const Matrix &matrix)
             }
         }
     }
-    
+
     return result;
 }
 
@@ -248,11 +248,12 @@ void Matrix::addBox(double x, double y, double z, double w, double h, double d)
     double y1 = y - h;
     double z1 = z - d;
 
-    addTriangle(x, y, z, x1, y, z, x, y, z1);
-    addTriangle(x1, y ,z, x1, y, z1, x, y, z1);
+         addTriangle(x, y, z, x1, y, z, x, y, z1);
+    //oui
+    addTriangle(x1, y, z, x1, y, z1, x, y, z1);
 
     addTriangle(x, y, z, x, y1, z, x1, y1, z);
-    addTriangle(x, y, z, x1, y1, z, x1, y, z);
+         addTriangle(x, y, z, x1, y1, z, x1, y, z);
 
     addTriangle(x, y, z, x, y1, z1, x, y1, z);
     addTriangle(x, y, z, x, y, z1, x, y1, z1);
@@ -260,7 +261,13 @@ void Matrix::addBox(double x, double y, double z, double w, double h, double d)
     addTriangle(x, y1, z, x, y1, z1, x1, y1, z);
     addTriangle(x1, y1, z, x, y1, z1, x1, y1, z1);
 
+    // std::cout << x1 << " " << y << " " << z << std::endl;
+    // std::cout << x1 << " " << y1 << " " << z << std::endl;
+    // std::cout << x1 << " " << y1 << " " << z1 << std::endl;
+    // std::cout << x1 << " " << y << " " << z1 << std::endl;
+
     addTriangle(x1, y, z, x1, y1, z, x1, y1, z1);
+    //oui
     addTriangle(x1, y, z, x1, y1, z1, x1, y, z1);
 
     addTriangle(x, y, z1, x1, y1, z1, x, y1, z1);
@@ -340,6 +347,33 @@ void Matrix::addSphere(Vec v, double r, int thetaSteps, int phiSteps)
     addSphere(temp[0], temp[1], temp[2], r, thetaSteps, phiSteps);
 }
 
+// void Matrix::addTorus(double x, double y, double z, double r1, double r2, int thetaSteps, int phiSteps)
+// {
+//     double thetaStepSize = 2 * M_PI / thetaSteps;
+//     double phiStepSize = 2 * M_PI / phiSteps;
+//
+//     std::vector<int> offsets{0, 0, 1, 0, 1, 1, 0, 1};
+//
+//     for (int phiStep = 0; phiStep < phiSteps; phiStep++)
+//     {
+//         for (int thetaStep = 0; thetaStep < thetaSteps; thetaStep++)
+//         {
+//             std::vector<Vec> points;
+//             for (int i = 0; i < 8; i += 2)
+//             {
+//                 double phi = (phiStep + offsets[i]) * phiStepSize;
+//                 double theta = (thetaStep + offsets[i + 1]) * thetaStepSize;
+//                 points.push_back({{(r2 + r1 * std::cos(phi)) * std::cos(theta) + x,
+//                                    r1 * std::sin(phi) + y,
+//                                    (r2 + r1 * std::cos(phi)) * std::sin(theta) + z}});
+//             }
+//
+//             addTriangle(points[0], points[1], points[2]);
+//             addTriangle(points[0], points[2], points[3]);
+//         }
+//     }
+// }
+
 void Matrix::addTorus(double x, double y, double z, double r1, double r2, int thetaSteps, int phiSteps)
 {
     double thetaStepSize = 2 * M_PI / thetaSteps;
@@ -347,6 +381,11 @@ void Matrix::addTorus(double x, double y, double z, double r1, double r2, int th
 
     std::vector<int> offsets{0, 0, 1, 0, 1, 1, 0, 1};
 
+    //for (int phiStep = phiSteps+1-2; phiStep < phiSteps+1+; phiStep++)
+    // for (int phiStep = 0; phiStep < phiSteps; phiStep++)
+    // {
+    //     for (int thetaStep = 0; thetaStep < thetaSteps; thetaStep++)
+    //     {
     for (int phiStep = 0; phiStep < phiSteps; phiStep++)
     {
         for (int thetaStep = 0; thetaStep < thetaSteps; thetaStep++)
@@ -354,7 +393,7 @@ void Matrix::addTorus(double x, double y, double z, double r1, double r2, int th
             std::vector<Vec> points;
             for (int i = 0; i < 8; i += 2)
             {
-                double phi = (phiStep + offsets[i]) * phiStepSize;
+                double phi = (phiStep % phiSteps + offsets[i]) * phiStepSize;
                 double theta = (thetaStep + offsets[i + 1]) * thetaStepSize;
                 points.push_back({{(r2 + r1 * std::cos(phi)) * std::cos(theta) + x,
                                    r1 * std::sin(phi) + y,
@@ -380,12 +419,11 @@ void Matrix::addTorus(Vec v, double r1, double r2, int thetaSteps, int phiSteps)
 Vec Matrix::getTriangleNormal(int idx)
 {
     Vec temps[2];
-    for (int i = 0; i < 2; i++) {
-        temps[i] = {{
-            m[0][i + idx + 1] - m[0][i + idx],
-            m[1][i + idx + 1] - m[1][i + idx],
-            m[2][i + idx + 1] - m[1][i + idx]
-        }};
+    for (int i = 0; i < 2; i++)
+    {
+        temps[i] = {{m[0][i + idx + 1] - m[0][i + idx],
+                     m[1][i + idx + 1] - m[1][i + idx],
+                     m[2][i + idx + 1] - m[1][i + idx]}};
     }
     return temps[0].cross(temps[1]);
 }

@@ -1,0 +1,15 @@
+push
+movescreen
+250 250 0
+rotate
+x 5
+rotate
+y 8
+rotate
+z 2
+torus
+0 0 0 50 200
+#sphere
+0 0 0 200
+save
+000.png
