@@ -20,6 +20,9 @@ public:
     void toFile(std::string fileName);
     void toFileExtension(std::string fileName);
     void display();
+
+    void plot(Vec3 point, Color color);
+
     PixelGrid<double> &zbuf();
     double &zbuf(int row, int col);
     void clearZbuf(double value = -std::numeric_limits<double>::infinity());

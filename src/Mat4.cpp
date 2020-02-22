@@ -59,6 +59,23 @@ Vec3 Mat4::getPoint(int col) {
     return {m[0][col], m[1][col], m[2][col]};
 }
 
+Vec4 Mat4::getVec4(int col) {
+    return {m[0][col], m[1][col], m[2][col], m[3][col]};
+}
+
+void Mat4::perspectiveDivision() {
+    for (int col = 0; col < getCols(); col++)
+    {
+        double w = m[3][col];
+        for (int row = 0; row < getRows(); row++)
+        {
+            if (m[row][col] != 0) {
+                m[row][col] /= w;
+            }
+        }
+    }
+}
+
 Mat4 Mat4::identity()
 {
     Mat4 temp(4);
@@ -105,7 +122,7 @@ void Mat4::multiplyMutate(const Mat4 &matrix)
 {
     assert(matrix.getCols() == getRows());
 
-    std::vector<int> temp(4);
+    std::vector<double> temp(4);
 
     for (int col = 0; col < getCols(); col++)
     {
@@ -120,6 +137,7 @@ void Mat4::multiplyMutate(const Mat4 &matrix)
             {
                 m[row][col] += matrix.m[row][i] * temp[i];
             }
+            //std::cout << row << ", " << col << ": " << m[row][col] << std::endl;
         }
     }
 }
@@ -129,12 +147,24 @@ void Mat4::addPoint(Vec3 v)
     cols += 1;
     for (int row = 0; row < getRows(); row++)
     {
+        m[row].push_back(1); //adds 1, including to w
+    }
+    m[0][getCols() - 1] = v.x;
+    m[1][getCols() - 1] = v.y;
+    m[2][getCols() - 1] = v.z;
+}
+
+void Mat4::addVec4(Vec4 v)
+{
+    cols += 1;
+    for (int row = 0; row < getRows(); row++)
+    {
         m[row].push_back(1);
     }
     m[0][getCols() - 1] = v.x;
     m[1][getCols() - 1] = v.y;
     m[2][getCols() - 1] = v.z;
-    m[3][getCols() - 1] = 1; // redundant
+    m[3][getCols() - 1] = v.w;
 }
 
 void Mat4::addEdge(Vec3 v0, Vec3 v1)

@@ -5,10 +5,9 @@
 class Vec3
 {
 public:
-    double x;
-    double y;
-    double z;
+    double x, y, z, w;
 
+    Vec3(double x, double y, double z, double w);
     Vec3(double x, double y, double z);
     Vec3(double x, double y);
     Vec3();

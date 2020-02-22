@@ -11,22 +11,49 @@
 
 Graphics::Graphics(Screen &screen) : screen(screen){};
 
-void Graphics::drawLine(Vec3 a, Vec3 b, Color color, bool debug) const
+void Graphics::drawLine(Vec3 a, Vec3 b, Color color) const
 {
-    std::vector<Vec3> pixels = Utils::linePixelsAndZ(a, b);
+    drawLine(a, b, color, false);
+}
 
-    // double zInc = (b.z - a.z) / (pixels.size() == 1 ? 1 : (pixels.size() - 1));
-    // double z = a.z;
-
-    for (auto &pixel : pixels)
+void Graphics::drawLine(Vec3 a, Vec3 b, Color color, bool flipped) const
+{
+    if (b.x < a.x)
     {
-        if (screen.zbuf(pixel.y, pixel.x) < pixel.z)
+        return drawLine(b, a, color, flipped);
+    }
+
+    long x0r = std::lround(a.x), x1r = std::lround(b.x), y0r = std::lround(a.y), y1r = std::lround(b.y);
+
+    long dY = y1r - y0r, dX = x1r - x0r;
+
+    if (std::abs(dY) > dX)
+    {
+        return drawLine({a.y, a.x}, {b.y, b.x}, color, !flipped);
+    }
+
+    int dir = Utils::sign(dY);
+
+    dY = std::abs(dY) * 2;
+
+    int d = dY - dX;
+
+    dX *= 2;
+
+    int y = y0r;
+    for (int x = x0r; x <= x1r; x++)
+    {
+        if (!flipped)
+            screen.plot({x, y}, color);
+        else
+            screen.plot({y, x}, color);
+
+        if (d > 0)
         {
-            screen.zbuf(pixel.y, pixel.x) = pixel.z;
-            screen(pixel.y, pixel.x) = color;
+            y += dir;
+            d -= dX;
         }
-        //screen(pixel.y, pixel.x) = color;
-        //z += zInc;
+        d += dY;
     }
 }
 
@@ -45,26 +72,29 @@ void Graphics::drawTriangles(Mat4 &matrix, Color color) const
     for (int col = 0; col < matrix.getCols(); col += 3)
     {
         Vec3 normal = matrix.getTriangleNormal(col);
-
-        if (normal.z < std::numeric_limits<double>::epsilon() * 100)
-        {
-            continue;
+        if (matrix.getPoint(col).dot(normal) < 0) {
+            continue; //Normal calculation might be broken, should check on it. (May need to do calculation earlier)
         }
+
+        // if (normal.z < std::numeric_limits<double>::epsilon() * 100)
+        // {
+        //     continue;
+        // }
         //std::cout << std::endl;
         //std::cout << "Tri: ";
 
         for (int i = 0; i < 3; i++)
         {
             points[i] = matrix.getPoint(col + i);
+            points[i].x = Utils::map(points[i].x, -1, 1, 0, screen.getWidth());
+            points[i].y = Utils::map(points[i].y, -1, 1, 0, screen.getHeight());
             //std::cout << points[i];
         }
 
         //std::cout << std::endl;
 
         color = {255, (col * 7) % 256, (col * 13 + 50) % 256, 255};
-
         fillTriangle(points, color);
-
         // for (int i = 0; i < 3; i++)
         // {
         //     // std::cout << "drawing from/to" << std::endl;
@@ -84,7 +114,7 @@ struct InterpInfo
 
 void projectSide(std::vector<InterpInfo> &scanlines, Vec3 const &lower, Vec3 const &higher, int minVal, int side)
 {
-    int x0 = std::ceil(lower.x), y0 = std::ceil(lower.y), x1 = std::ceil(higher.x), y1 = std::ceil(higher.y);
+    int y0 = std::ceil(lower.y), y1 = std::ceil(higher.y);
     double dY = higher.y - lower.y, dX = higher.x - lower.x, dZ = higher.z - lower.z;
 
     if (dY <= 0)
@@ -106,10 +136,6 @@ void projectSide(std::vector<InterpInfo> &scanlines, Vec3 const &lower, Vec3 con
 
 void Graphics::fillTriangle(std::vector<Vec3> &verts, Color color) const
 {
-    /*
-    Greggo, try two things -> make line pixels return z val, and also try calc-ing z val here
-    */
-
     if (verts[0].y > verts[1].y)
         std::swap(verts[0], verts[1]);
     if (verts[1].y > verts[2].y)
@@ -121,11 +147,9 @@ void Graphics::fillTriangle(std::vector<Vec3> &verts, Color color) const
     side = side >= 0 ? 0 : 1;
 
     std::vector<InterpInfo> scanlines(2 * (std::ceil(verts[2].y) - std::ceil(verts[0].y)));
-
     projectSide(scanlines, verts[0], verts[2], std::ceil(verts[0].y), side);
     projectSide(scanlines, verts[0], verts[1], std::ceil(verts[0].y), 1 - side);
     projectSide(scanlines, verts[1], verts[2], std::ceil(verts[0].y), 1 - side);
-
     for (uint i = 0; i < scanlines.size(); i += 2)
     {
         InterpInfo leftInterp = scanlines[i];
@@ -143,57 +167,58 @@ void Graphics::fillTriangle(std::vector<Vec3> &verts, Color color) const
                 screen.zbuf(y, x) = z;
                 screen(y, x) = color;
             }
-            //screen(y, x) = color;
             z += zStep;
         }
     }
+}
 
-    // std::vector<Vec3> side1Pixels = Utils::linePixelsAndZ(verts[2], verts[0]);
-    // std::vector<Vec3> side1;
-    // side1.push_back(side1Pixels.front());
-    // for (auto pixel : side1Pixels) {
-    //     if (pixel.y != side1.back().y) {
-    //         side1.push_back(pixel);
-    //     } else {
-    //         side1.back() = pixel;
-    //     }
-    // }
+void Graphics::renderObject(Camera &cam, RenderObject &object) const
+{
+    //instead of doing 3 mults here, get all 3 matrices and then chain and do one mult
+    Mat4 tris = object.toWorldSpace();
 
-    // std::vector<Vec3> side2Pixels = Utils::linePixelsAndZ(verts[2], verts[1]);
-    // std::vector<Vec3> side2;
-    // side2.push_back(side2Pixels.front());
-    // for (auto pixel : side2Pixels) {
-    //     if (pixel.y != side2.back().y) {
-    //         side2.push_back(pixel);
-    //     } else {
-    //         side2.back() = pixel;
-    //     }
-    // }
+    tris.multiplyMutate(cam.getViewMatrix());
+    tris.multiplyMutate(cam.getProjectionMatrix());
+    //clipping must be done here - clip from -w to w for all dimensions (or dont), -w's get discard, so clip that too
+    //std::cout << tris.toString() << std::endl;
+    Mat4 clipped;
 
-    // std::vector<Vec3> side3Pixels = Utils::linePixelsAndZ(verts[1], verts[0]);
-    // for (auto pixel : side3Pixels) {
-    //     if (pixel.y != side2.back().y) {
-    //         side2.push_back(pixel);
-    //     }
-    // }
+    std::vector<Vec4> points(3);
+    for (int col = 0; col < tris.getCols(); col += 3)
+    {
+        int wPosCount = 0;
+        for (int i = 0; i < 3; i++)
+        {
+            points[i] = tris.getVec4(col + i);
+            // > 0 or greater than near? not sure
+            if (points[i].w > 0) {
+                wPosCount += 1;
+            }
+        }
 
-    // for (uint i = 0; i < side1.size(); i++) {
-    //     std::cout << side1[i] << side2[i] << std::endl;
-    //     drawLine(side1[i], side2[i], color);
-    // }
+        if (wPosCount == 0) {
+            //no clipping, dont add
+        } else if (wPosCount == 1) {
+            //simpler clip
+            clipped.addVec4(points[0]);
+            clipped.addVec4(points[1]);
+            clipped.addVec4(points[2]);
+        } else if (wPosCount == 2) {
+            //harder clip, need two tris
+            clipped.addVec4(points[0]);
+            clipped.addVec4(points[1]);
+            clipped.addVec4(points[2]);
+        } else if (wPosCount == 3) {
+            //no clipping, add
+            clipped.addVec4(points[0]);
+            clipped.addVec4(points[1]);
+            clipped.addVec4(points[2]);
+        }
+    }
 
-    // for (int i = 0; i < side1Pixels.size(); i++)
-    // {
-    //     if (side1Pixels[i][1] != side1.back()[1])
-    //     {
-    //         side1.push_back(side1Pixels[i]);
-    //     }
-    //     else
-    //     {
-    //         //side1.back()[2] = std::min(side1.back()[2], side1Pixels[i][2]);
-    //         side1.back() = side1Pixels[i];
-    //     }
-    // }
+    clipped.perspectiveDivision();
+
+    drawTriangles(clipped, {255, 255, 255, 255});
 }
 
 void Graphics::clear(Color color) const

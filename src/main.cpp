@@ -13,6 +13,9 @@
 #include "Mat4.hpp"
 #include "Vec3.hpp"
 
+#include "RenderObject.hpp"
+#include "Camera.hpp"
+
 void parse(std::string fileName, Screen &screen, Mat4 &edges, Mat4 &triangles, std::vector<Mat4> &coordSystems)
 {
     std::ifstream infile(fileName);
@@ -193,7 +196,7 @@ void parse(std::string fileName, Screen &screen, Mat4 &edges, Mat4 &triangles, s
             double r;
             iss >> v >> r;
 
-             triangles.addSphere(v, r, 30, 15);
+            triangles.addSphere(v, r, 30, 15);
             // triangles.addSphere(v, r, 3000, 1500);
 
             //std::cout << triangles.getCols() << std::endl;
@@ -216,10 +219,11 @@ void parse(std::string fileName, Screen &screen, Mat4 &edges, Mat4 &triangles, s
 
             //triangles = coordSystems.back().multiply(triangles);
             triangles.multiplyMutate(coordSystems.back());
-            for (int i = 0; i < triangles.getCols(); i++) {
-              triangles[0][i] += offset.x;
-              triangles[1][i] += offset.y;
-              triangles[2][i] += offset.z;
+            for (int i = 0; i < triangles.getCols(); i++)
+            {
+                triangles[0][i] += offset.x;
+                triangles[1][i] += offset.y;
+                triangles[2][i] += offset.z;
             }
             screen.graphics.drawTriangles(triangles, {255, 0, 255, 255});
             triangles.clear();
@@ -253,8 +257,58 @@ int main()
     coordSystems.push_back(Mat4::identity());
 
     Screen screen(500, 500);
+    Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), 0.001, 1000);
 
-    parse("script", screen, edges, triangles, coordSystems);
+    RenderObject obj1;
+    //obj1.getMesh().addSphere({0, 0, 0}, 1, 30, 15);
+    //obj1.getMesh().addTorus({0, 0, 0}, .2, .8, 60, 24);
+    obj1.getMesh().addBox({0, 0, 0}, {1, 1, 1});
+    obj1.position = {.2, 1.2, -3};
+
+    screen.graphics.renderObject(cam, obj1);
+    screen.display();
+
+    //obj1.rotation.x = 25 * M_PI / 180;
+
+    // RenderObject obj2;
+    // obj2.getMesh().addSphere({0, 0, 0}, 1, 50, 25);
+    // obj2.position = {0, 0, 0.01};
+
+    // for (int i = 0; i < 36; i++)
+    // {
+    //     double angle = M_PI * 2 / 36 * i;
+
+    //     cam.rotation.y = angle;
+    //     cam.position.x = 1;
+
+    //     screen.graphics.clear({0, 0, 0, 255});
+    //     screen.clearZbuf();
+    //     screen.graphics.renderObject(cam, obj1);
+
+    //     std::string s = std::to_string(i);
+    //     s.insert(s.begin(), 3 - s.size(), '0');
+
+    //     screen.toFileExtension("img" + s + ".png");
+    // }
+
+    // int counter = 0;
+    // for (double i = 0; i < 2*M_PI * 4; i += (2*M_PI) / 120 * 8) {
+    //     screen.graphics.clear({0, 0, 0, 255});
+    //     screen.clearZbuf();
+
+    //     obj1.rotation = {i/2, i, i/4};
+
+    //     screen.graphics.renderObject(cam, obj1);
+
+    //     std::string s = std::to_string(counter);
+    //     s.insert(s.begin(), 3 - s.size(), '0');
+
+    //     std::cout << "img" + s + ".png" << std::endl;
+
+    //     screen.toFileExtension("img" + s + ".png");
+    //     counter++;
+    // }
+    //parse("script", screen, edges, triangles, coordSystems);
 
     return 0;
 }

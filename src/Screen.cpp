@@ -2,7 +2,8 @@
 #include "Screen.hpp"
 #include "PixelGrid.hpp"
 
-Screen::Screen(int width, int height) : PixelGrid(width, height), zbuffer(width, height), graphics(*this) {
+Screen::Screen(int width, int height) : PixelGrid(width, height), zbuffer(width, height), graphics(*this)
+{
     clearZbuf();
 }
 
@@ -80,6 +81,15 @@ void Screen::display()
         fprintf(f, "\n");
     }
     pclose(f);
+}
+
+void Screen::plot(Vec3 pixel, Color color)
+{
+    if (zbuf(pixel.y, pixel.x) < pixel.z)
+    {
+        zbuf(pixel.y, pixel.x) = pixel.z;
+        pixelAt(pixel.y, pixel.x) = color;
+    }
 }
 
 PixelGrid<double> &Screen::zbuf()

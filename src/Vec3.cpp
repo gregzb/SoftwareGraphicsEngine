@@ -1,11 +1,15 @@
-#include "Vec3.hpp"
 #include <cmath>
+#include "Vec3.hpp"
 
-Vec3::Vec3(double x, double y, double z) : x(x), y(y), z(z)
+Vec3::Vec3(double x, double y, double z, double w) : x(x), y(y), z(z), w(w)
 {
 }
 
-Vec3::Vec3(double x, double y) : x(x), y(y), z(0)
+Vec3::Vec3(double x, double y, double z) : x(x), y(y), z(z), w(0)
+{
+}
+
+Vec3::Vec3(double x, double y) : x(x), y(y), z(0), w(0)
 {
 }
 

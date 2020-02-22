@@ -4,6 +4,7 @@
 #include <string>
 
 #include "Vec3.hpp"
+#include "Vec4.hpp"
 #include "Utils.hpp"
 
 class Mat4
@@ -13,7 +14,7 @@ private:
     int cols;
 
 public:
-    Mat4(int cols);
+    Mat4(int cols = 0);
     Mat4(std::vector<std::vector<double>> m);
     std::vector<double> &operator[](int idx);
     int getRows() const;
@@ -21,11 +22,14 @@ public:
     std::string toString() const;
 
     Vec3 getPoint(int col);
+    Vec4 getVec4(int col);
+    void perspectiveDivision();
 
     void clear();
     Mat4 multiply(const Mat4 &matrix);
     void multiplyMutate(const Mat4 &matrix);
     void addPoint(Vec3 v);
+    void addVec4(Vec4 v);
     void addEdge(Vec3 v0, Vec3 v1);
     void addTriangle(Vec3 v0, Vec3 v1, Vec3 v2);
     void addCircle(Vec3 v, double r, int steps);

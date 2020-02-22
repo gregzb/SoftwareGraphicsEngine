@@ -26,6 +26,5 @@ namespace Utils
 int sign(double x);
 double inverseLerp(double a, double b, double val);
 double lerp(double a, double b, double t);
-std::vector<Vec3> linePixels(Vec3 a, Vec3 b, bool flipped = false);
-std::vector<Vec3> linePixelsAndZ(Vec3 a, Vec3 b);
+double map(double value, double low1, double high1, double low2, double high2);
 } // namespace Utils
