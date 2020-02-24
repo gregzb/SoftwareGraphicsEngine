@@ -21,7 +21,7 @@ public:
     void toFileExtension(std::string fileName);
     void display();
 
-    void plot(Vec3 point, Color color);
+    void plot(Vec4 point, Color color);
 
     PixelGrid<double> &zbuf();
     double &zbuf(int row, int col);

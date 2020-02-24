@@ -83,7 +83,7 @@ void Screen::display()
     pclose(f);
 }
 
-void Screen::plot(Vec3 pixel, Color color)
+void Screen::plot(Vec4 pixel, Color color)
 {
     if (zbuf(pixel.y, pixel.x) < pixel.z)
     {

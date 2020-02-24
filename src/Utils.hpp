@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Vec3.hpp"
 #include <vector>
+#include "Vec4.hpp"
 
 enum class CurveType {
     Hermite,
     Bezier
 };
 
-class Color
+struct Color
 {
 public:
     unsigned char r;
@@ -19,6 +19,7 @@ public:
     Color();
     Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
     Color(int r, int g, int b, int a);
+    Color(Vec4 v);
 };
 
 namespace Utils
