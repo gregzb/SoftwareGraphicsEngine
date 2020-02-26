@@ -112,10 +112,10 @@ void Graphics::drawTriangle(std::vector<Vertex> vertices) const
 {
     Vec4 normal = vertices[0].getFaceNormal(vertices[1], vertices[2]);
 
-    // if (normal.z < std::numeric_limits<double>::epsilon() * 100) //this works in screen space :)
-    // {
-    //     //return;
-    // }
+    if (normal.z < std::numeric_limits<double>::epsilon() * 100) //this works in screen space :)
+    {
+        //return;
+    }
 
     for (int i = 0; i < 3; i++)
     {
@@ -203,7 +203,23 @@ void projectSide(std::vector<InterpInfo> &scanlines, Vertex &lower, Vertex &high
     double xStep = dX / dY;
     double x = lower.pos.x + (y0 - lower.pos.y) * xStep;
 
-    double z = interpolation.getStartDepth() + interpolation.getDepthStepX() * (x - lower.pos.x) + interpolation.getDepthStepY() * (y0 - lower.pos.y);
+    //min y vert index, not min y
+    /**
+     * dsfsfsdf
+     * sdf
+     * sdf
+     * s
+     * df
+     * sd
+     * fs
+     * df
+     * sd
+     * fs
+     * df
+     * sdf
+     **/
+    //double z = interpolation.getStartDepth() + interpolation.getDepthStepX() * (x - lower.pos.x) + interpolation.getDepthStepY() * (y0 - lower.pos.y);
+    double z = lower.pos.z + interpolation.getDepthStepX() * (x - lower.pos.x) + interpolation.getDepthStepY() * (y0 - lower.pos.y);
     //double z = interpolation.getStartDepth();
     //double zStep = interpolation.getDepthStepY();
     double zStep = interpolation.getDepthStepY() + interpolation.getDepthStepX() * xStep;
@@ -261,6 +277,7 @@ void Graphics::fillTriangle(std::vector<Vertex> &verts) const
         xRight = std::ceil(rightInterp.x);
 
         //double zStep = (rightInterp.z - leftInterp.z) / (rightInterp.x - leftInterp.x);
+        //double z = leftInterp.z;
         double z = leftInterp.z + interpolation.getDepthStepX() * (xLeft - leftInterp.x);
         double overZ = leftInterp.overZ + interpolation.getOverZStepX() * (xLeft - leftInterp.x);
         //double z = leftInterp.z;
@@ -279,6 +296,7 @@ void Graphics::fillTriangle(std::vector<Vertex> &verts) const
             }
             //z += zStep;
             z += interpolation.getDepthStepX(); // may need to recalc etc: (rightInterp.z - leftInterp.z)/(rightInterp.x - leftInterp.x));
+            overZ += interpolation.getOverZStepX();
             //c = c.add(cStep);
         }
     }

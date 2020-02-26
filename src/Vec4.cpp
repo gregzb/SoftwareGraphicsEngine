@@ -46,7 +46,7 @@ Vec4 Vec4::normalize()
 
 Vec4 Vec4::perspectiveDivision()
 {
-    return {x / w, y / w, z / w, w / w};
+    return {x / w, y / w, z / w, w};
 }
 
 Vec4 Vec4::cross(Vec4 other)

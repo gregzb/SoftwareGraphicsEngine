@@ -15,6 +15,8 @@
 #include "RenderObject.hpp"
 #include "Camera.hpp"
 
+#include "OBJLoader.hpp"
+
 // void parse(std::string fileName, Screen &screen, Mat4 &edges, Mat4 &triangles, std::vector<Mat4> &coordSystems)
 // {
 //     std::ifstream infile(fileName);
@@ -250,33 +252,57 @@
 
 int main()
 {
-    srand(time(NULL));
-    Mat4 edges(0);
-    Mat4 triangles(0);
-    std::vector<Mat4> coordSystems;
-    coordSystems.push_back(Mat4::identity());
+    OBJLoader obj("resources/monkey.obj");
 
     Screen screen(500, 500);
     Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), 0.001, 1000);
 
-    RenderObject obj1;
-    //obj1.addTriangle({0, 0, -3}, {1, 0, -3}, {0.5, 1, -3});
-    //obj1.addSphere({0, 0, 0}, 1, 30, 15);
-    obj1.addTorus({0, 0, 0}, .2, .7, 30, 12);
-    //obj1.addBox({0, 0, 0}, {1, 1, 1});
-    obj1.position = {0, 0, -3};
-    obj1.rotation = {0, (55 + 180) * M_PI / 180, 20 * M_PI / 180};
+    RenderObject monkey = obj.toRenderObject("Suzanne");
+    monkey.position = {0, 0, -3};
+    monkey.rotation = {(15) * M_PI / 180, (-30) * M_PI / 180, (3) * M_PI / 180};
 
-    for (uint i = 0; i < obj1.getMesh().size(); i++) {
-        obj1.getMesh()[i].color = {static_cast<double>((i * 7 + 120)%256), static_cast<double>((i * 3 + 80)%256), static_cast<double>((i * 13 + 130)%256), 255.0};
-    }
+    screen.graphics.renderObject(cam, monkey);
+    screen.display();
+
+    // OBJLoader obj("resources/test2.obj");
+
+    // Screen screen(500, 500);
+    // Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), 0.001, 1000);
+
+    // RenderObject monkey = obj.toRenderObject("Plane");
+    // monkey.position = {0, -.5, -3};
+    // monkey.rotation = {(40) * M_PI / 180, (-10) * M_PI / 180, (3) * M_PI / 180};
+
+    // screen.graphics.renderObject(cam, monkey);
+    // screen.display();
+
+    // srand(time(NULL));
+    // Mat4 edges(0);
+    // Mat4 triangles(0);
+    // std::vector<Mat4> coordSystems;
+    // coordSystems.push_back(Mat4::identity());
+
+    // Screen screen(500, 500);
+    // Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), 0.001, 1000);
+
+    // RenderObject obj1;
+    // //obj1.addTriangle({0, 0, -3}, {1, 0, -3}, {0.5, 1, -3});
+    // //obj1.addSphere({0, 0, 0}, 1, 30, 15);
+    // obj1.addTorus({0, 0, 0}, .2, .7, 30, 12);
+    // //obj1.addBox({0, 0, 0}, {1, 1, 1});
+    // obj1.position = {0, 0, -3};
+    // obj1.rotation = {0, (55 + 180) * M_PI / 180, 20 * M_PI / 180};
+
+    // for (uint i = 0; i < obj1.getMesh().size(); i++) {
+    //     obj1.getMesh()[i].color = {static_cast<double>((i * 7 + 120)%256), static_cast<double>((i * 3 + 80)%256), static_cast<double>((i * 13 + 130)%256), 255.0};
+    // }
+
+    // screen.graphics.renderObject(cam, obj1);
+    // screen.display();
 
     // for (auto & vert : obj1.getMesh()) {
     //     std::cout << vert.pos << std::endl;
     // }
-
-    screen.graphics.renderObject(cam, obj1);
-    screen.display();
 
     // RenderObject obj1;
     // // obj1.getMesh().addSphere({0, 0, 0}, 1, 30, 15);

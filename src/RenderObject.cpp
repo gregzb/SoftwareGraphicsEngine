@@ -53,6 +53,7 @@ void RenderObject::addEdge(Vec4 v0, Vec4 v1)
 
 void RenderObject::addTriangle(Vec4 v0, Vec4 v1, Vec4 v2)
 {
+    //std::cout << v0 << v1 << v2 << std::endl;
     addPoint(v0);
     addPoint(v1);
     addPoint(v2);

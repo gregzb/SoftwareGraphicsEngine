@@ -25,5 +25,5 @@ public:
 
     PixelGrid<double> &zbuf();
     double &zbuf(int row, int col);
-    void clearZbuf(double value = std::numeric_limits<double>::infinity());
+    void clearZbuf(double value = +std::numeric_limits<double>::infinity());
 };
