@@ -73,6 +73,36 @@ Vec4 Vec4::scale(double other)
     return {x * other, y * other, z * other, w * other};
 }
 
+Vec4 Vec4::operator*(Vec4 other)
+{
+    return scale(other);
+}
+
+Vec4 Vec4::operator*(double other)
+{
+    return scale(other);
+}
+
+Vec4 Vec4::div(Vec4 other)
+{
+    return {x / other.x, y / other.y, z / other.z, w / other.w};
+}
+
+Vec4 Vec4::div(double other)
+{
+    return {x / other, y / other, z / other, w / other};
+}
+
+Vec4 Vec4::operator/(Vec4 other)
+{
+    return div(other);
+}
+
+Vec4 Vec4::operator/(double other)
+{
+    return div(other);
+}
+
 Vec4 Vec4::add(Vec4 other)
 {
     return {x + other.x, y + other.y, z + other.z, w + other.w};
@@ -81,6 +111,16 @@ Vec4 Vec4::add(Vec4 other)
 Vec4 Vec4::add(double other)
 {
     return {x + other, y + other, z + other, w + other};
+}
+
+Vec4 Vec4::operator+(Vec4 other)
+{
+    return add(other);
+}
+
+Vec4 Vec4::operator+(double other)
+{
+    return add(other);
 }
 
 Vec4 Vec4::sub(Vec4 other)
@@ -93,9 +133,23 @@ Vec4 Vec4::sub(double other)
     return {x - other, y - other, z - other, w - other};
 }
 
+Vec4 Vec4::operator-(Vec4 other)
+{
+    return sub(other);
+}
+
+Vec4 Vec4::operator-(double other)
+{
+    return sub(other);
+}
+
 Vec4 Vec4::lerp(Vec4 other, double t)
 {
     return other.sub(*this).scale(t).add(*this);
+}
+
+Vec4 Vec4::round(double roundFactor) {
+    return {std::lround(x*roundFactor)/roundFactor, std::lround(y * roundFactor)/roundFactor, std::lround(z*roundFactor)/roundFactor, std::lround(w*roundFactor)/roundFactor};
 }
 
 bool Vec4::operator==(const Vec4 &other) const

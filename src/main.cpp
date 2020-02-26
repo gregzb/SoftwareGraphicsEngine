@@ -261,10 +261,11 @@ int main()
 
     RenderObject obj1;
     //obj1.addTriangle({0, 0, -3}, {1, 0, -3}, {0.5, 1, -3});
-    obj1.addSphere({0, 0, 0}, 1, 30, 15);
-    //obj1.addBox({0, 0, 0}, 200, 30, 15);
+    //obj1.addSphere({0, 0, 0}, 1, 30, 15);
+    obj1.addTorus({0, 0, 0}, .2, .7, 30, 12);
+    //obj1.addBox({0, 0, 0}, {1, 1, 1});
     obj1.position = {0, 0, -3};
-    //obj1.rotation = {0, 180 * M_PI / 180, 0};
+    obj1.rotation = {0, (55 + 180) * M_PI / 180, 20 * M_PI / 180};
 
     for (uint i = 0; i < obj1.getMesh().size(); i++) {
         obj1.getMesh()[i].color = {static_cast<double>((i * 7 + 120)%256), static_cast<double>((i * 3 + 80)%256), static_cast<double>((i * 13 + 130)%256), 255.0};
@@ -274,8 +275,8 @@ int main()
     //     std::cout << vert.pos << std::endl;
     // }
 
-    // screen.graphics.renderObject(cam, obj1);
-    // screen.display();
+    screen.graphics.renderObject(cam, obj1);
+    screen.display();
 
     // RenderObject obj1;
     // // obj1.getMesh().addSphere({0, 0, 0}, 1, 30, 15);
@@ -316,23 +317,23 @@ int main()
     //     screen.toFileExtension("img" + s + ".png");
     // }
 
-    int counter = 0;
-    for (double i = 0; i < 2*M_PI * 4; i += (2*M_PI) / 60 * 4) {
-        screen.graphics.clear({0, 0, 0, 255});
-        screen.clearZbuf();
+    // int counter = 0;
+    // for (double i = 0; i < 2*M_PI * 4; i += (2*M_PI) / 60 * 4) {
+    //     screen.graphics.clear({0, 0, 0, 255});
+    //     screen.clearZbuf();
 
-        obj1.rotation = {i/2, i, i/4};
+    //     obj1.rotation = {i/2, i, i/4};
 
-        screen.graphics.renderObject(cam, obj1);
+    //     screen.graphics.renderObject(cam, obj1);
 
-        std::string s = std::to_string(counter);
-        s.insert(s.begin(), 3 - s.size(), '0');
+    //     std::string s = std::to_string(counter);
+    //     s.insert(s.begin(), 3 - s.size(), '0');
 
-        std::cout << "img" + s + ".png" << std::endl;
+    //     std::cout << "img" + s + ".png" << std::endl;
 
-        screen.toFileExtension("img" + s + ".png");
-        counter++;
-    }
+    //     screen.toFileExtension("img" + s + ".png");
+    //     counter++;
+    // }
     //parse("script", screen, edges, triangles, coordSystems);
 
     return 0;

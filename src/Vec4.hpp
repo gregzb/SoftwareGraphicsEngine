@@ -19,11 +19,22 @@ public:
     Vec4 negate();
     Vec4 cross(Vec4 other);
     Vec4 scale(Vec4 other);
+    Vec4 operator*(Vec4 other);
     Vec4 scale(double other);
+    Vec4 operator*(double other);
+    Vec4 div(Vec4 other);
+    Vec4 operator/(Vec4 other);
+    Vec4 div(double other);
+    Vec4 operator/(double other);
     Vec4 add(Vec4 other);
+    Vec4 operator+(Vec4 other);
     Vec4 add(double other);
+    Vec4 operator+(double other);
     Vec4 sub(Vec4 other);
+    Vec4 operator-(Vec4 other);
     Vec4 sub(double other);
+    Vec4 operator-(double other);
+    Vec4 round(double roundFactor);
 
     Vec4 lerp(Vec4 other, double t);
 

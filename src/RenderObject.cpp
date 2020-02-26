@@ -38,6 +38,7 @@ void RenderObject::generateVertexNormals() {
 
 void RenderObject::addPoint(Vec4 v)
 {
+    v = v.round(100000000.0);
     if (vertex_mappings.count(v) == 0) {
         vertex_mappings.insert({v, vertices.size()});
         vertices.push_back(v);
