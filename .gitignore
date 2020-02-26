@@ -32,7 +32,13 @@
 *.app
 
 out/
+resources/
 *.png
 *.gif
 *.ppm
+*.m4v
+*.mov
+*.mp4
+*.jpg
+*.jpeg
 
