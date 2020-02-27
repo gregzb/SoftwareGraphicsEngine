@@ -342,15 +342,30 @@ RenderObject OBJLoader::toRenderObject(std::string name)
     // }
 
     OBJObject &obj = objects.at(name);
-    for (auto const & face : obj.getVertexIndices()) {
-        for (auto const & vertex : face) {
-            auto pos = v[vertex-1];
-            auto tex = vt[vertex-1];
+    // for (auto const & face : obj.getVertexIndices()) {
+    //     for (auto const & vertex : face) {
+    //         auto pos = v[vertex-1];
+    //         auto tex = vt[vertex-1];
+
+    //         temp.addVertex({pos, tex});
+    //     }
+    // }
+    // std::cout << obj.getVertexIndices().size() << std::endl;
+    // std::cout << obj.getVertexTexIndices().size() << std::endl;
+    for(uint i = 0; i < obj.getVertexIndices().size(); i++) {
+        for (uint j = 0; j < obj.getVertexIndices()[i].size(); j++) {
+            auto pos = v[obj.getVertexIndices()[i][j]-1];
+            auto tex = vt[obj.getVertexTexIndices()[i][j]-1];
+
+            //std::cout << obj.getVertexIndices()[i][j]-1 << " " << obj.getVertexTexIndices()[i][j]-1 << std::endl;
 
             temp.addVertex({pos, tex});
         }
     }
     temp.setTexture(obj.getMat()->getTexture());
+    //std::cout << obj.getMat()->getTexture().getWidth() << " " << obj.getMat()->getTexture().getHeight() << std::endl;
+    //exit(0);
+    //obj.getMat()->getTexture().display();
     // for (auto face : obj.getVertexIndices())
     // {
     //     // if (face[0] > v.size() || face[1] > v.size() || face[2] > v.size())

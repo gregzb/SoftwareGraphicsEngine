@@ -46,7 +46,7 @@ void RenderObject::generateVertexNormals()
 
 void RenderObject::addVertex(Vertex vert)
 {
-    vert.pos = vert.pos.round(100000000.0);
+    //vert.pos = vert.pos.round(100000000.0);
     if (vertex_mappings.count(vert) == 0)
     {
         vertex_mappings.insert({vert, vertices.size()});

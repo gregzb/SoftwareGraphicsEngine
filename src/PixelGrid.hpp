@@ -21,5 +21,7 @@ public:
     int getHeight();
     int getWidth();
 
+    void display();
+
     static PixelGrid<Color> loadTexture(std::string texName);
 };

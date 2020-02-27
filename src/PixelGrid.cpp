@@ -16,7 +16,9 @@ T &PixelGrid<T>::operator()(int row, int col)
 template <class T>
 T &PixelGrid<T>::pixelAt(int row, int col)
 {
-    if (row >= height || row < 0 || col >= width || col < 0) {
+    if (row >= height || row < 0 || col >= width || col < 0)
+    {
+        std::cout << "out: " << row << " " << col << std::endl;
         return pixelData[height * width];
     }
     return pixelData[row * width + col];
@@ -25,7 +27,9 @@ T &PixelGrid<T>::pixelAt(int row, int col)
 template <class T>
 T &PixelGrid<T>::pixelAt(int idx)
 {
-    if (idx < 0 || idx >= height*width) {
+    if (idx < 0 || idx >= height * width)
+    {
+        std::cout << "her1 " << idx << std::endl;
         return pixelData[height * width];
     }
     return pixelData[idx];
@@ -49,13 +53,47 @@ int PixelGrid<T>::getWidth()
     return width;
 }
 
-template<>
-PixelGrid<Color> PixelGrid<Color>::loadTexture(std::string texName) {
+template <>
+void PixelGrid<Color>::display()
+{
+    FILE *f;
+
+    f = popen("display", "w");
+
+    fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
+    //for (int y = height - 1; y >= 0; y--)
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            Color color = pixelAt(y, x);
+            fprintf(f, "%d %d %d ", color.r, color.g, color.b);
+        }
+        fprintf(f, "\n");
+    }
+    // for (int x = 0; x < width; x++)
+    // {
+    //     for (int y = height - 1; y >= 0; y--)
+    //     {
+    //         Color color = pixelAt(y, x);
+    //         fprintf(f, "%d %d %d ", color.r, color.g, color.b);
+    //     }
+    //     fprintf(f, "\n");
+    // }
+    pclose(f);
+}
+
+template <>
+PixelGrid<Color> PixelGrid<Color>::loadTexture(std::string texName)
+{
     //static_assert(std::is_same<T, Color>::value);
     std::ifstream texFile(texName, std::ios::in | std::ios::binary);
 
+    //std::cout << texName << std::endl;
+
     std::string fileHeader;
-    texFile >> fileHeader >> fileHeader >> fileHeader >> fileHeader;
+    //texFile >> fileHeader >> fileHeader >> fileHeader >> fileHeader;
+    texFile >> fileHeader;
     int width, height, maxColor;
     texFile >> width >> height >> maxColor;
 
@@ -63,21 +101,32 @@ PixelGrid<Color> PixelGrid<Color>::loadTexture(std::string texName) {
 
     int counter = 0;
     int idx = 0;
-    u_char temp;
-    while(texFile >> temp) {
-        if (counter == 0) {
+    char temp;
+    texFile.read(&temp, 1);
+    //std::cout << temp << std::endl;
+    while (texFile.read(&temp, 1))
+    {
+        //std::cout << (int)(u_char) temp << std::endl;
+        if (counter == 0)
+        {
             tempScreen.pixelAt(idx).r = temp;
-        } else if (counter == 1) {
+        }
+        else if (counter == 1)
+        {
             tempScreen.pixelAt(idx).g = temp;
-        } else if (counter == 2) {
+        }
+        else if (counter == 2)
+        {
             tempScreen.pixelAt(idx).b = temp;
         }
         counter++;
         counter %= 3;
-        if (counter == 0) {
+        if (counter == 0)
+        {
             idx++;
-            if (idx < 100)
-            std::cout << idx-1 << ": " << (int) tempScreen.pixelAt(idx-1).r << " " << (int) tempScreen.pixelAt(idx-1).g << " " << (int) tempScreen.pixelAt(idx-1).b << std::endl;
+            //tempScreen.pixelAt(idx-1).b = temp
+            // if (idx < 1282)
+            // std::cout << idx-1 << ": " << (int) tempScreen.pixelAt(idx-1).r << " " << (int) tempScreen.pixelAt(idx-1).g << " " << (int) tempScreen.pixelAt(idx-1).b << std::endl;
         }
     }
 

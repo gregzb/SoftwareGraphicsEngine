@@ -45,9 +45,11 @@ void Graphics::drawLine(Vec4 a, Vec4 b, Color color, bool flipped) const
     for (int x = x0r; x <= x1r; x++)
     {
         if (!flipped)
-            screen.plot({x, y}, color);
+            //screen.plot({x, y}, color);
+            screen(x, y) = color;
         else
-            screen.plot({y, x}, color);
+            //screen.plot({y, x}, color);
+            screen(y, x) = color;
 
         if (d > 0)
         {
@@ -108,17 +110,18 @@ void Graphics::drawEdges(Mat4 &matrix, Color color) const
 //     }
 // }
 
-void Graphics::drawTriangle(std::vector<Vertex> vertices, RenderObject & ro) const
+void Graphics::drawTriangle(std::vector<Vertex> vertices, RenderObject &ro) const
 {
     Vec4 normal = vertices[0].getFaceNormal(vertices[1], vertices[2]);
 
     if (normal.z < std::numeric_limits<double>::epsilon() * 100) //this works in screen space :)
     {
-        //return;
+        return;
     }
 
     for (int i = 0; i < 3; i++)
     {
+        //std::cout << vertices[i].pos << std::endl;
         vertices[i].pos.x = Utils::map(vertices[i].pos.x, -1, 1, 0, screen.getWidth());
         vertices[i].pos.y = Utils::map(vertices[i].pos.y, -1, 1, 0, screen.getHeight());
     }
@@ -133,7 +136,7 @@ void Graphics::drawTriangle(std::vector<Vertex> vertices, RenderObject & ro) con
     //     // std::cout << points[i][0] << " " << points[i][1] << " " << points[i][2] << std::endl;
     //     // std::cout << verts[(i + 1) % 3][0] << " " << verts[(i + 1) % 3][1] << " " << verts[(i + 1) % 3][2] << std::endl;
     //     //drawLine(verts[i][0], verts[i][1], verts[i][2] + 0.5, verts[(i + 1) % 3][0], verts[(i + 1) % 3][1], verts[(i + 1) % 3][2] + 0.5, randColor, true);
-    //     drawLine(points[i].add({0, 0, 1000}), points[(i + 1) % 3].add({0, 0, 1000}), {255, 255, 255, 255}, true);
+    //     drawLine(vertices[i].pos.add({0, 0, -10}), vertices[(i + 1) % 3].pos.add({0, 0, -10}), {255, 0, 255, 255}, true);
     // }
 }
 
@@ -158,6 +161,9 @@ public:
         double xDenom = 1.0 / (((mid.pos.x - max.pos.x) * (min.pos.y - max.pos.y)) - ((min.pos.x - max.pos.x) * (mid.pos.y - max.pos.y)));
         double yDenom = -xDenom;
 
+        //std::cout << min.pos << mid.pos << max.pos << std::endl;
+        //std::cout << min.texCoords << mid.texCoords << max.texCoords << std::endl;
+
         startDepth = min.pos.z;
         depthStepX = ((mid.pos.z - max.pos.z) * (min.pos.y - max.pos.y) - (min.pos.z - max.pos.z) * (mid.pos.y - max.pos.y)) * xDenom;
         depthStepY = ((mid.pos.z - max.pos.z) * (min.pos.x - max.pos.x) - (min.pos.z - max.pos.z) * (mid.pos.x - max.pos.x)) * yDenom;
@@ -168,6 +174,7 @@ public:
 
         texStepX = ((mid.texCoords / mid.pos.w - max.texCoords / max.pos.w) * (min.pos.y - max.pos.y) - (min.texCoords / min.pos.w - max.texCoords / max.pos.w) * (mid.pos.y - max.pos.y)) * xDenom;
         texStepY = ((mid.texCoords / mid.pos.w - max.texCoords / max.pos.w) * (min.pos.x - max.pos.x) - (min.texCoords / min.pos.w - max.texCoords / max.pos.w) * (mid.pos.x - max.pos.x)) * yDenom;
+        //std::cout << "steps: " << texStepX << texStepX << std::endl;
     }
 
     double getDepthStepX()
@@ -214,8 +221,9 @@ public:
 void projectSide(std::vector<InterpInfo> &scanlines, Vertex &lower, Vertex &higher, int minVal, int side, Interpolation interpolation)
 {
     int y0 = std::ceil(lower.pos.y), y1 = std::ceil(higher.pos.y);
-    double dY = higher.pos.y - lower.pos.y, dX = higher.pos.x - lower.pos.x, dZ = higher.pos.z - lower.pos.z;
-    Vec4 dC = higher.color.sub(lower.color);
+    double dY = higher.pos.y - lower.pos.y, dX = higher.pos.x - lower.pos.x;
+    //double dZ = higher.pos.z - lower.pos.z;
+    //Vec4 dC = higher.color.sub(lower.color);
 
     if (dY <= 0)
         return;
@@ -249,10 +257,11 @@ void projectSide(std::vector<InterpInfo> &scanlines, Vertex &lower, Vertex &high
     //double z = lower.pos.z;
     //Vec4 c = lower.color.add(cStep.scale(y0 - lower.pos.y));
 
-    double overZ = interpolation.getStartOverZ() + interpolation.getOverZStepX() * (x - lower.pos.x) + interpolation.getOverZStepY() * (y0 - lower.pos.y);
+    //double overZ = interpolation.getStartOverZ() + interpolation.getOverZStepX() * (x - lower.pos.x) + interpolation.getOverZStepY() * (y0 - lower.pos.y);
+    double overZ = 1/lower.pos.w + interpolation.getOverZStepX() * (x - lower.pos.x) + interpolation.getOverZStepY() * (y0 - lower.pos.y);
     double overZStep = interpolation.getOverZStepY() + interpolation.getOverZStepX() * xStep;
 
-    Vec4 tex = lower.texCoords + interpolation.getTexStepX() * (x - lower.pos.x) + interpolation.getTexStepY() * (y0 - lower.pos.y);
+    Vec4 tex = lower.texCoords / lower.pos.w + interpolation.getTexStepX() * (x - lower.pos.x) + interpolation.getTexStepY() * (y0 - lower.pos.y);
     Vec4 texStep = interpolation.getTexStepY() + interpolation.getTexStepX() * xStep;
 
     for (int y = y0; y < y1; y++)
@@ -266,7 +275,7 @@ void projectSide(std::vector<InterpInfo> &scanlines, Vertex &lower, Vertex &high
     }
 }
 
-void Graphics::fillTriangle(std::vector<Vertex> &verts, RenderObject & ro) const
+void Graphics::fillTriangle(std::vector<Vertex> &verts, RenderObject &ro) const
 {
     if (verts[0].pos.y > verts[1].pos.y)
         std::swap(verts[0], verts[1]);
@@ -282,7 +291,7 @@ void Graphics::fillTriangle(std::vector<Vertex> &verts, RenderObject & ro) const
     // std::cout << interpolation.getStartDepth() << std::endl;
     // std::cout << interpolation.getDepthStepX() << std::endl;
     // std::cout << interpolation.getDepthStepY() << std::endl;
-    Color col = {std::rand() % 255, std::rand() % 255, std::rand() % 255, 255};
+    //Color col = {std::rand() % 255, std::rand() % 255, std::rand() % 255, 255};
 
     int side = Utils::sign(verts[1].pos.sub(verts[0].pos).cross(verts[2].pos.sub(verts[0].pos)).z);
     side = side >= 0 ? 0 : 1;
@@ -295,7 +304,8 @@ void Graphics::fillTriangle(std::vector<Vertex> &verts, RenderObject & ro) const
     {
         InterpInfo leftInterp = scanlines[i];
         InterpInfo rightInterp = scanlines[i + 1];
-        //std::cout << leftInterp.z << " " << rightInterp.z << std::endl;
+        //std::cout << leftInterp.x << " " << rightInterp.x << std::endl;
+        //std::cout << leftInterp.tex << " " << rightInterp.tex << std::endl;
 
         int xLeft, xRight;
         xLeft = std::ceil(leftInterp.x);
@@ -319,16 +329,26 @@ void Graphics::fillTriangle(std::vector<Vertex> &verts, RenderObject & ro) const
             {
                 screen.zbuf(y, x) = z;
                 Vec4 texAdjust = tex;
-                texAdjust.x = std::fmod(texAdjust.x, 1);
-                if (texAdjust.x < 0) texAdjust.x = 1 + texAdjust.x;
-                texAdjust.y = std::fmod(texAdjust.y, 1);
-                if (texAdjust.y < 0) texAdjust.y = 1 + texAdjust.y;
                 texAdjust.x /= overZ;
                 texAdjust.y /= overZ;
+                texAdjust.x = std::fmod(texAdjust.x, 1);
+                if (texAdjust.x < 0)
+                    texAdjust.x = 1 + texAdjust.x;
+                texAdjust.y = std::fmod(texAdjust.y, 1);
+                if (texAdjust.y < 0)
+                    texAdjust.y = 1 + texAdjust.y;
+
+                texAdjust.y = 1 - texAdjust.y;
+                //texAdjust.x = 1 - texAdjust.x;
 
                 //std::cout << overZ << std::endl;
                 //std::cout << texAdjust << std::endl;
-                Color col = ro.getTexture()(std::lround(texAdjust.y * ro.getTexture().getHeight()), std::lround(texAdjust.x * ro.getTexture().getWidth()));
+                //std::cout << std::lround(texAdjust.y * (ro.getTexture().getHeight()-1)) << " " << std::lround(texAdjust.x * (ro.getTexture().getWidth()-1)) << std::endl;
+                // if (std::lround(texAdjust.x * (ro.getTexture().getWidth() - 1)) == 1209)
+                // {
+                //     std::cout << texAdjust << std::endl;
+                // }
+                Color col = ro.getTexture()(std::lround(texAdjust.y * (ro.getTexture().getHeight() - 1)), std::lround(texAdjust.x * (ro.getTexture().getWidth() - 1)));
                 screen(y, x) = col;
             }
             //z += zStep;
@@ -375,7 +395,9 @@ void Graphics::renderObject(Camera &cam, RenderObject object) const
             triangle[j] = tris[indices[i + j]];
         }
 
-        drawTriangle(triangle, object);
+        //if (i == 6) {
+            drawTriangle(triangle, object);
+        //}
     }
 
     //tris.multiplyMutate(mvpMat);

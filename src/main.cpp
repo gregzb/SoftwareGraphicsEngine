@@ -252,16 +252,28 @@
 
 int main()
 {
-    OBJLoader obj("resources/monkey.obj");
+    OBJLoader obj("resources/uvtest3.obj");
 
     Screen screen(500, 500);
+    screen.graphics.clear({255, 0, 255, 255});
     Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), 0.001, 1000);
-    RenderObject monkey = obj.toRenderObject("Suzanne");
+    //RenderObject monkey = obj.toRenderObject("Plane");
+    RenderObject monkey = obj.toRenderObject("Icosphere");
     monkey.position = {0, 0, -3};
-    monkey.rotation = {(15) * M_PI / 180, (-30) * M_PI / 180, (3) * M_PI / 180};
+    monkey.rotation = {(0) * M_PI / 180, (-90) * M_PI / 180, (0) * M_PI / 180};
+    //monkey.rotation = {(15) * M_PI / 180, (-30) * M_PI / 180, (3) * M_PI / 180};
 
     screen.graphics.renderObject(cam, monkey);
     screen.display();
+
+    // for (int i = 0; i < 500; i++)
+    // {
+    //     std::cout << i << std::endl;
+    //     screen.graphics.clear({255, 0, 255, 255});
+    //     screen.clearZbuf();
+    //     screen.graphics.renderObject(cam, monkey);
+    //     //screen.display();
+    // }
 
     // OBJLoader obj("resources/test2.obj");
 
