@@ -17,9 +17,9 @@ private:
     Vec4 Kd;
     Vec4 Ks;
     Vec4 Ke;
-    Vec4 Ns;
-    Vec4 Ni;
 
+    double Ns;
+    double Ni;
     double opaqueness; //d
 
     int illum;
@@ -30,6 +30,52 @@ private:
 
 public:
     OBJMaterial();
+    void setVecConstants(Vec4 Ka_, Vec4 Kd_, Vec4 Ks_, Vec4 Ke_);
+    void setConstants(double Ns_, double Ni_, double opaqueness_);
+    void setIllumMode(int illum_);
+    void setKdTex(std::string texName);
+    void setName(std::string name);
+
+    inline Vec4 getKa() {
+        return Ka;
+    }
+
+    inline Vec4 getKd() {
+        return Kd;
+    }
+
+    inline Vec4 getKs() {
+        return Ks;
+    }
+
+    inline Vec4 getKe() {
+        return Ke;
+    }
+
+    inline double getNs() {
+        return Ns;
+    }
+
+    inline double getNi() {
+        return Ni;
+    }
+
+    inline double getOpaqueness() {
+        return opaqueness;
+    }
+
+    inline int getIllumMode() {
+        return illum;
+    }
+
+    inline PixelGrid<Color> getTexture() {
+        return mapKd;
+    }
+
+    inline std::string getName() {
+        return materialName;
+    }
+
 };
 
 class OBJObject
@@ -54,7 +100,7 @@ public:
     std::vector<std::vector<int>> const & getVertexIndices();
     std::vector<std::vector<int>> const & getVertexTexIndices();
     std::vector<std::vector<int>> const & getVertexNormalIndices();
-    OBJMaterial const * getMat();
+    OBJMaterial * getMat();
     bool getShading();
     std::string const & getName();
 };

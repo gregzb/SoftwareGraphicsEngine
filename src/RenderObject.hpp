@@ -2,6 +2,7 @@
 
 #include "Mat4.hpp"
 #include "Vertex.hpp"
+#include "PixelGrid.hpp"
 #include <vector>
 #include <unordered_map>
 
@@ -14,6 +15,8 @@ private:
 
     std::unordered_map<Vertex, int> vertex_mappings;
 
+    PixelGrid<Color> texture;
+
 public:
     Vec4 position;
     Vec4 rotation;
@@ -25,6 +28,15 @@ public:
     std::vector<int> &getMeshIndices();
 
     void generateVertexNormals();
+
+    void addVertex(Vertex vert);
+    inline void setTexture(PixelGrid<Color> tex) {
+        texture = tex;
+    }
+
+    inline PixelGrid<Color>& getTexture() {
+        return texture;
+    }
 
     void addPoint(Vec4 v);
     void addEdge(Vec4 v0, Vec4 v1);

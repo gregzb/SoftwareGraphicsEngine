@@ -256,7 +256,6 @@ int main()
 
     Screen screen(500, 500);
     Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), 0.001, 1000);
-
     RenderObject monkey = obj.toRenderObject("Suzanne");
     monkey.position = {0, 0, -3};
     monkey.rotation = {(15) * M_PI / 180, (-30) * M_PI / 180, (3) * M_PI / 180};

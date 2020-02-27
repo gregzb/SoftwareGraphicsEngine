@@ -1,10 +1,12 @@
 #include "RenderObject.hpp"
 #include <cmath>
 
-RenderObject::RenderObject() : vertex_mappings{}, scale(1, 1, 1){
+RenderObject::RenderObject() : vertex_mappings{}, scale(1, 1, 1), texture(0, 0)
+{
 }
 
-Mat4 RenderObject::getModelMatrix() {
+Mat4 RenderObject::getModelMatrix()
+{
     Mat4 translateMat = Mat4::translate(position);
     Mat4 rotXMat = Mat4::rotX(rotation.x);
     Mat4 rotYMat = Mat4::rotY(rotation.y);
@@ -16,30 +18,48 @@ Mat4 RenderObject::getModelMatrix() {
     return model;
 }
 
-std::vector<Vertex> & RenderObject::getMesh() {
+std::vector<Vertex> &RenderObject::getMesh()
+{
     return vertices;
 }
 
-std::vector<int> & RenderObject::getMeshIndices() {
+std::vector<int> &RenderObject::getMeshIndices()
+{
     return indices;
 }
 
-void RenderObject::generateVertexNormals() {
-    for (uint i = 0; i < indices.size(); i += 3) {
-        Vec4 faceNormal = vertices[indices[i]].getFaceNormal(vertices[indices[i+1]], vertices[indices[i+2]]);
-        for (int j = 0; j < 3; j++) {
-            vertices[indices[i+j]].normal = vertices[indices[i+j]].normal.add(faceNormal);
+void RenderObject::generateVertexNormals()
+{
+    for (uint i = 0; i < indices.size(); i += 3)
+    {
+        Vec4 faceNormal = vertices[indices[i]].getFaceNormal(vertices[indices[i + 1]], vertices[indices[i + 2]]);
+        for (int j = 0; j < 3; j++)
+        {
+            vertices[indices[i + j]].normal = vertices[indices[i + j]].normal.add(faceNormal);
         }
     }
-    for (auto & vert : vertices) {
+    for (auto &vert : vertices)
+    {
         vert.normal = vert.normal.normalize();
     }
+}
+
+void RenderObject::addVertex(Vertex vert)
+{
+    vert.pos = vert.pos.round(100000000.0);
+    if (vertex_mappings.count(vert) == 0)
+    {
+        vertex_mappings.insert({vert, vertices.size()});
+        vertices.push_back(vert);
+    }
+    indices.push_back(vertex_mappings.at(vert));
 }
 
 void RenderObject::addPoint(Vec4 v)
 {
     v = v.round(100000000.0);
-    if (vertex_mappings.count(v) == 0) {
+    if (vertex_mappings.count(v) == 0)
+    {
         vertex_mappings.insert({v, vertices.size()});
         vertices.push_back(v);
     }
@@ -67,12 +87,12 @@ void RenderObject::addBox(Vec4 v, Vec4 dims)
     double y1 = y - h;
     double z1 = z - d;
 
-         addTriangle({x, y, z}, {x1, y, z}, {x, y, z1});
+    addTriangle({x, y, z}, {x1, y, z}, {x, y, z1});
     //oui
     addTriangle({x1, y, z}, {x1, y, z1}, {x, y, z1});
 
     addTriangle({x, y, z}, {x, y1, z}, {x1, y1, z});
-         addTriangle({x, y, z}, {x1, y1, z}, {x1, y, z});
+    addTriangle({x, y, z}, {x1, y1, z}, {x1, y, z});
 
     addTriangle({x, y, z}, {x, y1, z1}, {x, y1, z});
     addTriangle({x, y, z}, {x, y, z1}, {x, y1, z1});
@@ -109,8 +129,8 @@ void RenderObject::addSphere(Vec4 v, double r, int thetaSteps, int phiSteps)
                 double phi = (phiStep + offsets[i]) * phiStepSize;
                 double theta = (thetaStep + offsets[i + 1]) * thetaStepSize;
                 points.push_back({r * std::cos(phi) + v.x,
-                                   r * std::sin(phi) * std::cos(theta) + v.y,
-                                   r * std::sin(phi) * std::sin(theta) + v.z});
+                                  r * std::sin(phi) * std::cos(theta) + v.y,
+                                  r * std::sin(phi) * std::sin(theta) + v.z});
             }
 
             addTriangle(points[0], points[1], points[2]);
@@ -141,8 +161,8 @@ void RenderObject::addTorus(Vec4 v, double r1, double r2, int thetaSteps, int ph
                 double phi = (phiStep % phiSteps + offsets[i]) * phiStepSize;
                 double theta = (thetaStep + offsets[i + 1]) * thetaStepSize;
                 points.push_back({(r2 + r1 * std::cos(phi)) * std::cos(theta) + v.x,
-                                   r1 * std::sin(phi) + v.y,
-                                   (r2 + r1 * std::cos(phi)) * std::sin(theta) + v.z});
+                                  r1 * std::sin(phi) + v.y,
+                                  (r2 + r1 * std::cos(phi)) * std::sin(theta) + v.z});
             }
 
             addTriangle(points[0], points[1], points[2]);

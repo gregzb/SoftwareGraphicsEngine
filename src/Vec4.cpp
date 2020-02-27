@@ -28,28 +28,28 @@ double &Vec4::operator[](int idx)
     }
 }
 
-double Vec4::magnitude()
+double Vec4::magnitude() const
 {
     return std::sqrt(std::pow(x, 2) + std::pow(y, 2) + std::pow(z, 2));
 }
 
-double Vec4::dot(Vec4 other)
+double Vec4::dot(Vec4 other) const
 {
     return x * other.x + y * other.y + z * other.z;
 }
 
-Vec4 Vec4::normalize()
+Vec4 Vec4::normalize() const
 {
     double mag = magnitude();
     return {x / mag, y / mag, z / mag, w};
 }
 
-Vec4 Vec4::perspectiveDivision()
+Vec4 Vec4::perspectiveDivision() const
 {
     return {x / w, y / w, z / w, w};
 }
 
-Vec4 Vec4::cross(Vec4 other)
+Vec4 Vec4::cross(Vec4 other) const
 {
     return {
         y * other.z - z * other.y,
@@ -58,98 +58,99 @@ Vec4 Vec4::cross(Vec4 other)
         1};
 }
 
-Vec4 Vec4::negate()
+Vec4 Vec4::negate() const
 {
     return {-x, -y, -z, -w};
 }
 
-Vec4 Vec4::scale(Vec4 other)
+Vec4 Vec4::scale(Vec4 other) const
 {
     return {x * other.x, y * other.y, z * other.z, w * other.w};
 }
 
-Vec4 Vec4::scale(double other)
+Vec4 Vec4::scale(double other) const
 {
     return {x * other, y * other, z * other, w * other};
 }
 
-Vec4 Vec4::operator*(Vec4 other)
+Vec4 Vec4::operator*(Vec4 other) const
 {
     return scale(other);
 }
 
-Vec4 Vec4::operator*(double other)
+Vec4 Vec4::operator*(double other) const
 {
     return scale(other);
 }
 
-Vec4 Vec4::div(Vec4 other)
+Vec4 Vec4::div(Vec4 other) const
 {
     return {x / other.x, y / other.y, z / other.z, w / other.w};
 }
 
-Vec4 Vec4::div(double other)
+Vec4 Vec4::div(double other) const
 {
     return {x / other, y / other, z / other, w / other};
 }
 
-Vec4 Vec4::operator/(Vec4 other)
+Vec4 Vec4::operator/(Vec4 other) const
 {
     return div(other);
 }
 
-Vec4 Vec4::operator/(double other)
+Vec4 Vec4::operator/(double other) const
 {
     return div(other);
 }
 
-Vec4 Vec4::add(Vec4 other)
+Vec4 Vec4::add(Vec4 other) const
 {
     return {x + other.x, y + other.y, z + other.z, w + other.w};
 }
 
-Vec4 Vec4::add(double other)
+Vec4 Vec4::add(double other) const
 {
     return {x + other, y + other, z + other, w + other};
 }
 
-Vec4 Vec4::operator+(Vec4 other)
+Vec4 Vec4::operator+(Vec4 other) const
 {
     return add(other);
 }
 
-Vec4 Vec4::operator+(double other)
+Vec4 Vec4::operator+(double other) const
 {
     return add(other);
 }
 
-Vec4 Vec4::sub(Vec4 other)
+Vec4 Vec4::sub(Vec4 other) const
 {
     return {x - other.x, y - other.y, z - other.z, w - other.w};
 }
 
-Vec4 Vec4::sub(double other)
+Vec4 Vec4::sub(double other) const
 {
     return {x - other, y - other, z - other, w - other};
 }
 
-Vec4 Vec4::operator-(Vec4 other)
+Vec4 Vec4::operator-(Vec4 other) const
 {
     return sub(other);
 }
 
-Vec4 Vec4::operator-(double other)
+Vec4 Vec4::operator-(double other) const
 {
     return sub(other);
 }
 
-Vec4 Vec4::lerp(Vec4 other, double t)
+Vec4 Vec4::lerp(Vec4 other, double t) const
 {
     return other.sub(*this).scale(t).add(*this);
 }
 
-Vec4 Vec4::round(double roundFactor) {
-    return {std::lround(x*roundFactor)/roundFactor, std::lround(y * roundFactor)/roundFactor, std::lround(z*roundFactor)/roundFactor, std::lround(w*roundFactor)/roundFactor};
+Vec4 Vec4::round(double roundFactor) const
+{
+    return {std::lround(x * roundFactor) / roundFactor, std::lround(y * roundFactor) / roundFactor, std::lround(z * roundFactor) / roundFactor, std::lround(w * roundFactor) / roundFactor};
 }
 
 bool Vec4::operator==(const Vec4 &other) const

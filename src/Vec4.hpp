@@ -12,31 +12,31 @@ public:
 
     Vec4(double x, double y, double z = 0, double w = 1);
     Vec4();
-    double magnitude();
-    double dot(Vec4 other);
-    Vec4 normalize();
-    Vec4 perspectiveDivision();
-    Vec4 negate();
-    Vec4 cross(Vec4 other);
-    Vec4 scale(Vec4 other);
-    Vec4 operator*(Vec4 other);
-    Vec4 scale(double other);
-    Vec4 operator*(double other);
-    Vec4 div(Vec4 other);
-    Vec4 operator/(Vec4 other);
-    Vec4 div(double other);
-    Vec4 operator/(double other);
-    Vec4 add(Vec4 other);
-    Vec4 operator+(Vec4 other);
-    Vec4 add(double other);
-    Vec4 operator+(double other);
-    Vec4 sub(Vec4 other);
-    Vec4 operator-(Vec4 other);
-    Vec4 sub(double other);
-    Vec4 operator-(double other);
-    Vec4 round(double roundFactor);
+    double magnitude() const;
+    double dot(Vec4 other) const;
+    Vec4 normalize() const;
+    Vec4 perspectiveDivision() const;
+    Vec4 negate() const;
+    Vec4 cross(Vec4 other) const;
+    Vec4 scale(Vec4 other) const;
+    Vec4 operator*(Vec4 other) const;
+    Vec4 scale(double other) const;
+    Vec4 operator*(double other) const;
+    Vec4 div(Vec4 other) const;
+    Vec4 operator/(Vec4 other) const;
+    Vec4 div(double other) const;
+    Vec4 operator/(double other) const;
+    Vec4 add(Vec4 other) const;
+    Vec4 operator+(Vec4 other) const;
+    Vec4 add(double other) const;
+    Vec4 operator+(double other) const;
+    Vec4 sub(Vec4 other) const;
+    Vec4 operator-(Vec4 other) const;
+    Vec4 sub(double other) const;
+    Vec4 operator-(double other) const;
+    Vec4 round(double roundFactor) const;
 
-    Vec4 lerp(Vec4 other, double t);
+    Vec4 lerp(Vec4 other, double t) const;
 
     bool operator==(const Vec4 &other) const;
 
