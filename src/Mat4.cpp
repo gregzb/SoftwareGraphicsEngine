@@ -88,7 +88,12 @@ void Mat4::clear()
 
 Mat4 Mat4::multiply(const Mat4 &matrix) const
 {
+    //std::cout << getRows() << " " << getCols() << " " << matrix.getRows() << " " << matrix.getCols() << std::endl;
     assert(getCols() == matrix.getRows());
+    //std::cout << m[0][1] << std::endl;
+    //std::cout << matrix.m[1][0] << std::endl;
+
+    //std::cout << matrix.m;
 
     Mat4 result(matrix.getCols());
 
@@ -98,6 +103,7 @@ Mat4 Mat4::multiply(const Mat4 &matrix) const
         {
             for (int i = 0; i < getCols(); i++)
             {
+                //std::cout << row << " " << col << " " << i << std::endl;
                 result.m[row][col] += m[row][i] * matrix.m[i][col];
             }
         }
@@ -244,7 +250,7 @@ Mat4 Mat4::rotZ(double theta)
     return temp;
 }
 
-Mat4 Mat4::translate(Vec4 v)
+Mat4 Mat4::translate(Vec4 const &v)
 {
     Mat4 temp = Mat4::identity();
     temp[0][3] = v.getX();
@@ -253,7 +259,7 @@ Mat4 Mat4::translate(Vec4 v)
     return temp;
 }
 
-Mat4 Mat4::scale(Vec4 v)
+Mat4 Mat4::scale(Vec4 const &v)
 {
     Mat4 temp = Mat4::identity();
     temp[0][0] = v.getX();

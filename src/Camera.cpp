@@ -23,7 +23,7 @@ Vec4 const &Camera::getRotation()
     return rotation;
 }
 
-Mat4 const &Camera::getViewMatrix()
+Mat4 Camera::getViewMatrix()
 {
     Mat4 const &translateMat = Mat4::translate(position.negate());
     Mat4 const &rotXMat = Mat4::rotX(-rotation.getX());
@@ -35,7 +35,7 @@ Mat4 const &Camera::getViewMatrix()
     return view;
 }
 
-Mat4 const &Camera::getProjectionMatrix()
+Mat4 Camera::getProjectionMatrix()
 {
     // Mat4 temp = {{
     //     {1/std::atan(fov/2), 0, 0, 0},

@@ -7,6 +7,10 @@ Vec4::Vec4(double x_, double y_, double z_, double w_) : x(x_), y(y_), z(z_), w(
 {
 }
 
+Vec4::Vec4(Color color) : x(color.r / 255.0), y(color.g / 255.0), z(color.b / 255.0), w(color.a / 255.0)
+{
+}
+
 Vec4::Vec4() : x(0), y(0), z(0), w(1)
 {
 }
@@ -52,13 +56,13 @@ void Vec4::set(int idx, double val) {
 void Vec4::setX(double x) {
     this->x = x;
 }
-void Vec4::setY(double x) {
+void Vec4::setY(double y) {
     this->y = y;
 }
-void Vec4::setZ(double x) {
+void Vec4::setZ(double z) {
     this->z = z;
 }
-void Vec4::setW(double x) {
+void Vec4::setW(double w) {
     this->w = w;
 }
 

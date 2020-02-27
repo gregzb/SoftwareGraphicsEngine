@@ -100,7 +100,7 @@ void PixelGrid<Color>::display() const
 }
 
 template <>
-PixelGrid<Color> const &PixelGrid<Color>::loadTexture(std::string texName)
+PixelGrid<Color> PixelGrid<Color>::loadTexture(std::string texName)
 {
     //static_assert(std::is_same<T, Color>::value);
     std::ifstream texFile(texName, std::ios::in | std::ios::binary);

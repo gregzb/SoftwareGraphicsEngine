@@ -25,5 +25,5 @@ public:
 
     void display() const;
 
-    static PixelGrid<Color> const &loadTexture(std::string texName);
+    static PixelGrid<Color> loadTexture(std::string texName);
 };

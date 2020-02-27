@@ -17,6 +17,6 @@ public:
     Vec4 const &getPosition();
     Vec4 const &getRotation();
 
-    Mat4 const &getViewMatrix();
-    Mat4 const &getProjectionMatrix();
+    Mat4 getViewMatrix();
+    Mat4 getProjectionMatrix();
 };

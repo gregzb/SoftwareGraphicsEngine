@@ -19,17 +19,39 @@
 
 int main()
 {
-    OBJLoader obj("resources/uvtest3.obj");
+    OBJLoader obj("resources/monkey.obj");
 
     Screen screen(500, 500);
-    screen.graphics.clear({255, 0, 255, 255});
+    screen.graphics.clear({255, 255, 255, 255});
     Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), 0.001, 1000);
     //RenderObject monkey = obj.toRenderObject("Plane");
-    RenderObject monkey = obj.toRenderObject("Icosphere");
+    //std::cout << "here" << std::endl;
+    RenderObject monkey = obj.toRenderObject("Suzanne");
+    //std::cout << "here2" << std::endl;
     monkey.setPosition({0, 0, -3});
-    monkey.setRotation({(0) * M_PI / 180, (-90) * M_PI / 180, (0) * M_PI / 180});
+    //monkey.setRotation({(20) * M_PI / 180, (0) * M_PI / 180, (0) * M_PI / 180});
+    monkey.setRotation({(20) * M_PI / 180, (20) * M_PI / 180, (0) * M_PI / 180});
 
     screen.graphics.renderObject(cam, monkey);
+
+    // for (int i = 0; i < 40; i++)
+    // {
+    //     Vec4 rot = monkey.getRotation();
+    //     rot.setY(2 * M_PI / 40 * i);
+    //     monkey.setRotation(rot);
+
+    //     screen.graphics.clear({255, 255, 255, 255});
+    //     screen.clearZbuf();
+    //     screen.graphics.renderObject(cam, monkey);
+    //     std::string s = std::to_string(i);
+    //     s.insert(s.begin(), 3 - s.size(), '0');
+
+    //     screen.toFileExtension("img" + s + ".png");
+    // }
+
+    //std::cout << "here3" << std::endl;
+    //screen.graphics.renderObject(cam, monkey);
+    //std::cout << "here4" << std::endl;
     screen.display();
 
     return 0;

@@ -22,7 +22,7 @@ private:
 
 public:
     RenderObject();
-    Mat4 const &getModelMatrix() const;
+    Mat4 getModelMatrix() const;
     std::vector<Vertex> &getMesh();
     std::vector<int> &getMeshIndices();
 

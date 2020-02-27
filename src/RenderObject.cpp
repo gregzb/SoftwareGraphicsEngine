@@ -5,7 +5,7 @@ RenderObject::RenderObject() : vertex_mappings{}, scale(1, 1, 1)
 {
 }
 
-Mat4 const &RenderObject::getModelMatrix() const
+Mat4 RenderObject::getModelMatrix() const
 {
     Mat4 const &translateMat = Mat4::translate(position);
     Mat4 const &rotXMat = Mat4::rotX(rotation.getX());

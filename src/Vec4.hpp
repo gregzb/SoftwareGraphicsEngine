@@ -3,6 +3,8 @@
 #include <iostream>
 #include <cstddef>
 
+#include "Utils.hpp"
+
 class Vec4
 {
 private:
@@ -23,6 +25,7 @@ public:
     double getW() const;
 
     Vec4(double x, double y, double z = 0, double w = 1);
+    Vec4(Color color);
     Vec4();
     double magnitude() const;
     double dot(Vec4 const &other) const;

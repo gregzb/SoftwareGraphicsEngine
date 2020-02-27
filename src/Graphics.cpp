@@ -12,12 +12,12 @@
 
 Graphics::Graphics(Screen &screen) : screen(screen){};
 
-void Graphics::drawLine(Vec4 a, Vec4 b, Color color) const
+void Graphics::drawLine(Vec4 const & a, Vec4 const & b, Color color) const
 {
     drawLine(a, b, color, false);
 }
 
-void Graphics::drawLine(Vec4 a, Vec4 b, Color color, bool flipped) const
+void Graphics::drawLine(Vec4 const & a, Vec4 const & b, Color color, bool flipped) const
 {
     if (b.getX() < a.getX())
     {
@@ -134,7 +134,7 @@ void Graphics::drawTriangle(std::vector<Vertex> vertices, RenderObject &ro) cons
     //     // std::cout << points[i][0] << " " << points[i][1] << " " << points[i][2] << std::endl;
     //     // std::cout << verts[(i + 1) % 3][0] << " " << verts[(i + 1) % 3][1] << " " << verts[(i + 1) % 3][2] << std::endl;
     //     //drawLine(verts[i][0], verts[i][1], verts[i][2] + 0.5, verts[(i + 1) % 3][0], verts[(i + 1) % 3][1], verts[(i + 1) % 3][2] + 0.5, randColor, true);
-    //     drawLine(vertices[i].pos.add({0, 0, -10}), vertices[(i + 1) % 3].pos.add({0, 0, -10}), {255, 0, 255, 255}, true);
+    //     drawLine(vertices[i].getPos(), vertices[(i + 1) % 3].getPos(), {255, 0, 255, 255}, true);
     // }
 }
 
@@ -323,12 +323,15 @@ void Graphics::fillTriangle(std::vector<Vertex> &verts, RenderObject &ro) const
                 Vec4 texAdjust = tex;
                 texAdjust.setX(texAdjust.getX()/overZ);
                 texAdjust.setY(texAdjust.getY()/overZ);
+
+                //std::cout << std::endl;
+                //std::cout << texAdjust << std::endl;
                 
-                texAdjust.setX(std::fmod(texAdjust.getX(), 1));
+                texAdjust.setX(std::fmod(texAdjust.getX(), 1.0));
                 if (texAdjust.getX() < 0)
                     texAdjust.setX(1 + texAdjust.getX());
-                texAdjust.setY(std::fmod(texAdjust.getY(), 1));
-                if (texAdjust.getY() < 0)
+                texAdjust.setY(std::fmod(texAdjust.getY(), 1.0));
+                if (texAdjust.getY() < 0) 
                     texAdjust.setY(1 + texAdjust.getY());
 
                 texAdjust.setY(1 - texAdjust.getY());

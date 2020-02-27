@@ -37,6 +37,6 @@ public:
     static Mat4 rotX(double theta);
     static Mat4 rotY(double theta);
     static Mat4 rotZ(double theta);
-    static Mat4 translate(Vec4 v);
-    static Mat4 scale(Vec4 v);
+    static Mat4 translate(Vec4 const &v);
+    static Mat4 scale(Vec4 const &v);
 };
