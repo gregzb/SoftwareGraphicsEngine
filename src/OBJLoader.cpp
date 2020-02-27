@@ -13,104 +13,104 @@
 #include "Utils.hpp"
 #include "PixelGrid.hpp"
 
-OBJMaterial::OBJMaterial() : mapKd(0, 0)
-{
-}
+// OBJMaterial::OBJMaterial() : mapKd(0, 0)
+// {
+// }
 
-void OBJMaterial::setVecConstants(Vec4 Ka_, Vec4 Kd_, Vec4 Ks_, Vec4 Ke_)
-{
-    Ka = Ka_;
-    Kd = Kd_;
-    Ks = Ks_;
-    Ke = Ke_;
-}
+// void OBJMaterial::setVecConstants(Vec4 Ka_, Vec4 Kd_, Vec4 Ks_, Vec4 Ke_)
+// {
+//     Ka = Ka_;
+//     Kd = Kd_;
+//     Ks = Ks_;
+//     Ke = Ke_;
+// }
 
-void OBJMaterial::setConstants(double Ns_, double Ni_, double opaqueness_)
-{
-    Ns = Ns_;
-    Ni = Ni_;
-    opaqueness = opaqueness_;
-}
+// void OBJMaterial::setConstants(double Ns_, double Ni_, double opaqueness_)
+// {
+//     Ns = Ns_;
+//     Ni = Ni_;
+//     opaqueness = opaqueness_;
+// }
 
-void OBJMaterial::setIllumMode(int illum_)
-{
-    illum = illum_;
-}
+// void OBJMaterial::setIllumMode(int illum_)
+// {
+//     illum = illum_;
+// }
 
-void OBJMaterial::setKdTex(std::string texName)
-{
-    //parse texname, read file, convert to pixelgrid
-    mapKd = PixelGrid<Color>::loadTexture(texName);
-}
+// void OBJMaterial::setKdTex(std::string texName)
+// {
+//     //parse texname, read file, convert to pixelgrid
+//     mapKd = PixelGrid<Color>::loadTexture(texName);
+// }
 
-void OBJMaterial::setName(std::string name)
-{
-    materialName = name;
-}
+// void OBJMaterial::setName(std::string name)
+// {
+//     materialName = name;
+// }
 
-OBJObject::OBJObject()
-{
-}
+// OBJObject::OBJObject()
+// {
+// }
 
-void OBJObject::addVertexIndices(std::vector<int> indices)
-{
-    vertexIndices.push_back(indices);
-}
+// void OBJObject::addVertexIndices(std::vector<int> indices)
+// {
+//     vertexIndices.push_back(indices);
+// }
 
-void OBJObject::addVertexTexIndices(std::vector<int> indices)
-{
-    vertexTexIndices.push_back(indices);
-}
+// void OBJObject::addVertexTexIndices(std::vector<int> indices)
+// {
+//     vertexTexIndices.push_back(indices);
+// }
 
-void OBJObject::addVertexNormalIndices(std::vector<int> indices)
-{
-    vertexNormalIndices.push_back(indices);
-}
+// void OBJObject::addVertexNormalIndices(std::vector<int> indices)
+// {
+//     vertexNormalIndices.push_back(indices);
+// }
 
-void OBJObject::setMat(OBJMaterial *mat_)
-{
-    mat = mat_;
-}
+// void OBJObject::setMat(OBJMaterial *mat_)
+// {
+//     mat = mat_;
+// }
 
-void OBJObject::setShading(bool smooth_)
-{
-    smoothShading = smooth_;
-}
+// void OBJObject::setShading(bool smooth_)
+// {
+//     smoothShading = smooth_;
+// }
 
-void OBJObject::setName(std::string name_)
-{
-    objectName = name_;
-}
+// void OBJObject::setName(std::string name_)
+// {
+//     objectName = name_;
+// }
 
-std::vector<std::vector<int>> const &OBJObject::getVertexIndices()
-{
-    return vertexIndices;
-}
+// std::vector<std::vector<int>> const &OBJObject::getVertexIndices()
+// {
+//     return vertexIndices;
+// }
 
-std::vector<std::vector<int>> const &OBJObject::getVertexTexIndices()
-{
-    return vertexTexIndices;
-}
+// std::vector<std::vector<int>> const &OBJObject::getVertexTexIndices()
+// {
+//     return vertexTexIndices;
+// }
 
-std::vector<std::vector<int>> const &OBJObject::getVertexNormalIndices()
-{
-    return vertexNormalIndices;
-}
+// std::vector<std::vector<int>> const &OBJObject::getVertexNormalIndices()
+// {
+//     return vertexNormalIndices;
+// }
 
-OBJMaterial *OBJObject::getMat()
-{
-    return mat;
-}
+// OBJMaterial *OBJObject::getMat()
+// {
+//     return mat;
+// }
 
-bool OBJObject::getShading()
-{
-    return smoothShading;
-}
+// bool OBJObject::getShading()
+// {
+//     return smoothShading;
+// }
 
-std::string const &OBJObject::getName()
-{
-    return objectName;
-}
+// std::string const &OBJObject::getName()
+// {
+//     return objectName;
+// }
 
 void OBJLoader::parseMTL()
 {
@@ -130,96 +130,76 @@ void OBJLoader::parseMTL()
 
         if (infoType == "newmtl")
         {
-            if (currentMaterial != nullptr)
-            {
-                currentMaterial->setConstants(Ns, Ni, opaqueness);
-                currentMaterial->setVecConstants(Ka, Kd, Ks, Ke);
-            }
-
             std::string matName;
             iss >> matName;
 
             materials.insert({matName, OBJMaterial()});
             currentMaterial = &materials.at(matName);
-            currentMaterial->setName(matName);
-
-            Ka = {};
-            Kd = {};
-            Ks = {};
-            Ke = {};
-
-            Ns = 0;
-            Ni = 0;
-            opaqueness = 1;
+            currentMaterial->name = matName;
         }
         else if (infoType == "Ns")
         {
             double val;
             iss >> val;
 
-            Ns = val;
+            currentMaterial->Ns = val;
         }
         else if (infoType == "Ka")
         {
             Vec4 val;
             iss >> val;
 
-            Ka = val;
+            currentMaterial->Ka = val;
         }
         else if (infoType == "Kd")
         {
             Vec4 val;
             iss >> val;
 
-            Kd = val;
+            currentMaterial->Kd = val;
         }
         else if (infoType == "Ks")
         {
             Vec4 val;
             iss >> val;
 
-            Ks = val;
+            currentMaterial->Ks = val;
         }
         else if (infoType == "Ke")
         {
             Vec4 val;
             iss >> val;
 
-            Ke = val;
+            currentMaterial->Ke = val;
         }
         else if (infoType == "Ni")
         {
             double val;
             iss >> val;
 
-            Ni = val;
+            currentMaterial->Ni = val;
         }
         else if (infoType == "d")
         {
             double val;
             iss >> val;
 
-            opaqueness = val;
+            currentMaterial->opaqueness = val;
         }
         else if (infoType == "illum")
         {
             int val;
             iss >> val;
 
-            currentMaterial->setIllumMode(val);
+            currentMaterial->illum = val;
         }
         else if (infoType == "map_Kd")
         {
             std::string texName;
             iss >> texName;
 
-            currentMaterial->setKdTex(texName);
+            currentMaterial->mapKd = PixelGrid<Color>::loadTexture(texName);
         }
-    }
-    if (currentMaterial != nullptr)
-    {
-        currentMaterial->setConstants(Ns, Ni, opaqueness);
-        currentMaterial->setVecConstants(Ka, Kd, Ks, Ke);
     }
     mtlFile.close();
 }
@@ -235,10 +215,7 @@ OBJLoader::OBJLoader(std::string const &fileName)
     {
         std::istringstream iss(line);
         std::string infoType;
-        //std::cout << line << std::endl;
         iss >> infoType;
-        // if (!(iss >> infoType))
-        //     break; //dont break, just go next line
 
         // std::cout << infoType << std::endl;
 
@@ -254,7 +231,7 @@ OBJLoader::OBJLoader(std::string const &fileName)
 
             objects.insert({objectName, OBJObject()});
             currentObject = &objects.at(objectName);
-            currentObject->setName(objectName);
+            currentObject->name = objectName;
         }
         else if (infoType == "v")
         {
@@ -300,39 +277,29 @@ OBJLoader::OBJLoader(std::string const &fileName)
                 }
             }
 
-            currentObject->addVertexIndices(indices[0]);
-            currentObject->addVertexTexIndices(indices[1]);
-            currentObject->addVertexNormalIndices(indices[2]);
+            currentObject->vertexIndices.push_back(indices[0]);
+            currentObject->vertexTexIndices.push_back(indices[1]);
+            currentObject->vertexNormalIndices.push_back(indices[2]);
         }
         else if (infoType == "usemtl")
         {
             std::string matName;
             iss >> matName;
 
-            //std::cout << matName << std::endl;
-
-            currentObject->setMat(&materials.at(matName));
+            currentObject->mat = &materials.at(matName);
         }
         else if (infoType == "s")
         {
             std::string smooth;
             iss >> smooth;
-            if (smooth == "1")
-            {
-                currentObject->setShading(true);
-            }
-            else
-            {
-                currentObject->setShading(false);
-            }
+            currentObject->smoothShading = smooth == "1";
         }
 
-        // process pair (a,b)
     }
     objFile.close();
 }
 
-RenderObject OBJLoader::toRenderObject(std::string name)
+RenderObject OBJLoader::toRenderObject(std::string name) const
 {
     RenderObject temp;
     std::unordered_set<int> inserted;
@@ -341,7 +308,7 @@ RenderObject OBJLoader::toRenderObject(std::string name)
     //     std::cout << thing.first << std::endl;
     // }
 
-    OBJObject &obj = objects.at(name);
+    OBJObject const &obj = objects.at(name);
     // for (auto const & face : obj.getVertexIndices()) {
     //     for (auto const & vertex : face) {
     //         auto pos = v[vertex-1];
@@ -352,17 +319,18 @@ RenderObject OBJLoader::toRenderObject(std::string name)
     // }
     // std::cout << obj.getVertexIndices().size() << std::endl;
     // std::cout << obj.getVertexTexIndices().size() << std::endl;
-    for(uint i = 0; i < obj.getVertexIndices().size(); i++) {
-        for (uint j = 0; j < obj.getVertexIndices()[i].size(); j++) {
-            auto pos = v[obj.getVertexIndices()[i][j]-1];
-            auto tex = vt[obj.getVertexTexIndices()[i][j]-1];
+    for(uint i = 0; i < obj.vertexIndices.size(); i++) {
+        for (uint j = 0; j < obj.vertexIndices[i].size(); j++) {
+            auto pos = v[obj.vertexIndices[i][j]-1];
+            auto tex = vt[obj.vertexTexIndices[i][j]-1];
 
             //std::cout << obj.getVertexIndices()[i][j]-1 << " " << obj.getVertexTexIndices()[i][j]-1 << std::endl;
 
             temp.addVertex({pos, tex});
         }
     }
-    temp.setTexture(obj.getMat()->getTexture());
+    temp.setMaterial(obj.mat);
+    //temp.setTexture(obj.mat->mapKd);
     //std::cout << obj.getMat()->getTexture().getWidth() << " " << obj.getMat()->getTexture().getHeight() << std::endl;
     //exit(0);
     //obj.getMat()->getTexture().display();

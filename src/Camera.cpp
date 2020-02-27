@@ -5,19 +5,37 @@ Camera::Camera(double fov, double aspectRatio, double near, double far) : fov(fo
 {
 }
 
-Mat4 Camera::getViewMatrix()
+void Camera::setPosition(Vec4 const &position)
 {
-    Mat4 translateMat = Mat4::translate(position.negate());
-    Mat4 rotXMat = Mat4::rotX(-rotation.x);
-    Mat4 rotYMat = Mat4::rotX(-rotation.y);
-    Mat4 rotZMat = Mat4::rotX(-rotation.z);
+    this->position = position;
+}
+void Camera::setRotation(Vec4 const &rotation)
+{
+    this->rotation = rotation;
+}
 
-    Mat4 view = translateMat.multiply(rotXMat).multiply(rotYMat).multiply(rotZMat);
+Vec4 const &Camera::getPosition()
+{
+    return position;
+}
+Vec4 const &Camera::getRotation()
+{
+    return rotation;
+}
+
+Mat4 const &Camera::getViewMatrix()
+{
+    Mat4 const &translateMat = Mat4::translate(position.negate());
+    Mat4 const &rotXMat = Mat4::rotX(-rotation.getX());
+    Mat4 const &rotYMat = Mat4::rotX(-rotation.getY());
+    Mat4 const &rotZMat = Mat4::rotX(-rotation.getZ());
+
+    Mat4 const &view = translateMat.multiply(rotXMat).multiply(rotYMat).multiply(rotZMat);
 
     return view;
 }
 
-Mat4 Camera::getProjectionMatrix()
+Mat4 const &Camera::getProjectionMatrix()
 {
     // Mat4 temp = {{
     //     {1/std::atan(fov/2), 0, 0, 0},

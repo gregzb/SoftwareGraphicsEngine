@@ -85,10 +85,10 @@ void Screen::display()
 
 void Screen::plot(Vec4 pixel, Color color)
 {
-    if (zbuf(pixel.y, pixel.x) < pixel.z)
+    if (zbuf(pixel.getY(), pixel.getX() < pixel.getZ()))
     {
-        zbuf(pixel.y, pixel.x) = pixel.z;
-        pixelAt(pixel.y, pixel.x) = color;
+        zbuf(pixel.getY(), pixel.getX()) = pixel.getZ();
+        pixelAt(pixel.getY(), pixel.getX()) = color;
     }
 }
 

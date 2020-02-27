@@ -1,19 +1,19 @@
 #include "RenderObject.hpp"
 #include <cmath>
 
-RenderObject::RenderObject() : vertex_mappings{}, scale(1, 1, 1), texture(0, 0)
+RenderObject::RenderObject() : vertex_mappings{}, scale(1, 1, 1)
 {
 }
 
-Mat4 RenderObject::getModelMatrix()
+Mat4 const &RenderObject::getModelMatrix() const
 {
-    Mat4 translateMat = Mat4::translate(position);
-    Mat4 rotXMat = Mat4::rotX(rotation.x);
-    Mat4 rotYMat = Mat4::rotY(rotation.y);
-    Mat4 rotZMat = Mat4::rotZ(rotation.z);
-    Mat4 scaleMat = Mat4::scale(scale);
+    Mat4 const &translateMat = Mat4::translate(position);
+    Mat4 const &rotXMat = Mat4::rotX(rotation.getX());
+    Mat4 const &rotYMat = Mat4::rotY(rotation.getY());
+    Mat4 const &rotZMat = Mat4::rotZ(rotation.getZ());
+    Mat4 const &scaleMat = Mat4::scale(scale);
 
-    Mat4 model = translateMat.multiply(rotXMat).multiply(rotYMat).multiply(rotZMat).multiply(scaleMat);
+    Mat4 const &model = translateMat.multiply(rotXMat).multiply(rotYMat).multiply(rotZMat).multiply(scaleMat);
 
     return model;
 }
@@ -28,6 +28,40 @@ std::vector<int> &RenderObject::getMeshIndices()
     return indices;
 }
 
+void RenderObject::setPosition(Vec4 const &position)
+{
+    this->position = position;
+}
+void RenderObject::setRotation(Vec4 const &rotation)
+{
+    this->rotation = rotation;
+}
+void RenderObject::setScale(Vec4 const &scale)
+{
+    this->scale = scale;
+}
+Vec4 const &RenderObject::getPosition() const
+{
+    return position;
+}
+Vec4 const &RenderObject::getRotation() const
+{
+    return rotation;
+}
+Vec4 const &RenderObject::getScale() const
+{
+    return scale;
+}
+
+void RenderObject::setMaterial(OBJMaterial *mat)
+{
+    this->mat = mat;
+}
+OBJMaterial const *RenderObject::getMaterial()
+{
+    return mat;
+}
+
 void RenderObject::generateVertexNormals()
 {
     for (uint i = 0; i < indices.size(); i += 3)
@@ -35,16 +69,16 @@ void RenderObject::generateVertexNormals()
         Vec4 faceNormal = vertices[indices[i]].getFaceNormal(vertices[indices[i + 1]], vertices[indices[i + 2]]);
         for (int j = 0; j < 3; j++)
         {
-            vertices[indices[i + j]].normal = vertices[indices[i + j]].normal.add(faceNormal);
+            vertices[indices[i + j]].setNormal(vertices[indices[i + j]].getNormal() + faceNormal);
         }
     }
     for (auto &vert : vertices)
     {
-        vert.normal = vert.normal.normalize();
+        vert.setNormal(vert.getNormal().normalize());
     }
 }
 
-void RenderObject::addVertex(Vertex vert)
+void RenderObject::addVertex(Vertex const &vert)
 {
     //vert.pos = vert.pos.round(100000000.0);
     if (vertex_mappings.count(vert) == 0)
@@ -55,23 +89,23 @@ void RenderObject::addVertex(Vertex vert)
     indices.push_back(vertex_mappings.at(vert));
 }
 
-void RenderObject::addPoint(Vec4 v)
+void RenderObject::addPoint(Vec4 const &v)
 {
-    v = v.round(100000000.0);
-    if (vertex_mappings.count(v) == 0)
+    Vec4 v0 = v.round(100000000.0);
+    if (vertex_mappings.count(v0) == 0)
     {
-        vertex_mappings.insert({v, vertices.size()});
-        vertices.push_back(v);
+        vertex_mappings.insert({v0, vertices.size()});
+        vertices.push_back(v0);
     }
-    indices.push_back(vertex_mappings.at(v));
+    indices.push_back(vertex_mappings.at(v0));
 }
-void RenderObject::addEdge(Vec4 v0, Vec4 v1)
+void RenderObject::addEdge(Vec4 const &v0, Vec4 const &v1)
 {
     addPoint(v0);
     addPoint(v1);
 }
 
-void RenderObject::addTriangle(Vec4 v0, Vec4 v1, Vec4 v2)
+void RenderObject::addTriangle(Vec4 const &v0, Vec4 const &v1, Vec4 const &v2)
 {
     //std::cout << v0 << v1 << v2 << std::endl;
     addPoint(v0);
@@ -79,10 +113,15 @@ void RenderObject::addTriangle(Vec4 v0, Vec4 v1, Vec4 v2)
     addPoint(v2);
 }
 
-void RenderObject::addBox(Vec4 v, Vec4 dims)
+void RenderObject::addBox(Vec4 const &v, Vec4 const &dims)
 {
     double x, y, z, w, h, d;
-    std::tie(x, y, z, w, h, d) = std::tie(v.x, v.y, v.z, dims.x, dims.y, dims.z);
+    x = v.getX();
+    y = v.getY();
+    z = v.getZ();
+    w = dims.getX();
+    h = dims.getY();
+    d = dims.getZ();
     double x1 = x + w;
     double y1 = y - h;
     double z1 = z - d;
@@ -112,7 +151,7 @@ void RenderObject::addBox(Vec4 v, Vec4 dims)
     // }
 }
 
-void RenderObject::addSphere(Vec4 v, double r, int thetaSteps, int phiSteps)
+void RenderObject::addSphere(Vec4 const &v, double r, int thetaSteps, int phiSteps)
 {
     double thetaStepSize = 2 * M_PI / thetaSteps;
     double phiStepSize = M_PI / phiSteps;
@@ -128,9 +167,9 @@ void RenderObject::addSphere(Vec4 v, double r, int thetaSteps, int phiSteps)
             {
                 double phi = (phiStep + offsets[i]) * phiStepSize;
                 double theta = (thetaStep + offsets[i + 1]) * thetaStepSize;
-                points.push_back({r * std::cos(phi) + v.x,
-                                  r * std::sin(phi) * std::cos(theta) + v.y,
-                                  r * std::sin(phi) * std::sin(theta) + v.z});
+                points.push_back({r * std::cos(phi) + v.getX(),
+                                  r * std::sin(phi) * std::cos(theta) + v.getY(),
+                                  r * std::sin(phi) * std::sin(theta) + v.getZ()});
             }
 
             addTriangle(points[0], points[1], points[2]);
@@ -139,18 +178,13 @@ void RenderObject::addSphere(Vec4 v, double r, int thetaSteps, int phiSteps)
     }
 }
 
-void RenderObject::addTorus(Vec4 v, double r1, double r2, int thetaSteps, int phiSteps)
+void RenderObject::addTorus(Vec4 const &v, double r1, double r2, int thetaSteps, int phiSteps)
 {
     double thetaStepSize = 2 * M_PI / thetaSteps;
     double phiStepSize = 2 * M_PI / phiSteps;
 
     std::vector<int> offsets{0, 0, 1, 0, 1, 1, 0, 1};
 
-    //for (int phiStep = phiSteps+1-2; phiStep < phiSteps+1+; phiStep++)
-    // for (int phiStep = 0; phiStep < phiSteps; phiStep++)
-    // {
-    //     for (int thetaStep = 0; thetaStep < thetaSteps; thetaStep++)
-    //     {
     for (int phiStep = 0; phiStep < phiSteps; phiStep++)
     {
         for (int thetaStep = 0; thetaStep < thetaSteps; thetaStep++)
@@ -160,9 +194,9 @@ void RenderObject::addTorus(Vec4 v, double r1, double r2, int thetaSteps, int ph
             {
                 double phi = (phiStep % phiSteps + offsets[i]) * phiStepSize;
                 double theta = (thetaStep + offsets[i + 1]) * thetaStepSize;
-                points.push_back({(r2 + r1 * std::cos(phi)) * std::cos(theta) + v.x,
-                                  r1 * std::sin(phi) + v.y,
-                                  (r2 + r1 * std::cos(phi)) * std::sin(theta) + v.z});
+                points.push_back({(r2 + r1 * std::cos(phi)) * std::cos(theta) + v.getX(),
+                                  r1 * std::sin(phi) + v.getY(),
+                                  (r2 + r1 * std::cos(phi)) * std::sin(theta) + v.getZ()});
             }
 
             addTriangle(points[0], points[1], points[2]);

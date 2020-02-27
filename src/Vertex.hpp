@@ -5,15 +5,26 @@
 
 class Vertex
 {
-public:
+private:
     Vec4 pos;
     Vec4 texCoords;
     Vec4 normal;
     Vec4 color;
 
+public:
     Vertex(Vec4 pos = {}, Vec4 texCoords = {}, Vec4 normal = {}, Vec4 color = {255, 255, 255, 255});
-    void transform(Mat4 transform);
-    Vec4 getFaceNormal(Vertex &b, Vertex &c);
+    void transform(Mat4 const &transform);
+    Vec4 getFaceNormal(Vertex const &b, Vertex const &c) const;
+
+    void setPos(Vec4 pos);
+    void setTexCoords(Vec4 texCoords);
+    void setNormal(Vec4 normal);
+    void setColor(Vec4 color);
+
+    Vec4 const &getPos() const;
+    Vec4 const &getTexCoords() const;
+    Vec4 const &getNormal() const;
+    Vec4 const &getColor() const;
 
     bool operator==(const Vertex &other) const;
 };
@@ -27,4 +38,4 @@ struct hash<Vertex>
     std::size_t operator()(const Vertex &vert) const;
 };
 
-}
+} // namespace std

@@ -14,14 +14,16 @@ protected:
     std::vector<T> pixelData;
 
 public:
+    PixelGrid();
     PixelGrid(int width, int height);
     T &operator()(int row, int col);
     T &pixelAt(int row, int col);
     T &pixelAt(int idx);
-    int getHeight();
-    int getWidth();
+    T const &read(int row, int col) const;
+    int getHeight() const;
+    int getWidth() const;
 
-    void display();
+    void display() const;
 
-    static PixelGrid<Color> loadTexture(std::string texName);
+    static PixelGrid<Color> const &loadTexture(std::string texName);
 };

@@ -18,7 +18,7 @@ T &PixelGrid<T>::pixelAt(int row, int col)
 {
     if (row >= height || row < 0 || col >= width || col < 0)
     {
-        std::cout << "out: " << row << " " << col << std::endl;
+        //std::cout << "out: " << row << " " << col << std::endl;
         return pixelData[height * width];
     }
     return pixelData[row * width + col];
@@ -29,10 +29,20 @@ T &PixelGrid<T>::pixelAt(int idx)
 {
     if (idx < 0 || idx >= height * width)
     {
-        std::cout << "her1 " << idx << std::endl;
+        //std::cout << "her1 " << idx << std::endl;
         return pixelData[height * width];
     }
     return pixelData[idx];
+}
+
+template <class T>
+T const &PixelGrid<T>::read(int row, int col) const {
+    if (row >= height || row < 0 || col >= width || col < 0)
+    {
+        //std::cout << "out: " << row << " " << col << std::endl;
+        return pixelData[height * width];
+    }
+    return pixelData[row * width + col];
 }
 
 template <class T>
@@ -42,19 +52,25 @@ PixelGrid<T>::PixelGrid(int width, int height) : width(width), height(height)
 }
 
 template <class T>
-int PixelGrid<T>::getHeight()
+PixelGrid<T>::PixelGrid() : width(0), height(0)
+{
+    pixelData.resize(1);
+}
+
+template <class T>
+int PixelGrid<T>::getHeight() const
 {
     return height;
 }
 
 template <class T>
-int PixelGrid<T>::getWidth()
+int PixelGrid<T>::getWidth() const
 {
     return width;
 }
 
 template <>
-void PixelGrid<Color>::display()
+void PixelGrid<Color>::display() const
 {
     FILE *f;
 
@@ -66,7 +82,7 @@ void PixelGrid<Color>::display()
     {
         for (int x = 0; x < width; x++)
         {
-            Color color = pixelAt(y, x);
+            Color color = read(y, x);
             fprintf(f, "%d %d %d ", color.r, color.g, color.b);
         }
         fprintf(f, "\n");
@@ -84,7 +100,7 @@ void PixelGrid<Color>::display()
 }
 
 template <>
-PixelGrid<Color> PixelGrid<Color>::loadTexture(std::string texName)
+PixelGrid<Color> const &PixelGrid<Color>::loadTexture(std::string texName)
 {
     //static_assert(std::is_same<T, Color>::value);
     std::ifstream texFile(texName, std::ios::in | std::ios::binary);

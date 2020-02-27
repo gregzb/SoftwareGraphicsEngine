@@ -3,7 +3,8 @@
 #include <vector>
 #include "Vec4.hpp"
 
-enum class CurveType {
+enum class CurveType
+{
     Hermite,
     Bezier
 };
@@ -19,7 +20,7 @@ public:
     Color();
     Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
     Color(int r, int g, int b, int a);
-    Color(Vec4 v);
+    Color(Vec4 const &v);
 };
 
 namespace Utils

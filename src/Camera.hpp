@@ -6,13 +6,17 @@ class Camera
 {
 private:
     double fov, aspectRatio, near, far; //vertical fov, aspect is hori/verti
+    Vec4 position, rotation;
 
 public:
-    Vec4 position;
-    Vec4 rotation;
-
     Camera(double fov, double aspectRatio, double near, double far);
 
-    Mat4 getViewMatrix();
-    Mat4 getProjectionMatrix();
+    void setPosition(Vec4 const &position);
+    void setRotation(Vec4 const &rotation);
+
+    Vec4 const &getPosition();
+    Vec4 const &getRotation();
+
+    Mat4 const &getViewMatrix();
+    Mat4 const &getProjectionMatrix();
 };

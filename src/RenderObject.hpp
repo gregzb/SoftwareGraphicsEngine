@@ -3,6 +3,7 @@
 #include "Mat4.hpp"
 #include "Vertex.hpp"
 #include "PixelGrid.hpp"
+#include "OBJStructs.hpp"
 #include <vector>
 #include <unordered_map>
 
@@ -15,33 +16,34 @@ private:
 
     std::unordered_map<Vertex, int> vertex_mappings;
 
-    PixelGrid<Color> texture;
+    OBJMaterial *mat;
+
+    Vec4 position, rotation, scale;
 
 public:
-    Vec4 position;
-    Vec4 rotation;
-    Vec4 scale;
-
     RenderObject();
-    Mat4 getModelMatrix();
+    Mat4 const &getModelMatrix() const;
     std::vector<Vertex> &getMesh();
     std::vector<int> &getMeshIndices();
 
+    void setPosition(Vec4 const &position);
+    void setRotation(Vec4 const &rotation);
+    void setScale(Vec4 const &scale);
+    Vec4 const &getPosition() const;
+    Vec4 const &getRotation() const;
+    Vec4 const &getScale() const;
+
+    void setMaterial(OBJMaterial *mat);
+    OBJMaterial const *getMaterial();
+
     void generateVertexNormals();
 
-    void addVertex(Vertex vert);
-    inline void setTexture(PixelGrid<Color> tex) {
-        texture = tex;
-    }
+    void addVertex(Vertex const &vert);
 
-    inline PixelGrid<Color>& getTexture() {
-        return texture;
-    }
-
-    void addPoint(Vec4 v);
-    void addEdge(Vec4 v0, Vec4 v1);
-    void addTriangle(Vec4 v0, Vec4 v1, Vec4 v2);
-    void addBox(Vec4 v, Vec4 dims);
-    void addSphere(Vec4 v, double r, int thetaSteps, int phiSteps);
-    void addTorus(Vec4 v, double r1, double r2, int thetaSteps, int phiSteps);
+    void addPoint(Vec4 const &v);
+    void addEdge(Vec4 const &v0, Vec4 const &v1);
+    void addTriangle(Vec4 const &v0, Vec4 const &v1, Vec4 const &v2);
+    void addBox(Vec4 const &v, Vec4 const &dims);
+    void addSphere(Vec4 const &v, double r, int thetaSteps, int phiSteps);
+    void addTorus(Vec4 const &v, double r1, double r2, int thetaSteps, int phiSteps);
 };
