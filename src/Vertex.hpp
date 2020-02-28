@@ -16,10 +16,10 @@ public:
     void transform(Mat4 const &transform);
     Vec4 getFaceNormal(Vertex const &b, Vertex const &c) const;
 
-    void setPos(Vec4 pos);
-    void setTexCoords(Vec4 texCoords);
-    void setNormal(Vec4 normal);
-    void setColor(Vec4 color);
+    void setPos(Vec4 const & pos);
+    void setTexCoords(Vec4 const & texCoords);
+    void setNormal(Vec4 const & normal);
+    void setColor(Vec4 const & color);
 
     Vec4 const &getPos() const;
     Vec4 const &getTexCoords() const;

@@ -17,7 +17,6 @@ public:
     Graphics(Screen &screen);
     void drawLine(Vec4 const &a, Vec4 const &b, Color color) const;
     void drawEdges(Mat4 &matrix, Color color) const;
-    //void drawTriangles(Mat4 &matrix, Color color) const;
     void drawTriangle(std::vector<Vertex> vertices, RenderObject &ro) const;
     void fillTriangle(std::vector<Vertex> &verts, RenderObject &ro) const;
     void renderObject(Camera &cam, RenderObject object) const;
