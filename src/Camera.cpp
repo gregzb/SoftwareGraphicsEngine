@@ -14,16 +14,16 @@ void Camera::setRotation(Vec4 const &rotation)
     this->rotation = rotation;
 }
 
-Vec4 const &Camera::getPosition()
+Vec4 const &Camera::getPosition() const
 {
     return position;
 }
-Vec4 const &Camera::getRotation()
+Vec4 const &Camera::getRotation() const
 {
     return rotation;
 }
 
-Mat4 Camera::getViewMatrix()
+Mat4 Camera::getViewMatrix() const
 {
     Mat4 const &translateMat = Mat4::translate(position.negate());
     Mat4 const &rotXMat = Mat4::rotX(-rotation.getX());
@@ -35,7 +35,7 @@ Mat4 Camera::getViewMatrix()
     return view;
 }
 
-Mat4 Camera::getProjectionMatrix()
+Mat4 Camera::getProjectionMatrix() const
 {
     // Mat4 temp = {{
     //     {1/std::atan(fov/2), 0, 0, 0},

@@ -57,7 +57,7 @@ void RenderObject::setMaterial(OBJMaterial *mat)
 {
     this->mat = mat;
 }
-OBJMaterial const *RenderObject::getMaterial()
+OBJMaterial const *RenderObject::getMaterial() const
 {
     return mat;
 }

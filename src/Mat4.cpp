@@ -59,7 +59,7 @@ std::string Mat4::toString() const
     return temp;
 }
 
-Vec4 Mat4::getPoint(int col)
+Vec4 Mat4::getPoint(int col) const
 {
     return {m[0][col], m[1][col], m[2][col], m[3][col]};
 }

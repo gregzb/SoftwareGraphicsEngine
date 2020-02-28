@@ -27,20 +27,20 @@ Vec4 Vertex::getFaceNormal(Vertex const &b, Vertex const &c) const
     return (b.pos - pos).cross(c.pos - b.pos);
 }
 
-void Vertex::setPos(Vec4 pos)
+void Vertex::setPos(Vec4 const &pos)
 {
     this->pos = pos;
 }
 
-void Vertex::setTexCoords(Vec4 texCoords)
+void Vertex::setTexCoords(Vec4 const &texCoords)
 {
     this->texCoords = texCoords;
 }
-void Vertex::setNormal(Vec4 normal)
+void Vertex::setNormal(Vec4 const &normal)
 {
     this->normal = normal;
 }
-void Vertex::setColor(Vec4 color)
+void Vertex::setColor(Vec4 const &color)
 {
     this->color = color;
 }

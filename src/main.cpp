@@ -16,23 +16,31 @@
 #include "Camera.hpp"
 
 #include "OBJLoader.hpp"
+#include "Scene.hpp"
 
 int main()
 {
+    std::cout << "Loading" << std::endl;
     OBJLoader obj("resources/monkey.obj");
 
-    Screen screen(500, 500);
-    screen.graphics.clear({255, 255, 255, 255});
+    std::cout << "Making Screen" << std::endl;
+    Screen screen(1920, 1080);
+    screen.clear({255, 255, 255, 255});
     Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), 0.001, 1000);
     //RenderObject monkey = obj.toRenderObject("Plane");
     //std::cout << "here" << std::endl;
-    RenderObject monkey = obj.toRenderObject("Suzanne");
-    //std::cout << "here2" << std::endl;
-    monkey.setPosition({0, 0, -3});
-    //monkey.setRotation({(20) * M_PI / 180, (0) * M_PI / 180, (0) * M_PI / 180});
-    monkey.setRotation({(20) * M_PI / 180, (20) * M_PI / 180, (0) * M_PI / 180});
+    std::cout << "Getting object" << std::endl;
 
-    screen.graphics.renderObject(cam, monkey);
+    Scene mainScene;
+    mainScene.addObject("Suzanne", obj.toRenderObject("Suzanne"));
+    //std::cout << "here2" << std::endl;
+    mainScene.getObject("Suzanne").setPosition({0, 0, -3});
+    //monkey.setRotation({(20) * M_PI / 180, (0) * M_PI / 180, (0) * M_PI / 180});
+    mainScene.getObject("Suzanne").setRotation({(20) * M_PI / 180, (20) * M_PI / 180, (0) * M_PI / 180});
+
+    std::cout << "Drawing" << std::endl;
+    mainScene.renderToScreen(cam, screen);
+    //screen.renderObject(cam, monkey);
 
     // for (int i = 0; i < 40; i++)
     // {
@@ -49,10 +57,31 @@ int main()
     //     screen.toFileExtension("img" + s + ".png");
     // }
 
+    // auto t1 = std::chrono::high_resolution_clock::now();
+
+    // for (int i = 0; i < 40; i++)
+    // {
+    //     Vec4 rot = monkey.getRotation();
+    //     rot.setY(2 * M_PI / 40 * i);
+    //     monkey.setRotation(rot);
+
+    //     screen.graphics.clear({255, 255, 255, 255});
+    //     screen.clearZbuf();
+    //     screen.graphics.renderObject(cam, monkey);
+    // }
+
+    // auto t2 = std::chrono::high_resolution_clock::now();
+
+    // auto dt = t2 - t1;
+
+    // std::cout << "Took " << std::chrono::duration_cast<std::chrono::milliseconds>(dt).count() << " ms" << std::endl;
+
     //std::cout << "here3" << std::endl;
     //screen.graphics.renderObject(cam, monkey);
     //std::cout << "here4" << std::endl;
+    std::cout << "Displaying" << std::endl;
     screen.display();
+    screen.toFileExtension("diamond.png");
 
     return 0;
 }

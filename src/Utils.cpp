@@ -12,12 +12,6 @@ Color::Color(int r, int g, int b, int a)
     this->b = (unsigned char)b;
     this->a = (unsigned char)a;
 }
-Color::Color(Vec4 const & v) {
-    this->r = static_cast<u_char>(v[0] * 255);
-    this->g = static_cast<u_char>(v[1] * 255);
-    this->b = static_cast<u_char>(v[2] * 255);
-    this->a = static_cast<u_char>(v[3] * 255);
-}
 
 int Utils::sign(double x)
 {

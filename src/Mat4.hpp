@@ -21,7 +21,7 @@ public:
     int getCols() const;
     std::string toString() const;
 
-    Vec4 getPoint(int col);
+    Vec4 getPoint(int col) const;
 
     void clear();
     Mat4 multiply(const Mat4 &matrix) const;

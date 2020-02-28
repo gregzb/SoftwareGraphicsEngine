@@ -32,7 +32,8 @@ double Vec4::operator[](int idx) const
     }
 }
 
-void Vec4::set(int idx, double val) {
+void Vec4::set(int idx, double val)
+{
     switch (idx)
     {
     case 0:
@@ -53,29 +54,37 @@ void Vec4::set(int idx, double val) {
     }
 }
 
-void Vec4::setX(double x) {
+void Vec4::setX(double x)
+{
     this->x = x;
 }
-void Vec4::setY(double y) {
+void Vec4::setY(double y)
+{
     this->y = y;
 }
-void Vec4::setZ(double z) {
+void Vec4::setZ(double z)
+{
     this->z = z;
 }
-void Vec4::setW(double w) {
+void Vec4::setW(double w)
+{
     this->w = w;
 }
 
-double Vec4::getX() const {
+double Vec4::getX() const
+{
     return x;
 }
-double Vec4::getY() const {
+double Vec4::getY() const
+{
     return y;
 }
-double Vec4::getZ() const {
+double Vec4::getZ() const
+{
     return z;
 }
-double Vec4::getW() const {
+double Vec4::getW() const
+{
     return w;
 }
 
@@ -202,6 +211,14 @@ Vec4 Vec4::lerp(Vec4 const &other, double t) const
 Vec4 Vec4::round(double roundFactor) const
 {
     return {std::lround(x * roundFactor) / roundFactor, std::lround(y * roundFactor) / roundFactor, std::lround(z * roundFactor) / roundFactor, std::lround(w * roundFactor) / roundFactor};
+}
+
+Color Vec4::toColor() const
+{
+    return {static_cast<u_char>((*this)[0] * 255),
+            static_cast<u_char>((*this)[1] * 255),
+            static_cast<u_char>((*this)[2] * 255),
+            static_cast<u_char>((*this)[3] * 255)};
 }
 
 bool Vec4::operator==(const Vec4 &other) const

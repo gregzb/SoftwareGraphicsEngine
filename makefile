@@ -13,10 +13,10 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 #$(pkg-config --cflags --libs sdl2)
 #-Wall
-LDFLAGS ?= -lm -std=c++17 -ggdb3 -g
+LDFLAGS ?= -lm -std=c++17 -O2
 CFLAGS = -Wall
 #CXXFLAGS = -Wall -Wextra -Werror
-CXXFLAGS = -Wall -std=c++17 -ggdb3 -g
+CXXFLAGS = -Wall -std=c++17 -O2
 CC = g++
 CXX = g++
 

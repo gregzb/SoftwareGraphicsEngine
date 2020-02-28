@@ -51,6 +51,8 @@ public:
     Vec4 operator-(double other) const;
     Vec4 round(double roundFactor) const;
 
+    Color toColor() const;
+
     Vec4 lerp(Vec4 const &other, double t) const;
 
     bool operator==(const Vec4 &other) const;

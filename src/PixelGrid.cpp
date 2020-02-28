@@ -108,8 +108,8 @@ PixelGrid<Color> PixelGrid<Color>::loadTexture(std::string texName)
     //std::cout << texName << std::endl;
 
     std::string fileHeader;
-    //texFile >> fileHeader >> fileHeader >> fileHeader >> fileHeader;
     texFile >> fileHeader;
+    //texFile >> fileHeader >> fileHeader >> fileHeader;
     int width, height, maxColor;
     texFile >> width >> height >> maxColor;
 

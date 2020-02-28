@@ -1,8 +1,6 @@
 #pragma once
 
 #include <vector>
-#include "Vec4.hpp"
-
 enum class CurveType
 {
     Hermite,
@@ -20,7 +18,6 @@ public:
     Color();
     Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
     Color(int r, int g, int b, int a);
-    Color(Vec4 const &v);
 };
 
 namespace Utils

@@ -14,9 +14,9 @@ public:
     void setPosition(Vec4 const &position);
     void setRotation(Vec4 const &rotation);
 
-    Vec4 const &getPosition();
-    Vec4 const &getRotation();
+    Vec4 const &getPosition() const;
+    Vec4 const &getRotation() const;
 
-    Mat4 getViewMatrix();
-    Mat4 getProjectionMatrix();
+    Mat4 getViewMatrix() const;
+    Mat4 getProjectionMatrix() const;
 };

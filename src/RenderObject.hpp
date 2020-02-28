@@ -34,7 +34,7 @@ public:
     Vec4 const &getScale() const;
 
     void setMaterial(OBJMaterial *mat);
-    OBJMaterial const *getMaterial();
+    OBJMaterial const *getMaterial() const;
 
     void generateVertexNormals();
 
