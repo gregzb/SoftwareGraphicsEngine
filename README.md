@@ -18,6 +18,8 @@ By: Greg Zborovsky
 * Lighting
 * MDL?
 * Better animation support
+* Gamma correction
+* Better image reading
 
 ## Resources:
 * https://www.scratchapixel.com/

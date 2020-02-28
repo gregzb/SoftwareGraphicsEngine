@@ -2,12 +2,13 @@
 #include <cmath>
 #include <functional>
 
-void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object)
+void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &objecto)
 {
+    RenderObject object = objecto;
     Mat4 const &mvMat = cam.getViewMatrix().multiply(object.getModelMatrix());
     Mat4 const &pMat = cam.getProjectionMatrix();
 
-    std::vector<Vertex> tris = object.getMesh();
+    std::vector<Vertex> & tris = object.getMesh(); // need to not make copy or smthing?
     std::vector<int> const &indices = object.getMeshIndices();
 
     for (auto &vert : tris)
@@ -19,6 +20,7 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
 
     for (auto &vert : tris)
     {
+        //std::cout << vert.getNormal() << std::endl;
         vert.transform(pMat);
         vert.setPos(vert.getPos().perspectiveDivision());
     }
@@ -94,29 +96,33 @@ public:
         depthStep.first = calcStepX<double>(min.getPos().getZ(), mid.getPos().getZ(), max.getPos().getZ());
         depthStep.second = calcStepY<double>(min.getPos().getZ(), mid.getPos().getZ(), max.getPos().getZ());
 
-        overZStep.first = calcStepX<double>(1.0/min.getPos().getW(), 1.0/mid.getPos().getW(), 1.0/max.getPos().getW());
-        overZStep.second = calcStepY<double>(1.0/min.getPos().getW(), 1.0/mid.getPos().getW(), 1.0/max.getPos().getW());
+        overZStep.first = calcStepX<double>(1.0 / min.getPos().getW(), 1.0 / mid.getPos().getW(), 1.0 / max.getPos().getW());
+        overZStep.second = calcStepY<double>(1.0 / min.getPos().getW(), 1.0 / mid.getPos().getW(), 1.0 / max.getPos().getW());
 
-        texStep.first = calcStepX<Vec4>(min.getTexCoords()/min.getPos().getW(), mid.getTexCoords()/mid.getPos().getW(), max.getTexCoords()/max.getPos().getW());
-        texStep.second = calcStepY<Vec4>(min.getTexCoords()/min.getPos().getW(), mid.getTexCoords()/mid.getPos().getW(), max.getTexCoords()/max.getPos().getW());
+        texStep.first = calcStepX<Vec4>(min.getTexCoords() / min.getPos().getW(), mid.getTexCoords() / mid.getPos().getW(), max.getTexCoords() / max.getPos().getW());
+        texStep.second = calcStepY<Vec4>(min.getTexCoords() / min.getPos().getW(), mid.getTexCoords() / mid.getPos().getW(), max.getTexCoords() / max.getPos().getW());
 
-        normalStep.first = calcStepX<Vec4>(min.getNormal()/min.getPos().getW(), mid.getNormal()/mid.getPos().getW(), max.getNormal()/max.getPos().getW());
-        normalStep.second = calcStepY<Vec4>(min.getNormal()/min.getPos().getW(), mid.getNormal()/mid.getPos().getW(), max.getNormal()/max.getPos().getW());
+        normalStep.first = calcStepX<Vec4>(min.getNormal() / min.getPos().getW(), mid.getNormal() / mid.getPos().getW(), max.getNormal() / max.getPos().getW());
+        normalStep.second = calcStepY<Vec4>(min.getNormal() / min.getPos().getW(), mid.getNormal() / mid.getPos().getW(), max.getNormal() / max.getPos().getW());
     }
 
-    std::pair<double, double> const & getDepthStep() {
+    std::pair<double, double> const &getDepthStep()
+    {
         return depthStep;
     }
 
-    std::pair<double, double> const & getOverZStep() {
+    std::pair<double, double> const &getOverZStep()
+    {
         return overZStep;
     }
 
-    std::pair<Vec4, Vec4> const & getTexStep() {
+    std::pair<Vec4, Vec4> const &getTexStep()
+    {
         return texStep;
     }
 
-    std::pair<Vec4, Vec4> const & getNormalStep() {
+    std::pair<Vec4, Vec4> const &getNormalStep()
+    {
         return normalStep;
     }
 };
@@ -183,6 +189,8 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
 
     Interpolation interpolation(verts[0], verts[1], verts[2]);
 
+    //std::cout << verts[0].getPos().getW() << " " << verts[1].getPos().getW() << " " << verts[2].getPos().getW() << std::endl;
+
     int side = Utils::sign((verts[1].getPos() - verts[0].getPos()).cross(verts[2].getPos() - verts[0].getPos()).getZ());
     side = side >= 0 ? 0 : 1;
 
@@ -202,7 +210,7 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
         double z = leftInterp.z + interpolation.getDepthStep().first * (xLeft - leftInterp.x);
         double overZ = leftInterp.overZ + interpolation.getOverZStep().first * (xLeft - leftInterp.x);
         Vec4 tex = leftInterp.tex + interpolation.getTexStep().first * (xLeft - leftInterp.x);
-        Vec4 normal = leftInterp.normal + interpolation.getNormalStep().first * (xLeft - leftInterp.x);
+        Vec4 norm = leftInterp.normal + interpolation.getNormalStep().first * (xLeft - leftInterp.x);
 
         int y = std::ceil(verts[0].getPos().getY()) + i / 2;
 
@@ -211,10 +219,10 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
             if (screen.zbuf(y, x) > z)
             {
                 screen.zbuf(y, x) = z;
-                
-                Vec4 texAdjust = tex;
-                texAdjust.setX(texAdjust.getX() / overZ);
-                texAdjust.setY(texAdjust.getY() / overZ);
+
+                Vec4 normal = norm / overZ;
+
+                Vec4 texAdjust = tex / overZ;
 
                 texAdjust.setX(std::fmod(texAdjust.getX(), 1.0));
                 if (texAdjust.getX() < 0)
@@ -226,13 +234,45 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
                 texAdjust.setY(1 - texAdjust.getY());
 
                 Color col = object.getMaterial()->mapKd.read(std::lround(texAdjust.getY() * (object.getMaterial()->mapKd.getHeight() - 1)), std::lround(texAdjust.getX() * (object.getMaterial()->mapKd.getWidth() - 1)));
-                screen(y, x) = col;
+
+                Vec4 Ka(col);
+                Vec4 Kd = Ka;
+                Vec4 Ks = object.getMaterial()->Ks;
+
+                Vec4 realPos = {x / overZ, y / overZ, 1 / overZ};
+
+                Vec4 illum;
+
+                for (auto const & entries : transformedLights) {
+                    auto const & light = entries.second;
+                    if (light.type == LightType::Ambient) {
+                        illum = illum + Ka * light.Ia;
+                    } else if (light.type == LightType::Directional) {
+                        Vec4 H = (light.pos.normalize() * realPos.normalize()).normalize();
+                        Vec4 diffuse = Kd * ((light.pos.negate() + realPos) - realPos).normalize().dot(normal.normalize()) * light.Id;
+                        diffuse = {std::max(0.0, diffuse[0]), std::max(0.0, diffuse[1]), std::max(0.0, diffuse[2]), std::max(0.0, diffuse[3])};
+                        Vec4 specular = Ks * std::pow(normal.normalize().dot(H), object.getMaterial()->Ns) * light.Is;
+                        specular = {std::max(0.0, specular[0]), std::max(0.0, specular[1]), std::max(0.0, specular[2]), std::max(0.0, specular[3])};
+                        illum = illum + diffuse + specular;
+                    } else if (light.type == LightType::Point) {
+                        Vec4 H = ((light.pos - realPos).normalize() - realPos.negate().normalize()).normalize();
+                        Vec4 diffuse = Kd * (light.pos - realPos).normalize().dot(normal.normalize()) * light.Id;
+                        diffuse = {std::max(0.0, diffuse[0]), std::max(0.0, diffuse[1]), std::max(0.0, diffuse[2]), std::max(0.0, diffuse[3])};
+                        Vec4 specular = Ks * std::pow(normal.normalize().dot(H), object.getMaterial()->Ns) * light.Is;
+                        specular = {std::max(0.0, specular[0]), std::max(0.0, specular[1]), std::max(0.0, specular[2]), std::max(0.0, specular[3])};
+                        illum = illum + diffuse + specular;
+                    }
+                }
+
+                //std::cout << illum << std::endl;
+                
+                screen(y, x) = illum.toColor();
             }
             //z += zStep;
             z += interpolation.getDepthStep().first; // may need to recalc etc: (rightInterp.z - leftInterp.z)/(rightInterp.x - leftInterp.x));
             overZ += interpolation.getOverZStep().first;
             tex = tex + interpolation.getTexStep().first;
-            normal = normal + interpolation.getNormalStep().first;
+            norm = norm + interpolation.getNormalStep().first;
         }
     }
 }
@@ -249,13 +289,38 @@ void Scene::addObject(std::string const &name, RenderObject const &object)
     objects.insert({name, object});
 }
 
-RenderObject &Scene::getObject(std::string const &name) {
+RenderObject &Scene::getObject(std::string const &name)
+{
     return objects.at(name);
+}
+
+void Scene::removeLight(std::string const &name)
+{
+    if (lights.count(name) > 0)
+    {
+        lights.erase(name);
+    }
+}
+void Scene::addLight(std::string const &name, Light const &light)
+{
+    lights.insert({name, light});
+}
+Light &Scene::getLight(std::string const &name)
+{
+    return lights.at(name);
 }
 
 void Scene::renderToScreen(Camera const &cam, Screen &screen)
 {
-    for (auto & obj : objects) {
+    Mat4 const &vMat = cam.getViewMatrix();
+    transformedLights.clear();
+    for (auto const &light : lights) {
+        Light temp = light.second;
+        temp.pos = temp.pos.transform(vMat);
+        transformedLights.insert({light.first, temp});
+    }
+    for (auto &obj : objects)
+    {
         renderObject(cam, screen, obj.second);
     }
 }

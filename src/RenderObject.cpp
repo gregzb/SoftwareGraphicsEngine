@@ -74,7 +74,9 @@ void RenderObject::generateVertexNormals()
     }
     for (auto &vert : vertices)
     {
+        //std::cout << vert.getNormal() << std::endl;
         vert.setNormal(vert.getNormal().normalize());
+        //std::cout << vert.getNormal() << std::endl;
     }
 }
 

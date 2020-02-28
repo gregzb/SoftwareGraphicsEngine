@@ -17,6 +17,7 @@
 
 #include "OBJLoader.hpp"
 #include "Scene.hpp"
+#include "Light.hpp"
 
 int main()
 {
@@ -24,8 +25,9 @@ int main()
     OBJLoader obj("resources/monkey.obj");
 
     std::cout << "Making Screen" << std::endl;
-    Screen screen(1920, 1080);
-    screen.clear({255, 255, 255, 255});
+    Screen screen(600, 600);
+    //screen.clear({255, 255, 255, 255});
+    screen.clear({0, 0, 0, 255});
     Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), 0.001, 1000);
     //RenderObject monkey = obj.toRenderObject("Plane");
     //std::cout << "here" << std::endl;
@@ -37,6 +39,10 @@ int main()
     mainScene.getObject("Suzanne").setPosition({0, 0, -3});
     //monkey.setRotation({(20) * M_PI / 180, (0) * M_PI / 180, (0) * M_PI / 180});
     mainScene.getObject("Suzanne").setRotation({(20) * M_PI / 180, (20) * M_PI / 180, (0) * M_PI / 180});
+
+    mainScene.addLight("Ambient", {LightType::Ambient, {.15, .15, .15}});
+    //mainScene.addLight("Directional", {LightType::Directional, {}, {1, 1, 1}, {1, 1, 1}, {-1, -1, -1}});
+    mainScene.addLight("Point", {LightType::Point, {}, {1, 1, 1}, {1, 1, 1}, {3, 3, -1}});
 
     std::cout << "Drawing" << std::endl;
     mainScene.renderToScreen(cam, screen);

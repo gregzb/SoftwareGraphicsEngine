@@ -8,17 +8,18 @@ Vertex::Vertex(Vec4 pos, Vec4 texCoords, Vec4 normal, Vec4 color) : pos(pos), te
 
 void Vertex::transform(Mat4 const &transform)
 {
-    Vec4 temp = this->pos;
-    assert(transform.getCols() == 4);
+    // Vec4 temp = this->pos;
+    // assert(transform.getCols() == 4);
 
-    for (int row = 0; row < transform.getRows(); row++)
-    {
-        this->pos.set(row, 0);
-        for (int i = 0; i < transform.getCols(); i++)
-        {
-            this->pos.set(row, this->pos[row] + transform(row, i) * temp[i]);
-        }
-    }
+    // for (int row = 0; row < transform.getRows(); row++)
+    // {
+    //     this->pos.set(row, 0);
+    //     for (int i = 0; i < transform.getCols(); i++)
+    //     {
+    //         this->pos.set(row, this->pos[row] + transform(row, i) * temp[i]);
+    //     }
+    // }
+    this->pos = this->pos.transform(transform);
 }
 
 Vec4 Vertex::getFaceNormal(Vertex const &b, Vertex const &c) const

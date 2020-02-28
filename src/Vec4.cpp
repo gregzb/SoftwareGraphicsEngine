@@ -2,6 +2,7 @@
 #include <cassert>
 #include <functional>
 #include "Vec4.hpp"
+#include "Mat4.hpp"
 
 Vec4::Vec4(double x_, double y_, double z_, double w_) : x(x_), y(y_), z(z_), w(w_)
 {
@@ -203,6 +204,22 @@ Vec4 Vec4::operator-(double other) const
     return sub(other);
 }
 
+Vec4 Vec4::transform(Mat4 const &transform)
+{
+    Vec4 temp = *this;
+    assert(transform.getCols() == 4);
+
+    for (int row = 0; row < transform.getRows(); row++)
+    {
+        temp.set(row, 0);
+        for (int i = 0; i < transform.getCols(); i++)
+        {
+            temp.set(row, temp[row] + transform(row, i) * (*this)[i]);
+        }
+    }
+    return temp;
+}
+
 Vec4 Vec4::lerp(Vec4 const &other, double t) const
 {
     return other.sub(*this).scale(t).add(*this);
@@ -211,6 +228,15 @@ Vec4 Vec4::lerp(Vec4 const &other, double t) const
 Vec4 Vec4::round(double roundFactor) const
 {
     return {std::lround(x * roundFactor) / roundFactor, std::lround(y * roundFactor) / roundFactor, std::lround(z * roundFactor) / roundFactor, std::lround(w * roundFactor) / roundFactor};
+}
+
+Vec4 Vec4::pow(Vec4 const &other) const
+{
+    return {std::pow(x, other.x), std::pow(y, other.y), std::pow(z, other.z), std::pow(w, other.w)};
+}
+Vec4 Vec4::pow(double other) const
+{
+    return {std::pow(x, other), std::pow(y, other), std::pow(z, other), std::pow(w, other)};
 }
 
 Color Vec4::toColor() const

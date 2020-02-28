@@ -5,6 +5,8 @@
 
 #include "Utils.hpp"
 
+class Mat4;
+
 class Vec4
 {
 private:
@@ -51,7 +53,12 @@ public:
     Vec4 operator-(double other) const;
     Vec4 round(double roundFactor) const;
 
+    Vec4 pow(Vec4 const &other) const;
+    Vec4 pow(double other) const;
+
     Color toColor() const;
+
+    Vec4 transform(Mat4 const &transform);
 
     Vec4 lerp(Vec4 const &other, double t) const;
 
