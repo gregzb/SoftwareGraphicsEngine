@@ -247,6 +247,11 @@ Color Vec4::toColor() const
             static_cast<u_char>((*this)[3] * 255)};
 }
 
+bool Vec4::inViewFrustum() const {
+    double w_ = std::abs(w);
+    return -w_ <= x && x <= w_ && -w_ <= y && y <= w_ && -w_ <= z && z <= w_;
+}
+
 bool Vec4::operator==(const Vec4 &other) const
 {
     return x == other.x && y == other.y && z == other.z && w == other.w;

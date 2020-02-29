@@ -62,6 +62,8 @@ public:
 
     Vec4 lerp(Vec4 const &other, double t) const;
 
+    bool inViewFrustum() const;
+
     bool operator==(const Vec4 &other) const;
 
     friend std::ostream &operator<<(std::ostream &os, const Vec4 v);

@@ -2,7 +2,7 @@
 #include <cassert>
 #include <functional>
 
-Vertex::Vertex(Vec4 pos, Vec4 texCoords, Vec4 normal, Vec4 color) : pos(pos), texCoords(texCoords), normal(normal), color(color)
+Vertex::Vertex(Vec4 pos, Vec4 texCoords, Vec4 normal, Vec4 worldPos, Vec4 projPos) : pos(pos), texCoords(texCoords), normal(normal), worldPos(worldPos), projPos(projPos)
 {
 }
 
@@ -45,10 +45,6 @@ void Vertex::setNormal(Vec4 const &normal)
 {
     this->normal = normal;
 }
-void Vertex::setColor(Vec4 const &color)
-{
-    this->color = color;
-}
 
 Vec4 const &Vertex::getPos() const
 {
@@ -61,10 +57,6 @@ Vec4 const &Vertex::getTexCoords() const
 Vec4 const &Vertex::getNormal() const
 {
     return normal;
-}
-Vec4 const &Vertex::getColor() const
-{
-    return color;
 }
 
 void Vertex::updateWorldPos(Vec4 const &worldPos) {
@@ -79,6 +71,15 @@ Vec4 const &Vertex::getWorldPos() const {
 }
 Vec4 const &Vertex::getProjPos() const {
     return projPos;
+}
+
+Vertex Vertex::lerp(Vertex const & other, double t) const {
+    Vec4 const & pos_ = pos.lerp(other.getPos(), t);
+    Vec4 const & texCoords_ = getTexCoords().lerp(other.getTexCoords(), t);
+    Vec4 const & normal_ = getNormal().lerp(other.getNormal(), t);
+    Vec4 const & worldPos_ = getWorldPos().lerp(other.getWorldPos(), t);
+    Vec4 const & projPos_ = getProjPos().lerp(other.getProjPos(), t);
+    return {pos_, texCoords_, normal_, worldPos_, projPos_};
 }
 
 bool Vertex::operator==(const Vertex &other) const

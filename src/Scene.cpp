@@ -7,7 +7,7 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
     Mat4 const &mvMat = cam.getViewMatrix().multiply(object.getModelMatrix());
     Mat4 const &pMat = cam.getProjectionMatrix();
 
-    std::vector<Vertex> & tris = object.getMesh(); // need to not make copy or smthing?
+    std::vector<Vertex> &tris = object.getMesh(); // need to not make copy or smthing?
     std::vector<int> const &indices = object.getMeshIndices();
 
     for (auto &vert : tris)
@@ -19,7 +19,28 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
 
     for (auto &vert : tris)
     {
-        vert.updateProjPos(vert.getWorldPos().transform(pMat).perspectiveDivision());
+        vert.updateProjPos(vert.getWorldPos().transform(pMat));
+    }
+
+    std::vector<Vertex> clippedVertices;
+
+    for (uint i = 0; i < indices.size(); i += 3)
+    {
+        int pointsInside = 0;
+        for (int j = 0; j < 3; j++)
+        {
+            pointsInside += tris[indices[i+j]].getProjPos().inViewFrustum();
+        }
+    }
+
+    /*
+        clipping goes here!
+        */
+
+    for (auto &vert : tris)
+    {
+
+        vert.updateProjPos(vert.getProjPos().perspectiveDivision());
     }
 
     std::vector<Vertex> triangle(3);
@@ -112,8 +133,6 @@ public:
         normalStep.first = calcStepX<Vec4>(min.getNormal() / min.getProjPos().getW(), mid.getNormal() / mid.getProjPos().getW(), max.getNormal() / max.getProjPos().getW());
         normalStep.second = calcStepY<Vec4>(min.getNormal() / min.getProjPos().getW(), mid.getNormal() / mid.getProjPos().getW(), max.getNormal() / max.getProjPos().getW());
 
-        //std::cout << "cromch" << std::endl;
-
         positionStep.first = calcStepX<Vec4>(min.getWorldPos() / min.getProjPos().getW(), mid.getWorldPos() / mid.getProjPos().getW(), max.getWorldPos() / max.getProjPos().getW());
         positionStep.second = calcStepY<Vec4>(min.getWorldPos() / min.getProjPos().getW(), mid.getWorldPos() / mid.getProjPos().getW(), max.getWorldPos() / max.getProjPos().getW());
     }
@@ -146,50 +165,32 @@ public:
 
 void projectSide(std::vector<Interpolant> &scanlines, Vertex &lower, Vertex &higher, int minVal, int side, Interpolation interpolation)
 {
-    //std::cout << "loa" << std::endl;
     int y0 = std::ceil(lower.getProjPos().getY()), y1 = std::ceil(higher.getProjPos().getY());
     double dY = higher.getProjPos().getY() - lower.getProjPos().getY(), dX = higher.getProjPos().getX() - lower.getProjPos().getX();
-    //double dZ = higher.pos.z - lower.pos.z;
-    //Vec4 dC = higher.color.sub(lower.color);
 
     if (dY <= 0)
         return;
 
-    //std::cout << "dawd" << std::endl;
+    double yOffset = y0 - lower.getProjPos().getY();
 
     double xStep = dX / dY;
-    double x = lower.getProjPos().getX() + (y0 - lower.getProjPos().getY()) * xStep;
+    double x = lower.getProjPos().getX() + yOffset * xStep;
 
-    //min y vert index, not min y
-    /**
-     * dsfsfsdf
-     * sdf
-     * sdf
-     * s
-     * df
-     * sd
-     * fs
-     * df
-     * sd
-     * fs
-     * df
-     * sdf
-     **/
-    double z = lower.getProjPos().getZ() + interpolation.getDepthStep().first * (x - lower.getProjPos().getX()) + interpolation.getDepthStep().second * (y0 - lower.getProjPos().getY());
+    double xOffset = x - lower.getProjPos().getX();
+
+    double z = lower.getProjPos().getZ() + interpolation.getDepthStep().first * xOffset + interpolation.getDepthStep().second * yOffset;
     double zStep = interpolation.getDepthStep().second + interpolation.getDepthStep().first * xStep;
 
-    double overZ = 1 / lower.getProjPos().getW() + interpolation.getOverZStep().first * (x - lower.getProjPos().getX()) + interpolation.getOverZStep().second * (y0 - lower.getProjPos().getY());
+    double overZ = 1.0 / lower.getProjPos().getW() + interpolation.getOverZStep().first * xOffset + interpolation.getOverZStep().second * yOffset;
     double overZStep = interpolation.getOverZStep().second + interpolation.getOverZStep().first * xStep;
 
-    Vec4 tex = lower.getTexCoords() / lower.getProjPos().getW() + interpolation.getTexStep().first * (x - lower.getProjPos().getX()) + interpolation.getTexStep().second * (y0 - lower.getProjPos().getY());
+    Vec4 tex = lower.getTexCoords() * (1.0 / lower.getProjPos().getW()) + interpolation.getTexStep().first * xOffset + interpolation.getTexStep().second * yOffset;
     Vec4 texStep = interpolation.getTexStep().second + interpolation.getTexStep().first * xStep;
 
-    Vec4 normal = lower.getNormal() / lower.getProjPos().getW() + interpolation.getNormalStep().first * (x - lower.getProjPos().getX()) + interpolation.getNormalStep().second * (y0 - lower.getProjPos().getY());
+    Vec4 normal = lower.getNormal() * (1.0 / lower.getProjPos().getW()) + interpolation.getNormalStep().first * xOffset + interpolation.getNormalStep().second * yOffset;
     Vec4 normalStep = interpolation.getNormalStep().second + interpolation.getNormalStep().first * xStep;
 
-    //std::cout << "hgell" << std::endl;
-
-    Vec4 position = lower.getWorldPos() / lower.getProjPos().getW() + interpolation.getPositionStep().first * (x - lower.getProjPos().getX()) + interpolation.getPositionStep().second * (y0 - lower.getProjPos().getY());
+    Vec4 position = lower.getWorldPos() * (1.0 / lower.getProjPos().getW()) + interpolation.getPositionStep().first * xOffset + interpolation.getPositionStep().second * yOffset;
     Vec4 positionStep = interpolation.getPositionStep().second + interpolation.getPositionStep().first * xStep;
 
     for (int y = y0; y < y1; y++)
@@ -213,23 +214,15 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
     if (verts[0].getProjPos().getY() > verts[1].getProjPos().getY())
         std::swap(verts[0], verts[1]);
 
-    //std::cout << verts[0].getProjPos() << verts[1].getProjPos() << verts[2].getProjPos() << std::endl;
-
     Interpolation interpolation(verts[0], verts[1], verts[2]);
-
-    //std::cout << verts[0].getProjPos().getW() << " " << verts[1].getProjPos().getW() << " " << verts[2].getProjPos().getW() << std::endl;
 
     int side = Utils::sign((verts[1].getProjPos() - verts[0].getProjPos()).cross(verts[2].getProjPos() - verts[0].getProjPos()).getZ());
     side = side >= 0 ? 0 : 1;
 
-    //std::cout << "gr" << std::endl;
-    //std::cout << verts[2].getProjPos().getY() << " " << verts[0].getProjPos().getY() << std::endl;
     std::vector<Interpolant> scanlines(2 * (std::ceil(verts[2].getProjPos().getY()) - std::ceil(verts[0].getProjPos().getY())));
-    //std::cout << "pls" << std::endl;
     projectSide(scanlines, verts[0], verts[2], std::ceil(verts[0].getProjPos().getY()), side, interpolation);
     projectSide(scanlines, verts[0], verts[1], std::ceil(verts[0].getProjPos().getY()), 1 - side, interpolation);
     projectSide(scanlines, verts[1], verts[2], std::ceil(verts[0].getProjPos().getY()), 1 - side, interpolation);
-    //std::cout << "r" << std::endl;
     for (uint i = 0; i < scanlines.size(); i += 2)
     {
         Interpolant leftInterp = scanlines[i];
@@ -239,11 +232,13 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
         xLeft = std::ceil(leftInterp.x);
         xRight = std::ceil(rightInterp.x);
 
-        double z = leftInterp.z + interpolation.getDepthStep().first * (xLeft - leftInterp.x);
-        double overZ = leftInterp.overZ + interpolation.getOverZStep().first * (xLeft - leftInterp.x);
-        Vec4 tex = leftInterp.tex + interpolation.getTexStep().first * (xLeft - leftInterp.x);
-        Vec4 norm = leftInterp.normal + interpolation.getNormalStep().first * (xLeft - leftInterp.x);
-        Vec4 pos_ = leftInterp.position + interpolation.getPositionStep().first * (xLeft - leftInterp.x);
+        double xOffset = xLeft - leftInterp.x;
+
+        double z = leftInterp.z + interpolation.getDepthStep().first * xOffset;
+        double overZ = leftInterp.overZ + interpolation.getOverZStep().first * xOffset;
+        Vec4 tex = leftInterp.tex + interpolation.getTexStep().first * xOffset;
+        Vec4 norm = leftInterp.normal + interpolation.getNormalStep().first * xOffset;
+        Vec4 pos_ = leftInterp.position + interpolation.getPositionStep().first * xOffset;
 
         int y = std::ceil(verts[0].getProjPos().getY()) + i / 2;
 
@@ -253,11 +248,13 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
             {
                 screen.zbuf(y, x) = z;
 
-                Vec4 pos = pos_/overZ;
+                double regZ = 1.0 / overZ;
 
-                Vec4 normal = (norm / overZ).normalize();
+                Vec4 pos = pos_ * regZ;
 
-                Vec4 texAdjust = tex / overZ;
+                Vec4 normal = (norm * regZ).normalize();
+
+                Vec4 texAdjust = tex * regZ;
 
                 texAdjust.setX(std::fmod(texAdjust.getX(), 1.0));
                 if (texAdjust.getX() < 0)
@@ -268,64 +265,54 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
 
                 texAdjust.setY(1 - texAdjust.getY());
 
+                //std::cout << texAdjust << std::endl;
+
                 Color col = object.getMaterial()->mapKd.read(std::lround(texAdjust.getY() * (object.getMaterial()->mapKd.getHeight() - 1)), std::lround(texAdjust.getX() * (object.getMaterial()->mapKd.getWidth() - 1)));
+                col = {215, 255, 215, 255};
 
-                //col = {215, 255, 215, 255};
-
-                Vec4 Ka(col);
-                Vec4 Kd = Ka;
-                Vec4 Ks = object.getMaterial()->Ks;
-
-                //Vec4 realPos = {x / overZ, y / overZ, 1 / overZ};
-                //Vec4 realPos = {Utils::map(x, 0, screen.getWidth(), -1, 1) / overZ, Utils::map(y, 0, screen.getHeight(), -1, 1) / overZ, 1 / overZ};
-                //realPos = {0, 0, -3};
-                //std::cout << pos << std::endl;
+                Vec4 const &Ka = col;
+                Vec4 const &Kd = Ka;
+                Vec4 const &Ks = object.getMaterial()->Ks;
 
                 Vec4 illum;
 
-                for (auto const & entries : transformedLights) {
-                    auto const & light = entries.second;
-                    if (light.type == LightType::Ambient) {
+                for (auto const &entries : transformedLights)
+                {
+                    auto const &light = entries.second;
+                    if (light.type == LightType::Ambient)
+                    {
                         illum = illum + Ka * light.Ia;
-                    } else if (light.type == LightType::Directional) {
-                        Vec4 L = light.pos.negate().normalize();
-                        Vec4 V = pos.negate().normalize();
-                        Vec4 H = (L + V).normalize();
+                    }
+                    else if (light.type == LightType::Directional)
+                    {
+                        Vec4 const &L = light.pos.negate().normalize();
+                        Vec4 const &V = pos.negate().normalize();
+                        Vec4 const &H = (L + V).normalize();
                         double NL = normal.dot(L);
                         int B = NL > 0 ? 1 : 0;
-                        Vec4 diffuse = Kd * light.Id * B * (NL);
-                        //diffuse = {};
-                        Vec4 specular = Ks * light.Is * B * std::pow(normal.dot(H), object.getMaterial()->Ns);
-                        //std::cout << normal << H << std::endl;
+                        Vec4 const &diffuse = Kd * light.Id * B * (NL);
+                        Vec4 const &specular = Ks * light.Is * B * std::pow(normal.dot(H), object.getMaterial()->Ns);
                         illum = illum + diffuse + specular;
-                    } else if (light.type == LightType::Point) {
-                        //std::cout << light.pos << std::endl;
-                        Vec4 lDist = light.pos - pos;
+                    }
+                    else if (light.type == LightType::Point)
+                    {
+                        Vec4 const &lDist = light.pos - pos;
                         double dist = lDist.magnitude();
-                        Vec4 L = lDist.normalize();
-                        //std::cout << realPos << std::endl;
-                        Vec4 V = pos.negate().normalize();
-                        Vec4 H = (L + V).normalize();
+                        Vec4 const &L = lDist.normalize();
+                        Vec4 const &V = pos.negate().normalize();
+                        Vec4 const &H = (L + V).normalize();
                         double NL = normal.dot(L);
                         int B = NL > 0 ? 1 : 0;
-                        Vec4 diffuse = Kd * light.Id * B * (NL);
-                        Vec4 specular = Ks * light.Is * B * std::pow(normal.dot(H), object.getMaterial()->Ns);
-                        illum = illum + diffuse / (dist*dist) + specular / (dist*dist);
+                        Vec4 const &diffuse = Kd * light.Id * B * (NL);
+                        Vec4 const &specular = Ks * light.Is * B * std::pow(normal.dot(H), object.getMaterial()->Ns);
+                        illum = illum + diffuse / (dist * dist) + specular / (dist * dist);
                     }
                 }
-                
-                //std::cout << illum << std::endl;
-
-                //illum = illum.normalize();
 
                 illum.set(0, Utils::clamp(illum[0], 0, 1));
                 illum.set(1, Utils::clamp(illum[1], 0, 1));
                 illum.set(2, Utils::clamp(illum[2], 0, 1));
 
-                //illum = col;
-
-                //std::cout << illum << std::endl;
-                
                 screen(y, x) = illum.toColor();
             }
             //z += zStep;
@@ -375,7 +362,8 @@ void Scene::renderToScreen(Camera const &cam, Screen &screen)
 {
     Mat4 const &vMat = cam.getViewMatrix();
     transformedLights.clear();
-    for (auto const &light : lights) {
+    for (auto const &light : lights)
+    {
         Light temp = light.second;
         temp.pos = temp.pos.transform(vMat);
         //std::cout << temp.pos << std::endl;
