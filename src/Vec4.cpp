@@ -204,7 +204,7 @@ Vec4 Vec4::operator-(double other) const
     return sub(other);
 }
 
-Vec4 Vec4::transform(Mat4 const &transform)
+Vec4 Vec4::transform(Mat4 const &transform) const
 {
     Vec4 temp = *this;
     assert(transform.getCols() == 4);

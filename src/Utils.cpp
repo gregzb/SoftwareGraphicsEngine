@@ -31,3 +31,7 @@ double Utils::lerp(double a, double b, double t)
 double Utils::map(double value, double low1, double high1, double low2, double high2) { //optimize this usage in screen space area
     return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
 }
+
+double Utils::clamp(double value, double min, double max) {
+    return std::min(std::max(value, min), max);
+}

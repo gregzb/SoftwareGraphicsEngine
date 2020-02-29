@@ -64,6 +64,10 @@ OBJMaterial const *RenderObject::getMaterial() const
 
 void RenderObject::generateVertexNormals()
 {
+    for (auto &vert : vertices)
+    {
+        vert.setNormal({});
+    }
     for (uint i = 0; i < indices.size(); i += 3)
     {
         Vec4 faceNormal = vertices[indices[i]].getFaceNormal(vertices[indices[i + 1]], vertices[indices[i + 2]]);
@@ -78,6 +82,9 @@ void RenderObject::generateVertexNormals()
         vert.setNormal(vert.getNormal().normalize());
         //std::cout << vert.getNormal() << std::endl;
     }
+    // int i = 0;
+    //std::cout << vertices[0].getWorldPos() << vertices[1].getWorldPos() << vertices[2].getWorldPos() << std::endl;
+    //std::cout << vertices[indices[i]].getFaceNormal(vertices[indices[i + 1]], vertices[indices[i + 2]]) << std::endl;
 }
 
 void RenderObject::addVertex(Vertex const &vert)

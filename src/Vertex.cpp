@@ -25,7 +25,11 @@ void Vertex::transform(Mat4 const &transform)
 Vec4 Vertex::getFaceNormal(Vertex const &b, Vertex const &c) const
 {
     //return b.pos.sub(pos)).cross(c.pos.sub(b.pos));
-    return (b.pos - pos).cross(c.pos - b.pos);
+    return (b.worldPos - worldPos).cross(c.worldPos - b.worldPos);
+}
+
+Vec4 Vertex::getProjNormal(Vertex const &b, Vertex const &c) const {
+    return (b.projPos - projPos).cross(c.projPos - b.projPos);
 }
 
 void Vertex::setPos(Vec4 const &pos)
@@ -61,6 +65,20 @@ Vec4 const &Vertex::getNormal() const
 Vec4 const &Vertex::getColor() const
 {
     return color;
+}
+
+void Vertex::updateWorldPos(Vec4 const &worldPos) {
+    this->worldPos = worldPos;
+}
+void Vertex::updateProjPos(Vec4 const &projPos) {
+    this->projPos = projPos;
+}
+
+Vec4 const &Vertex::getWorldPos() const {
+    return worldPos;
+}
+Vec4 const &Vertex::getProjPos() const {
+    return projPos;
 }
 
 bool Vertex::operator==(const Vertex &other) const

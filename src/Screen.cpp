@@ -127,10 +127,10 @@ void Screen::drawLine(Vec4 const & a, Vec4 const & b, Color color, bool flipped)
     {
         if (!flipped)
             //screen.plot({x, y}, color);
-            pixelAt(x, y) = color;
+            pixelAt(y, x) = color;
         else
             //screen.plot({y, x}, color);
-            pixelAt(y, x) = color;
+            pixelAt(x, y) = color;
 
         if (d > 0)
         {

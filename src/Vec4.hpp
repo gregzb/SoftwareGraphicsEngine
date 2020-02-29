@@ -58,7 +58,7 @@ public:
 
     Color toColor() const;
 
-    Vec4 transform(Mat4 const &transform);
+    Vec4 transform(Mat4 const &transform) const;
 
     Vec4 lerp(Vec4 const &other, double t) const;
 

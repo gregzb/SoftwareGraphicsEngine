@@ -26,4 +26,5 @@ int sign(double x);
 double inverseLerp(double a, double b, double val);
 double lerp(double a, double b, double t);
 double map(double value, double low1, double high1, double low2, double high2);
+double clamp(double value, double min, double max);
 } // namespace Utils

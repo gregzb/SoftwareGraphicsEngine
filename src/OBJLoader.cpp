@@ -272,6 +272,7 @@ OBJLoader::OBJLoader(std::string const &fileName)
                 std::string temp;
                 while (std::getline(vertStream, temp, '/'))
                 {
+                    if (temp != "")
                     indices[counter][i] = std::stoi(temp);
                     counter++;
                 }
