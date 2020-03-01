@@ -91,7 +91,8 @@ double Vec4::getW() const
 
 double Vec4::magnitude() const
 {
-    return std::sqrt(std::pow(x, 2) + std::pow(y, 2) + std::pow(z, 2));
+    //return std::sqrt(std::pow(x, 2) + std::pow(y, 2) + std::pow(z, 2));
+    return std::sqrt(x * x + y * y + z * z);
 }
 
 double Vec4::dot(Vec4 const &other) const
@@ -222,7 +223,7 @@ Vec4 Vec4::transform(Mat4 const &transform) const
 
 Vec4 Vec4::lerp(Vec4 const &other, double t) const
 {
-    return other.sub(*this).scale(t).add(*this);
+    return (other - *this) * t + *this;
 }
 
 Vec4 Vec4::round(double roundFactor) const

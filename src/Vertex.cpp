@@ -74,7 +74,7 @@ Vec4 const &Vertex::getProjPos() const {
 }
 
 Vertex Vertex::lerp(Vertex const & other, double t) const {
-    Vec4 const & pos_ = pos.lerp(other.getPos(), t);
+    Vec4 const & pos_ = getPos().lerp(other.getPos(), t);
     Vec4 const & texCoords_ = getTexCoords().lerp(other.getTexCoords(), t);
     Vec4 const & normal_ = getNormal().lerp(other.getNormal(), t);
     Vec4 const & worldPos_ = getWorldPos().lerp(other.getWorldPos(), t);

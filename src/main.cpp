@@ -23,15 +23,22 @@ int main()
 {
     OBJLoader obj("resources/dragonboi.obj");
     Screen screen(500, 500);
-    Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), 0.001, 1000);
+    Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), .1, 1000);
     Scene mainScene;
     mainScene.addObject("Dragon", obj.toRenderObject("Dragon_Dragon_2"));
     //mainScene.addObject("Dragon", obj.toRenderObject("Suzanne"));
     //mainScene.addObject("Plane", obj.toRenderObject("Plane"));
 
-    mainScene.getObject("Dragon").setPosition({.2, -.75, -3});
-    mainScene.getObject("Dragon").setRotation({10 * M_PI  / 180, 0 * M_PI  / 180, 0});
+    mainScene.getObject("Dragon").setPosition({.4, -.75, -3});
+    //mainScene.getObject("Dragon").setPosition({0, 0, -1.5});
+    mainScene.getObject("Dragon").setRotation({10 * M_PI  / 180, 20 * M_PI  / 180, 0});
     //mainScene.getObject("Plane").setPosition({-5, 4, -10});
+
+    // RenderObject obj1;
+    // //obj1.addTriangle({-.2, -.2, 1}, {1, 0, -3}, {1, 1, -3});
+    // obj1.addTriangle({-2, 0, -3}, {1, 0, -3}, {1, 1, -3});
+
+    // mainScene.addObject("tri", obj1);
 
     mainScene.addLight("Ambient", {LightType::Ambient, {.15, .15, .15}});
     //mainScene.addLight("Point", {LightType::Point, {}, {6, 6, 6}, {6, 6, 6}, {2, 2, -1}});

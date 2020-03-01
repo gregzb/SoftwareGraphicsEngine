@@ -2,6 +2,34 @@
 #include <cmath>
 #include <functional>
 
+void Scene::clipTriangle(std::vector<Vertex> &triangle, int dimension, int side, std::vector<Vertex> &out)
+{
+    for (uint i = 0; i < triangle.size(); i++)
+    {
+        Vec4 const &pos1 = triangle[i].getProjPos();
+        bool inside1 = pos1[dimension] * side <= pos1.getW();
+
+        Vec4 const &pos2 = triangle[(i + 1) % triangle.size()].getProjPos();
+        bool inside2 = pos2[dimension] * side <= pos2.getW();
+
+        if (inside1)
+        {
+            out.push_back(triangle[i]);
+        }
+
+        if (inside1 != inside2)
+        {
+            double t = (pos1.getW() - pos1[dimension] * side) / ((pos2[dimension] * side - pos2.getW()) - (pos1[dimension] * side - pos1.getW()));
+            out.push_back(triangle[i].lerp(triangle[(i + 1) % triangle.size()], t));
+        }
+
+        // if (inside2)
+        // {
+        //     out.push_back(triangle[(i + 1) % triangle.size()]);
+        // }
+    }
+}
+
 void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object)
 {
     Mat4 const &mvMat = cam.getViewMatrix().multiply(object.getModelMatrix());
@@ -22,57 +50,80 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
         vert.updateProjPos(vert.getWorldPos().transform(pMat));
     }
 
-    std::vector<Vertex> clippedVertices;
+    std::vector<Vertex> triangle(3);
+    std::vector<Vertex> clipping1;
+    clipping1.reserve(32);
+    std::vector<Vertex> clipping2;
+    clipping2.reserve(32);
 
     for (uint i = 0; i < indices.size(); i += 3)
     {
         int pointsInside = 0;
         for (int j = 0; j < 3; j++)
         {
-            pointsInside += tris[indices[i+j]].getProjPos().inViewFrustum();
+            pointsInside += tris[indices[i + j]].getProjPos().inViewFrustum();
         }
-    }
 
-    /*
-        clipping goes here!
-        */
-
-    for (auto &vert : tris)
-    {
-
-        vert.updateProjPos(vert.getProjPos().perspectiveDivision());
-    }
-
-    std::vector<Vertex> triangle(3);
-
-    //std::cout << "Rendering" << std::endl;
-
-    for (uint i = 0; i < indices.size(); i += 3)
-    {
-        for (int j = 0; j < 3; j++)
+        switch (pointsInside)
         {
-            triangle[j] = tris[indices[i + j]];
-            //std::cout << triangle[j].getProjPos() << std::endl;
-        }
-        //std::cout << i << std::endl;
+        case 3:
+            for (int j = 0; j < 3; j++)
+            {
+                triangle[j] = tris[indices[i + j]];
+                triangle[j].updateProjPos(triangle[j].getProjPos().perspectiveDivision());
+                triangle[j].updateProjPos({Utils::map(triangle[j].getProjPos().getX(), -1, 1, 0, screen.getWidth()), Utils::map(triangle[j].getProjPos().getY(), -1, 1, 0, screen.getHeight()), triangle[j].getProjPos().getZ(), triangle[j].getProjPos().getW()});
+            }
+            drawTriangle(screen, triangle, object);
+            break;
+        case 2:
+        case 1:
+        case 0:
+        /*
+        Cohen Sutherland(?) - might help speed this up
+        */
+            clipping1.clear();
+            clipping2.clear();
 
-        drawTriangle(screen, triangle, object);
+            for (uint j = 0; j < 3; j++)
+            {
+                clipping1.push_back(tris[indices[i + j]]);
+            }
+
+            for (uint j = 0; j < 3; j++)
+            {
+                clipping2.clear();
+                clipTriangle(clipping1, j, 1, clipping2);
+                clipping1.clear();
+                clipTriangle(clipping2, j, -1, clipping1);
+            }
+
+            for (uint j = 0; j < clipping1.size(); j++)
+            {
+                clipping1[j].updateProjPos(clipping1[j].getProjPos().perspectiveDivision());
+                clipping1[j].updateProjPos({Utils::map(clipping1[j].getProjPos().getX(), -1, 1, 0, screen.getWidth()), Utils::map(clipping1[j].getProjPos().getY(), -1, 1, 0, screen.getHeight()), clipping1[j].getProjPos().getZ(), clipping1[j].getProjPos().getW()});
+            }
+
+            triangle[0] = clipping1[0];
+            for (int j = 1; j < ((int)clipping1.size() - 1); j++)
+            {
+                triangle[1] = clipping1[j];
+                triangle[2] = clipping1[j + 1];
+                drawTriangle(screen, triangle, object);
+            }
+            break;
+        default:
+            break;
+        }
     }
 }
 
-void Scene::drawTriangle(Screen &screen, std::vector<Vertex> &vertices, RenderObject const &object)
+void Scene::drawTriangle(Screen &screen, std::vector<Vertex> vertices, RenderObject const &object)
 {
     Vec4 normal = vertices[0].getProjNormal(vertices[1], vertices[2]);
 
     if (normal.getZ() < std::numeric_limits<double>::epsilon() * 100) //this works in screen space :)
     {
         return;
-    }
-
-    for (int i = 0; i < 3; i++)
-    {
-        //Vec4 const & temp = vertices[i].getProjPos();
-        vertices[i].updateProjPos({Utils::map(vertices[i].getProjPos().getX(), -1, 1, 0, screen.getWidth()), Utils::map(vertices[i].getProjPos().getY(), -1, 1, 0, screen.getHeight()), vertices[i].getProjPos().getZ(), vertices[i].getProjPos().getW()});
     }
 
     fillTriangle(screen, vertices, object);
