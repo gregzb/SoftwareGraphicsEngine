@@ -13,9 +13,9 @@ By: Greg Zborovsky
 * Object-space transformations
 * Perspective Camera
 * Texture Mapping
+* Blinn-Phong Lighting
 
 ## Todo:
-* Lighting
 * MDL?
 * Better animation support
 * Gamma correction
