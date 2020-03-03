@@ -20,6 +20,8 @@ By: Greg Zborovsky
 * Better animation support
 * Gamma correction
 * Better image reading
+* Quaternions
+* Ray tracing
 
 ## Resources:
 * https://www.scratchapixel.com/
