@@ -165,6 +165,15 @@ void RenderObject::addSphere(Vec4 const &v, double r, int thetaSteps, int phiSte
     double thetaStepSize = 2 * M_PI / thetaSteps;
     double phiStepSize = M_PI / phiSteps;
 
+    std::vector<std::vector<Vec4>> dp(phiSteps + 1);
+    for (auto &row : dp)
+    {
+        for (int i = 0; i <= thetaSteps; i++)
+        {
+            row.push_back({0, 0, 0, -1});
+        }
+    }
+
     std::vector<int> offsets{0, 0, 1, 0, 1, 1, 0, 1};
 
     for (int phiStep = 0; phiStep < phiSteps; phiStep++)
@@ -172,17 +181,37 @@ void RenderObject::addSphere(Vec4 const &v, double r, int thetaSteps, int phiSte
         for (int thetaStep = 0; thetaStep < thetaSteps; thetaStep++)
         {
             std::vector<Vec4> points;
+            points.reserve(4);
             for (int i = 0; i < 8; i += 2)
             {
-                double phi = (phiStep + offsets[i]) * phiStepSize;
-                double theta = (thetaStep + offsets[i + 1]) * thetaStepSize;
-                points.push_back({r * std::cos(phi) + v.getX(),
-                                  r * std::sin(phi) * std::cos(theta) + v.getY(),
-                                  r * std::sin(phi) * std::sin(theta) + v.getZ()});
-            }
+                int newPhiStep = phiStep + offsets[i];
+                int newThetaStep = thetaStep + offsets[i + 1];
 
-            addTriangle(points[0], points[1], points[2]);
-            addTriangle(points[0], points[2], points[3]);
+                if (dp[newPhiStep][newThetaStep].getW() == -1)
+                {
+                    double phi = newPhiStep * phiStepSize;
+                    double theta = newThetaStep * thetaStepSize;
+                    Vec4 point = {r * std::cos(phi),
+                                  r * std::sin(phi) * std::cos(theta),
+                                  r * std::sin(phi) * std::sin(theta)};
+                    point.setW(0);
+                    dp[newPhiStep][newThetaStep] = v + point;
+                }
+                points.push_back(dp[newPhiStep][newThetaStep]);
+            }
+            if (phiStep == 0)
+            {
+                addTriangle(points[0], points[1], points[2]);
+            }
+            else if (phiStep == phiSteps - 1)
+            {
+                addTriangle(points[0], points[2], points[3]);
+            }
+            else
+            {
+                addTriangle(points[0], points[1], points[2]);
+                addTriangle(points[0], points[2], points[3]);
+            }
         }
     }
 }
@@ -192,6 +221,15 @@ void RenderObject::addTorus(Vec4 const &v, double r1, double r2, int thetaSteps,
     double thetaStepSize = 2 * M_PI / thetaSteps;
     double phiStepSize = 2 * M_PI / phiSteps;
 
+    std::vector<std::vector<Vec4>> dp(phiSteps + 1);
+    for (auto &row : dp)
+    {
+        for (int i = 0; i <= thetaSteps; i++)
+        {
+            row.push_back({0, 0, 0, -1});
+        }
+    }
+
     std::vector<int> offsets{0, 0, 1, 0, 1, 1, 0, 1};
 
     for (int phiStep = 0; phiStep < phiSteps; phiStep++)
@@ -199,13 +237,23 @@ void RenderObject::addTorus(Vec4 const &v, double r1, double r2, int thetaSteps,
         for (int thetaStep = 0; thetaStep < thetaSteps; thetaStep++)
         {
             std::vector<Vec4> points;
+            points.reserve(4);
             for (int i = 0; i < 8; i += 2)
             {
-                double phi = (phiStep % phiSteps + offsets[i]) * phiStepSize;
-                double theta = (thetaStep + offsets[i + 1]) * thetaStepSize;
-                points.push_back({(r2 + r1 * std::cos(phi)) * std::cos(theta) + v.getX(),
-                                  r1 * std::sin(phi) + v.getY(),
-                                  (r2 + r1 * std::cos(phi)) * std::sin(theta) + v.getZ()});
+                int newPhiStep = phiStep + offsets[i];
+                int newThetaStep = thetaStep + offsets[i + 1];
+
+                if (dp[newPhiStep][newThetaStep].getW() == -1)
+                {
+                    double phi = newPhiStep * phiStepSize;
+                    double theta = newThetaStep * thetaStepSize;
+                    Vec4 point = {(r2 + r1 * std::cos(phi)) * std::cos(theta),
+                                  r1 * std::sin(phi),
+                                  (r2 + r1 * std::cos(phi)) * std::sin(theta)};
+                    point.setW(0);
+                    dp[newPhiStep][newThetaStep] = v + point;
+                }
+                points.push_back(dp[newPhiStep][newThetaStep]);
             }
 
             addTriangle(points[0], points[1], points[2]);
