@@ -13,7 +13,7 @@ By: Greg Zborovsky
 * Object-space transformations
 * Perspective Camera
 * Texture Mapping
-* Blinn-Phong Lighting
+* Blinn-Phong Lighting, Phong Shading
 
 ## Todo:
 * MDL?
@@ -22,6 +22,7 @@ By: Greg Zborovsky
 * Better image reading
 * Quaternions
 * Ray tracing
+* Shadow Mapping
 
 ## Resources:
 * https://www.scratchapixel.com/
