@@ -2,20 +2,15 @@
 
 #include <vector>
 #include <string>
+#include "Material.hpp"
 #include "PixelGrid.hpp"
 #include "Vec4.hpp"
 
-struct OBJMaterial {
-    Vec4 Ka, Kd, Ks, Ke;
-    double Ns, Ni, opaqueness;
-    int illum;
-    PixelGrid<Color> mapKd;
-    std::string name;
-};
-
 struct OBJObject {
     std::vector<std::vector<int>> vertexIndices, vertexTexIndices, vertexNormalIndices;
-    OBJMaterial * mat;
+    std::vector<Material*> triMats;
+    
+    //std::map<std::string, 
     bool smoothShading;
     std::string name;
 };

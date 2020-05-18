@@ -53,14 +53,21 @@ Vec4 const &RenderObject::getScale() const
     return scale;
 }
 
-void RenderObject::setMaterial(OBJMaterial *mat)
-{
-    this->mat = mat;
+Material const * RenderObject::getMat(unsigned int i) const{
+    return triMats[i];
 }
-OBJMaterial const *RenderObject::getMaterial() const
-{
-    return mat;
-}
+
+// void RenderObject::setMaterial(Material *mat_)
+// {
+//     mat = *mat_;
+// }
+// bool RenderObject::hasMaterial() const {
+//     return mat.has_value();
+// }
+// Material const *RenderObject::getMaterial() const
+// {
+//     return &mat.value();
+// }
 
 void RenderObject::generateVertexNormals()
 {
@@ -90,12 +97,24 @@ void RenderObject::generateVertexNormals()
 void RenderObject::addVertex(Vertex const &vert)
 {
     //vert.pos = vert.pos.round(100000000.0);
-    if (vertex_mappings.count(vert) == 0)
-    {
-        vertex_mappings.insert({vert, vertices.size()});
-        vertices.push_back(vert);
-    }
-    indices.push_back(vertex_mappings.at(vert));
+
+    // if (vertex_mappings.count(vert) == 0)
+    // {
+    //     vertex_mappings.insert({vert, vertices.size()});
+    //     vertices.push_back(vert);
+    // }
+    // indices.push_back(vertex_mappings.at(vert));
+
+    //vertex_mappings.insert({vert, vertices.size()});
+    vertices.push_back(vert);
+    indices.push_back(vertices.size()-1);
+
+
+}
+
+void RenderObject::addMatTri(Material * mat)
+{
+    triMats.push_back(mat);
 }
 
 void RenderObject::addPoint(Vec4 const &v)

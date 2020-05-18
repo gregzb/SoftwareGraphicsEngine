@@ -82,6 +82,8 @@ Vertex Vertex::lerp(Vertex const & other, double t) const {
     return {pos_, texCoords_, normal_, worldPos_, projPos_};
 }
 
+// NORMAL CANNOT BE HASHED!
+
 bool Vertex::operator==(const Vertex &other) const
 {
     return pos == other.pos && texCoords == other.texCoords && normal == other.normal;

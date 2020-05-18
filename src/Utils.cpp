@@ -35,3 +35,7 @@ double Utils::map(double value, double low1, double high1, double low2, double h
 double Utils::clamp(double value, double min, double max) {
     return std::min(std::max(value, min), max);
 }
+
+int Utils::clamp(int value, int min, int max) {
+    return std::min(std::max(value, min), max);
+}

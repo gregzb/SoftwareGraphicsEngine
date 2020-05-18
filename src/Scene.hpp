@@ -16,8 +16,8 @@ private:
     std::unordered_map<std::string, Light> transformedLights;
 
     void renderObject(Camera const &cam, Screen &screen, RenderObject &object);
-    void drawTriangle(Screen &screen, std::vector<Vertex> vertices, RenderObject const &object);
-    void fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObject const &object);
+    void drawTriangle(Screen &screen, std::vector<Vertex> vertices, RenderObject const &object, Material const * mat);
+    void fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObject const &object, Material const * mat);
     void clipTriangle(std::vector<Vertex> & triangle, int dimension, int side, std::vector<Vertex> & out);
 
 public:

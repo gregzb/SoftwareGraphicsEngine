@@ -4,8 +4,10 @@
 #include "Vertex.hpp"
 #include "PixelGrid.hpp"
 #include "OBJStructs.hpp"
+#include "Material.hpp"
 #include <vector>
 #include <unordered_map>
+#include <map>
 
 class RenderObject
 {
@@ -13,10 +15,11 @@ private:
     //Mat4 mesh; //object space verts
     std::vector<Vertex> vertices;
     std::vector<int> indices;
+    std::vector<Material*> triMats;
 
     std::unordered_map<Vertex, int> vertex_mappings;
 
-    OBJMaterial *mat;
+    //std::optional<Material> mat;
 
     Vec4 position, rotation, scale;
 
@@ -33,12 +36,17 @@ public:
     Vec4 const &getRotation() const;
     Vec4 const &getScale() const;
 
-    void setMaterial(OBJMaterial *mat);
-    OBJMaterial const *getMaterial() const;
+    //make const
+    Material const * getMat(unsigned int i) const;
+
+    // void setMaterial(Material *mat_);
+    // bool hasMaterial() const;
+    // Material const *getMaterial() const;
 
     void generateVertexNormals();
 
     void addVertex(Vertex const &vert);
+    void addMatTri(Material * mat);
 
     void addPoint(Vec4 const &v);
     void addEdge(Vec4 const &v0, Vec4 const &v1);

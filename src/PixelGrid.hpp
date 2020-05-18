@@ -4,10 +4,14 @@
 #include <string>
 
 #include "Utils.hpp"
+#include "Vec4.hpp"
 
 template <class T>
 class PixelGrid
 {
+// private:
+//     void drawLine(Vec4 const &a, Vec4 const &b, T color, bool flipped);
+
 protected:
     int width;
     int height;
@@ -26,4 +30,6 @@ public:
     void display() const;
 
     static PixelGrid<Color> loadTexture(std::string texName);
+
+    //void drawLine(Vec4 const &a, Vec4 const &b, T color);
 };

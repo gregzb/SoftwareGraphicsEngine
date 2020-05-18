@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <type_traits>
+#include <cmath>
 
 template <class T>
 T &PixelGrid<T>::operator()(int row, int col)
@@ -113,6 +114,8 @@ PixelGrid<Color> PixelGrid<Color>::loadTexture(std::string texName)
     int width, height, maxColor;
     texFile >> width >> height >> maxColor;
 
+    std::cout << texName << ": " << width << " " << height << " " << maxColor << std::endl;
+
     PixelGrid<Color> tempScreen(width, height);
 
     int counter = 0;
@@ -150,6 +153,56 @@ PixelGrid<Color> PixelGrid<Color>::loadTexture(std::string texName)
 
     return tempScreen;
 }
+
+// template <class T>
+// void PixelGrid<T>::drawLine(Vec4 const & a, Vec4 const & b, T color)
+// {
+//     drawLine(a, b, color, false);
+// }
+
+// template <class T>
+// void PixelGrid<T>::drawLine(Vec4 const & a, Vec4 const & b, T color, bool flipped)
+// {
+//     if (b.getX() < a.getX())
+//     {
+//         return drawLine(b, a, color, flipped);
+//     }
+
+//     long x0r = std::lround(a.getX()), x1r = std::lround(b.getX()), y0r = std::lround(a.getY()), y1r = std::lround(b.getY());
+
+//     long dY = y1r - y0r, dX = x1r - x0r;
+
+//     if (std::abs(dY) > dX)
+//     {
+//         return drawLine({a.getY(), a.getX()}, {b.getY(), b.getX()}, color, !flipped);
+//     }
+
+//     int dir = Utils::sign(dY);
+
+//     dY = std::abs(dY) * 2;
+
+//     int d = dY - dX;
+
+//     dX *= 2;
+
+//     int y = y0r;
+//     for (int x = x0r; x <= x1r; x++)
+//     {
+//         if (!flipped)
+//             //screen.plot({x, y}, color);
+//             pixelAt(y, x) = color;
+//         else
+//             //screen.plot({y, x}, color);
+//             pixelAt(x, y) = color;
+
+//         if (d > 0)
+//         {
+//             y += dir;
+//             d -= dX;
+//         }
+//         d += dY;
+//     }
+// }
 
 template class PixelGrid<Color>;
 template class PixelGrid<double>;
