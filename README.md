@@ -1,6 +1,14 @@
 # Software Graphics Engine
 By: Greg Zborovsky
 
+## Greg Zborovsky pd. 4
+### Features I want to implement for final project:
+* Correct/ensure that texture loading works fine
+* Support multiple texture coordinates per vertex
+* Bilinear filtering during texture read
+* Normal mapping
+* Orthographic Camera
+
 ## Features:
 * Render to ppm/ImageMagick/png
 * Basic 3d command input
@@ -19,7 +27,6 @@ By: Greg Zborovsky
 * MDL?
 * Better animation support
 * Gamma correction
-* Better image reading
 * Quaternions
 * Ray tracing
 * Shadow Mapping
