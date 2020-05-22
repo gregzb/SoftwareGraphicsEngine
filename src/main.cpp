@@ -27,7 +27,8 @@ int main()
     //OBJLoader obj("resources/smalltex.obj");
     //std::cout << "here1" << std::endl;
     Screen screen(500, 500);
-    Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), .1, 1000);
+    //Camera cam(170, static_cast<double>(screen.getWidth()) / screen.getHeight(), .1, 1000, false);
+    Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), .1, 1000, true);
     Scene mainScene;
 
     RenderObject r = obj.toRenderObject("zAset_rock_assembly_M_thkqfbjda_LOD0_Aset_rock_assembly_M_thkqfbjda_LOD0");

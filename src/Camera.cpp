@@ -1,7 +1,7 @@
 #include <cmath>
 #include "Camera.hpp"
 
-Camera::Camera(double fov, double aspectRatio, double near, double far) : fov(fov * M_PI / 180), aspectRatio(aspectRatio), near(near), far(far)
+Camera::Camera(double fov, double aspectRatio, double near, double far, bool perspective_) : fov(fov * M_PI / 180), aspectRatio(aspectRatio), near(near), far(far), perspective(perspective_)
 {
 }
 
@@ -35,14 +35,8 @@ Mat4 Camera::getViewMatrix() const
     return view;
 }
 
-Mat4 Camera::getProjectionMatrix() const
+Mat4 Camera::getPerspectiveProjectionMatrix() const
 {
-    // Mat4 temp = {{
-    //     {1/std::atan(fov/2), 0, 0, 0},
-    //     {0, 1/std::atan(fov*aspectRatio/2), 0, 0},
-    //     {0, 0, -(far+near)/(far-near), -(2 * far * near)/(far-near)},
-    //     {0, 0, -1, 0}
-    // }};
     double q = 1 / std::tan(fov / 2);
     double a = q / aspectRatio;
     double b = (far + near) / (far - near);
@@ -52,4 +46,22 @@ Mat4 Camera::getProjectionMatrix() const
                   {0, 0, -b, -c},
                   {0, 0, -1, 0}}};
     return temp;
+}
+
+Mat4 Camera::getOrthographicProjectionMatrix() const
+{
+    double q = std::tan(fov / 2);
+    double t = q * near;
+    double r = t * aspectRatio;
+    double b = -2 / (far - near);
+    double c = -(near + far) / (far - near);
+    Mat4 temp = {{{1/r, 0, 0, 0},
+                  {0, 1/t, 0, 0},
+                  {0, 0, b, c},
+                  {0, 0, 0, 1}}};
+    return temp;
+}
+
+bool Camera::isPerspective() const {
+    return perspective;
 }

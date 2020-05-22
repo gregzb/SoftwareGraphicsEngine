@@ -33,7 +33,7 @@ void Scene::clipTriangle(std::vector<Vertex> &triangle, int dimension, int side,
 void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object)
 {
     Mat4 const &mvMat = cam.getViewMatrix().multiply(object.getModelMatrix());
-    Mat4 const &pMat = cam.getProjectionMatrix();
+    Mat4 const &pMat = cam.isPerspective() ? cam.getPerspectiveProjectionMatrix() : cam.getOrthographicProjectionMatrix();
 
     std::vector<Vertex> &tris = object.getMesh(); // need to not make copy or smthing?
     std::vector<int> const &indices = object.getMeshIndices();
@@ -303,6 +303,8 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
                     Vec4 Kd = mat->getDiffuse(texAdjust);
                     Vec4 Ks = mat->getSpecular(texAdjust);
                     double Ns = mat->getShininess(texAdjust);
+
+                    Ks = {};
 
                     Vec4 illum;
 
