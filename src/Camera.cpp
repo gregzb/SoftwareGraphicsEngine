@@ -26,11 +26,24 @@ Vec4 const &Camera::getRotation() const
 Mat4 Camera::getViewMatrix() const
 {
     Mat4 const &translateMat = Mat4::translate(position.negate());
+    // Mat4 const &rotXMat = Mat4::rotX(-rotation.getX());
+    // Mat4 const &rotYMat = Mat4::rotX(-rotation.getY());
+    // Mat4 const &rotZMat = Mat4::rotX(-rotation.getZ());
+
+    // Mat4 const &view = translateMat.multiply(rotXMat).multiply(rotYMat).multiply(rotZMat);
+
+    Mat4 const &view = translateMat.multiply(getRotationMatrix());
+
+    return view;
+}
+
+Mat4 Camera::getRotationMatrix() const
+{
     Mat4 const &rotXMat = Mat4::rotX(-rotation.getX());
     Mat4 const &rotYMat = Mat4::rotX(-rotation.getY());
     Mat4 const &rotZMat = Mat4::rotX(-rotation.getZ());
 
-    Mat4 const &view = translateMat.multiply(rotXMat).multiply(rotYMat).multiply(rotZMat);
+    Mat4 const &view = rotXMat.multiply(rotYMat).multiply(rotZMat);
 
     return view;
 }

@@ -19,6 +19,7 @@ public:
     Vec4 const &getRotation() const;
 
     Mat4 getViewMatrix() const;
+    Mat4 getRotationMatrix() const;
     Mat4 getPerspectiveProjectionMatrix() const;
     Mat4 getOrthographicProjectionMatrix() const;
 

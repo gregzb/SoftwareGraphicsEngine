@@ -122,7 +122,6 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
 void Scene::drawTriangle(Screen &screen, std::vector<Vertex> vertices, RenderObject const &object, Material const *mat)
 {
     Vec4 normal = vertices[0].getProjNormal(vertices[1], vertices[2]);
-
     if (normal.getZ() < std::numeric_limits<double>::epsilon() * 100) //this works in screen space :)
     {
         return;
