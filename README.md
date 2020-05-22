@@ -14,6 +14,8 @@ By: Greg Zborovsky
 * Cube Map
   * Essentially a regular cube, but normals are inverted and texture is available on the inside.
   * (Maybe allow using normals from OBJ file?)
+* Gamma correction
+ * Gamma correct all values related to user input and light except for non color data. (To power of 1/2.2, and to power of 2.2 at end)
 
 ### Features I might want to add for final project:
 * MDL Support
@@ -22,7 +24,6 @@ By: Greg Zborovsky
   * Every object's/camera's/light's position/rotation/scale should be animatable, maybe special animatable features for each object type
   * Multiple interpolation types - linear, quadratic, cubic, etc
 * Quaternion-based rotation
-* Gamma correction
 
 ## Features:
 * Render to ppm/ImageMagick/png
