@@ -4,13 +4,13 @@ By: Greg Zborovsky
 ## Greg Zborovsky pd. 4
 ### Features I want to implement for final project:
 * Finish texture loading/OBJ Loading
-  * Correct/ensure that texture loading works fine
+  * Correct/ensure that texture loading works fine - Done
   * Support multiple texture coordinates per vertex
-  * Bilinear filtering during texture read
+  * Bilinear filtering during texture read  - Done
   * Support quadrilaterals and other convex shapes in OBJ loading
 * Normal mapping
   * Will combine texture mapping and normals to alter light calculations as if triangle wasn't perfectly flat
-* Orthographic Camera
+* Orthographic Camera - Done
 * Cube Map
   * Essentially a regular cube, but normals are inverted and texture is available on the inside.
   * (Maybe allow using normals from OBJ file?)
