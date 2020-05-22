@@ -98,16 +98,18 @@ void RenderObject::addVertex(Vertex const &vert)
 {
     //vert.pos = vert.pos.round(100000000.0);
 
-    // if (vertex_mappings.count(vert) == 0)
-    // {
-    //     vertex_mappings.insert({vert, vertices.size()});
-    //     vertices.push_back(vert);
-    // }
-    // indices.push_back(vertex_mappings.at(vert));
+    if (vertex_mappings.count(vert) == 0)
+    {
+        vertex_mappings.insert({vert, vertices.size()});
+        vertices.push_back(vert);
+    }
+    indices.push_back(vertex_mappings.at(vert));
 
-    //vertex_mappings.insert({vert, vertices.size()});
-    vertices.push_back(vert);
-    indices.push_back(vertices.size()-1);
+    // vertex_mappings.insert({vert, vertices.size()});
+
+    
+    // vertices.push_back(vert);
+    // indices.push_back(vertices.size()-1);
 
 
 }
@@ -221,15 +223,19 @@ void RenderObject::addSphere(Vec4 const &v, double r, int thetaSteps, int phiSte
             if (phiStep == 0)
             {
                 addTriangle(points[0], points[1], points[2]);
+                triMats.push_back(&Material::defaultMaterial);
             }
             else if (phiStep == phiSteps - 1)
             {
                 addTriangle(points[0], points[2], points[3]);
+                triMats.push_back(&Material::defaultMaterial);
             }
             else
             {
                 addTriangle(points[0], points[1], points[2]);
+                triMats.push_back(&Material::defaultMaterial);
                 addTriangle(points[0], points[2], points[3]);
+                triMats.push_back(&Material::defaultMaterial);
             }
         }
     }

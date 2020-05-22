@@ -24,10 +24,13 @@ public:
     T &pixelAt(int row, int col);
     T &pixelAt(int idx);
     T const &read(int row, int col) const;
+    T const &rawRead(Vec4 const & pos) const;
+    Vec4 linRead(Vec4 const & pos) const;
     int getHeight() const;
     int getWidth() const;
 
     void display() const;
+    void toFileExtension(std::string fileName);
 
     static PixelGrid<Color> loadTexture(std::string texName);
 

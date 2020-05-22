@@ -7,6 +7,8 @@
 #include <string>
 #include <type_traits>
 #include <cmath>
+#include <cassert>
+#include <limits>
 
 template <class T>
 T &PixelGrid<T>::operator()(int row, int col)
@@ -37,13 +39,61 @@ T &PixelGrid<T>::pixelAt(int idx)
 }
 
 template <class T>
-T const &PixelGrid<T>::read(int row, int col) const {
+T const &PixelGrid<T>::read(int row, int col) const
+{
     if (row >= height || row < 0 || col >= width || col < 0)
     {
         //std::cout << "out: " << row << " " << col << std::endl;
         return pixelData[height * width];
     }
     return pixelData[row * width + col];
+}
+
+template <class T>
+T const &PixelGrid<T>::rawRead(Vec4 const & pos) const {
+    assert(pos[0] >= 0 && pos[0] < getWidth() && pos[1] >= 0 && pos[1] < getHeight());
+    double y = pos[1] * getHeight();
+    while (y >= getHeight()) y -= std::numeric_limits<double>::epsilon() * 10;
+    double x = pos[0] * getWidth();
+    while (x >= getWidth()) x -= std::numeric_limits<double>::epsilon() * 10;
+    return read(y, x);
+}
+
+template <>
+Vec4 PixelGrid<Color>::linRead(Vec4 const &pos) const
+{
+    assert(pos[0] >= 0 && pos[0] < getWidth() && pos[1] >= 0 && pos[1] < getHeight());
+    double y = pos[1] * getHeight();
+    while (y >= getHeight()) y -= std::numeric_limits<double>::epsilon() * 10;
+    double x = pos[0] * getWidth();
+    while (x >= getWidth()) x -= std::numeric_limits<double>::epsilon() * 10;
+    y-=0.5;
+    x-=0.5;
+
+    int r0 = std::floor(y);
+    if (r0 < 0) r0 = getHeight();
+    if (r0 >= getHeight()) r0 = 0;
+    int c0 = std::floor(x);
+    if (c0 < 0) c0 = getWidth();
+    if (c0 >= getHeight()) c0 = 0;
+
+    int r1 = std::ceil(y);
+    if (r1 < 0) r1 = getHeight();
+    if (r1 >= getHeight()) r1 = 0;
+    int c1 = std::ceil(x);
+    if (c1 < 0) c1 = getWidth();
+    if (c1 >= getHeight()) c1 = 0;
+
+    Vec4 v00 = read(r0, c0);
+    Vec4 v10 = read(r1, c0);
+    Vec4 v01 = read(r0, c1);
+    Vec4 v11 = read(r1, c1);
+
+    Vec4 vb = v00 * (1 - (x - c0)) + v01 * (x - c0);
+    Vec4 vt = v10 * (1 - (x - c0)) + v11 * (x - c0);
+
+    Vec4 final = vb * (1 - (y - r0)) + vt * (y - r0);
+    return final;
 }
 
 template <class T>
@@ -97,6 +147,27 @@ void PixelGrid<Color>::display() const
     //     }
     //     fprintf(f, "\n");
     // }
+    pclose(f);
+}
+
+template <>
+void PixelGrid<Color>::toFileExtension(std::string fileName)
+{
+    std::string command = "convert - ";
+    command.append(fileName);
+
+    FILE *f = popen(command.c_str(), "w");
+    fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
+    for (int y = height - 1; y >= 0; y--)
+    //for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            Color color = pixelAt(y, x);
+            fprintf(f, "%d %d %d ", color.r, color.g, color.b);
+        }
+        fprintf(f, "\n");
+    }
     pclose(f);
 }
 

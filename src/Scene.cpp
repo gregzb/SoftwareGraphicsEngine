@@ -156,6 +156,8 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
     if (verts[0].getProjPos().getY() > verts[1].getProjPos().getY())
         std::swap(verts[0], verts[1]);
 
+    //std::cout << verts[0].getTexCoords() << " " << verts[1].getTexCoords() << " " << verts[2].getTexCoords() << std::endl;
+
     Vec4 const &vert20 = verts[2].getProjPos() - verts[0].getProjPos();
     Vec4 const &vert10 = verts[1].getProjPos() - verts[0].getProjPos();
     Vec4 const &vert21 = verts[2].getProjPos() - verts[1].getProjPos();
@@ -275,7 +277,7 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
                     Vec4 pos = posX * regZ;
 
                     Vec4 normal = (normX * regZ).normalize();
-                    normal = NO.normalize();
+                    //normal = NO.normalize();
 
                     Vec4 texAdjust = texX * regZ;
 
@@ -315,16 +317,25 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
                         {
                             Vec4 const &L = light.pos.negate().normalize();
                             Vec4 const &V = pos.negate().normalize();
-                            Vec4 const &H = (L + V).normalize();
+                            Vec4 const &H = (L).normalize();
                             double NL = normal.dot(L);
                             int B = NL > 0 ? 1 : 0;
                             Vec4 const &diffuse = Kd * light.Id * B * (NL);
                             //Vec4 diffuse = {};
-                            Vec4 const &specular = Ks * light.Is * B * std::pow(normal.dot(H), Ns);
+                            //std::cout << B * normal.dot(H) << std::endl;
+                            //double v = std::pow(normal.dot(H), 20);
+                            //Vec4 const &specular = {v, v, v};
+                            Vec4 const &specular = Ks * light.Is * B * std::pow(B * normal.dot(H), Ns);
+                            //Vec4 const & specular = {};
                             //Vec4 specular = {};
                             //std::cout << Kd << " " << light.Id << " " << NL << " " << diffuse << " " << specular << std::endl;
+                            // Vec4 combo = diffuse + specular;
+                            // if (combo[0] < 0 || combo[1] < 0 || combo[2] < 0) {
+                            //     std::cout << "hmm" << std::endl;
+                            // }
+                            //std::cout << normal.dot(H) << " " << Ns << std::endl;
                             illum = illum + diffuse + specular;
-                            //illum = illum + Kd * light.Id * B;
+                            //illum = illum + diffuse;
                         }
                         else if (light.type == LightType::Point)
                         {
@@ -343,6 +354,15 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
 
                     // if (illum[0] <= 0 && illum[1] <= 0 && illum[2] <= 0)
                     // std::cout << illum << " " << Ks << " " << texAdjust << std::endl;
+
+                    illum.set(0, Utils::clamp(illum[0], 0.0, 1.0));
+                    illum.set(1, Utils::clamp(illum[1], 0.0, 1.0));
+                    illum.set(2, Utils::clamp(illum[2], 0.0, 1.0));
+
+                    //gamma correct right here by raising to 1/2.2 power
+                    illum.set(0, std::pow(illum[0], 2.2));
+                    illum.set(1, std::pow(illum[1], 2.2));
+                    illum.set(2, std::pow(illum[2], 2.2));
 
                     illum.set(0, Utils::clamp(illum[0], 0.0, 1.0));
                     illum.set(1, Utils::clamp(illum[1], 0.0, 1.0));

@@ -7,13 +7,17 @@
 # include "Utils.hpp"
 
 class Material {
-    public:
+    //public:
     Vec4 ka, kd, ks, ke;
     double ns;
     std::optional<PixelGrid<Color>> bumpMap, kdMap, ksMap, keMap, nsMap;
     std::string name;
 
     public:
+
+    static TextureFiltering TexFiltering;
+
+    static Material defaultMaterial;
 
     static std::map<std::string, Material> materials;
 

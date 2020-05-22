@@ -7,6 +7,10 @@ enum class CurveType
     Bezier
 };
 
+enum class TextureFiltering {
+    CLOSEST, BILINEAR
+};
+
 struct Color
 {
 public:
