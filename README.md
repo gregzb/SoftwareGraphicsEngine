@@ -5,7 +5,7 @@ By: Greg Zborovsky
 ### Features I want to implement for final project:
 * Finish texture loading/OBJ Loading
   * Correct/ensure that texture loading works fine - Done
-  * Support multiple texture coordinates per vertex
+  * Support multiple texture coordinates per vertex - Done
   * Bilinear filtering during texture read  - Done
   * Support quadrilaterals and other convex shapes in OBJ loading
 * Normal mapping

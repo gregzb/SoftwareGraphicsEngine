@@ -95,31 +95,31 @@ void OBJLoader::parseMTL(std::string base, std::string mtlFileName)
         {
             std::string texName;
             iss >> texName;
-            currentMaterial->addDiffuseMap(base+"/"+texName);
+            currentMaterial->addDiffuseMap(base + "/" + texName);
         }
         else if (infoType == "map_Bump")
         {
             std::string texName;
             iss >> texName;
-            currentMaterial->addBumpMap(base+"/"+texName);
+            currentMaterial->addBumpMap(base + "/" + texName);
         }
         else if (infoType == "map_Ks")
         {
             std::string texName;
             iss >> texName;
-            currentMaterial->addSpecularMap(base+"/"+texName);
+            currentMaterial->addSpecularMap(base + "/" + texName);
         }
         else if (infoType == "map_Ns")
         {
             std::string texName;
             iss >> texName;
-            currentMaterial->addShininessMap(base+"/"+texName);
+            currentMaterial->addShininessMap(base + "/" + texName);
         }
         else if (infoType == "map_Ke")
         {
             std::string texName;
             iss >> texName;
-            currentMaterial->addEmissiveMap(base+"/"+texName);
+            currentMaterial->addEmissiveMap(base + "/" + texName);
         }
     }
     mtlFile.close();
@@ -200,6 +200,9 @@ OBJLoader::OBJLoader(std::string const &fileName)
                 }
             }
 
+            // std::cout << indices[0][0] << " " << indices[1][0] << " " << indices[2][0] << std::endl;
+            // exit(1);
+
             currentObject->vertexIndices.push_back(indices[0]);
             currentObject->vertexTexIndices.push_back(indices[1]);
             currentObject->vertexNormalIndices.push_back(indices[2]);
@@ -224,41 +227,95 @@ OBJLoader::OBJLoader(std::string const &fileName)
 
 RenderObject OBJLoader::toRenderObject(std::string name) const
 {
+
     RenderObject temp;
-    std::unordered_set<int> inserted;
-    // std::cout << objects.size() << std::endl;
-    // for (auto thing : objects) {
-    //     std::cout << thing.first << std::endl;
-    // }
+    std::unordered_map<int, int> vertMap;
+    vertMap.insert({-2, -1});
+    std::unordered_map<int, int> texMap;
+    texMap.insert({-2, -1});
+    std::unordered_map<int, int> normMap;
+    normMap.insert({-2, -1});
 
+    if (objects.count(name) == 0)
+    {
+        std::cout << "Could not find object: " << name << " in an OBJ file." << std::endl;
+        exit(1);
+    }
+    
+    // std::cout << objects.count(name) << std::endl;
     OBJObject const &obj = objects.at(name);
-    // for (auto const & face : obj.getVertexIndices()) {
-    //     for (auto const & vertex : face) {
-    //         auto pos = v[vertex-1];
-    //         auto tex = vt[vertex-1];
 
-    //         temp.addVertex({pos, tex});
-    //     }
-    // }
-    // std::cout << obj.getVertexIndices().size() << std::endl;
-    // std::cout << obj.getVertexTexIndices().size() << std::endl;
     for (uint i = 0; i < obj.vertexIndices.size(); i++)
     {
         assert(obj.vertexIndices[i].size() == 3);
+
+        //loop through indices, see which indices get used, store in set
+
         for (uint j = 0; j < obj.vertexIndices[i].size(); j++)
         {
-            //std::cout << obj.vertexIndices[i][j] << " " << obj.vertexTexIndices[i][j] << std::endl;
-            //std::cout << v[obj.vertexIndices[i][j] - 1] << " " << vt[obj.vertexTexIndices[i][j] - 1] << std::endl;
-            auto pos = v[obj.vertexIndices[i][j] - 1];
-            auto tex = vt[obj.vertexTexIndices[i][j] - 1];
-            //std::cout << pos << tex << std::endl;
+            // std::cout << i << " " << j << std::endl;
+            int vertIdx = obj.vertexIndices[i][j] - 1;
+            int texIdx = obj.vertexTexIndices[i][j] - 1;
+            int normIdx = obj.vertexNormalIndices[i][j] - 1;
+            // std::cout << "hi !" << std::endl;
 
-            //std::cout << obj.getVertexIndices()[i][j]-1 << " " << obj.getVertexTexIndices()[i][j]-1 << std::endl;
+            // std::cout << obj.vertexIndices.size() << " " << obj.vertexIndices.size() << " " << obj.vertexNormalIndices.size() << std::endl;
+            // std::cout << vertIdx << " " << texIdx << " " << normIdx << std::endl;
 
-            temp.addVertex({pos, tex});
+            if (vertMap.count(vertIdx) == 0) {
+                vertMap.insert({vertIdx, temp.getMesh().size()});
+                temp.addVertexPos(v[vertIdx]);
+            }
+            if (texMap.count(texIdx) == 0) {
+                texMap.insert({texIdx, temp.getTexCoords().size()});
+                temp.addTextureCoord(vt[texIdx]);
+            }
+            if (normMap.count(normIdx) == 0) {
+                normMap.insert({normIdx, temp.getNormals().size()});
+                temp.addNormal(vn[normIdx]);
+            }
+            // std::cout << "bye! " << std::endl;
+            temp.addIndex({vertMap[vertIdx], texMap[texIdx], normMap[normIdx]});
         }
-        temp.addMatTri(obj.triMats[i]);
+
+        temp.addMaterial(obj.triMats[i]);
     }
+
+    // RenderObject temp;
+    // std::unordered_set<int> inserted;
+    // // std::cout << objects.size() << std::endl;
+    // // for (auto thing : objects) {
+    // //     std::cout << thing.first << std::endl;
+    // // }
+
+    // OBJObject const &obj = objects.at(name);
+    // // for (auto const & face : obj.getVertexIndices()) {
+    // //     for (auto const & vertex : face) {
+    // //         auto pos = v[vertex-1];
+    // //         auto tex = vt[vertex-1];
+
+    // //         temp.addVertex({pos, tex});
+    // //     }
+    // // }
+    // // std::cout << obj.getVertexIndices().size() << std::endl;
+    // // std::cout << obj.getVertexTexIndices().size() << std::endl;
+    // for (uint i = 0; i < obj.vertexIndices.size(); i++)
+    // {
+    //     assert(obj.vertexIndices[i].size() == 3);
+    //     for (uint j = 0; j < obj.vertexIndices[i].size(); j++)
+    //     {
+    //         //std::cout << obj.vertexIndices[i][j] << " " << obj.vertexTexIndices[i][j] << std::endl;
+    //         //std::cout << v[obj.vertexIndices[i][j] - 1] << " " << vt[obj.vertexTexIndices[i][j] - 1] << std::endl;
+    //         auto pos = v[obj.vertexIndices[i][j] - 1];
+    //         auto tex = vt[obj.vertexTexIndices[i][j] - 1];
+    //         //std::cout << pos << tex << std::endl;
+
+    //         //std::cout << obj.getVertexIndices()[i][j]-1 << " " << obj.getVertexTexIndices()[i][j]-1 << std::endl;
+
+    //         temp.addVertex({pos, tex});
+    //     }
+    //     temp.addMatTri(obj.triMats[i]);
+    // }
     //temp.setMaterial(obj.);
     //temp.setMaterial(obj.mat);
     //temp.setTexture(obj.mat->mapKd);

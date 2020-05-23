@@ -21,9 +21,33 @@
 
 int main()
 {
-    //OBJLoader obj("resources/dragonboi.obj");
-    //std::cout << "here0" << std::endl;
+    // Screen screen(500, 500);
+    // Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), .1, 1000, true);
+    // Scene mainScene;
+    // mainScene.addLight("Ambient", {LightType::Ambient, {1, 1, 1}});
+    // RenderObject r(false);
+    // //r.addTriangle({0, 0, 0}, {1, 0, 0}, {0, 1, 0});
+    // //r.addSphere({0, 0, 0}, 1, 12, 6);
+    // r.addBox({0, 0, 0}, {1, 1, 1});
+    // mainScene.addObject("Tri", r);
+    // mainScene.getObject("Tri").setPosition({0, -0.5, -2});
+    // //mainScene.getObject("Tri").setRotation({0, 0, 30 * M_PI / 180});
+    // mainScene.renderToScreen(cam, screen);
+    // screen.display();
+
+    // Mat4 mat({{-0.866, 0.0000, -0.500, 0.0000},
+    //           {-0.211, 0.9063, 0.3659, -0.300},
+    //           {0.4531, 0.4226, -0.784, -2.200},
+    //           {0.0000, 0.0000, 0.0000, 1.0000}});
+    // std::cout << mat.toString() << std::endl << std::endl;
+    // std::cout << mat.invert().toString() << std::endl;
+
+    // OBJLoader obj("resources/dragonboi.obj");
+    // std::cout << "here0" << std::endl;
     OBJLoader obj("resources/onetest.obj");
+    //OBJLoader obj("resources/twotest.obj");
+    // OBJLoader obj("resources/sword.obj");
+    // std::cout << "g" << std::endl;
     //OBJLoader obj("resources/smalltex.obj");
     //std::cout << "here1" << std::endl;
     Screen screen(500, 500);
@@ -32,50 +56,43 @@ int main()
     Scene mainScene;
 
     RenderObject r = obj.toRenderObject("zAset_rock_assembly_M_thkqfbjda_LOD0_Aset_rock_assembly_M_thkqfbjda_LOD0");
-    //RenderObject r;
-    //r.addSphere({}, 1, 30, 15);
+    // std::cout << "zx" << std::endl;
+    // RenderObject r = obj.toRenderObject("sword_Plane");
+    // std::cout << "e " << std::endl;
+    // RenderObject r(false);
+    // r.addSphere({}, 1, 30, 15);
     mainScene.addObject("Sphere", r);
-    mainScene.getObject("Sphere").setPosition({0, -.3, -2.8});
+    mainScene.getObject("Sphere").setPosition({0, -.3, -2.4});
     mainScene.getObject("Sphere").setRotation({25 * M_PI / 180, 10 * M_PI / 180, 0});
-    //mainScene.getObject("Sphere").setRotation({10 * M_PI  / 180, 20 * M_PI  / 180, 0});
-
-    //std::cout << "here!" << std::endl;
-    //std::cout << "here2" << std::endl;
-    // RenderObject r = obj.toRenderObject("zAset_rock_assembly_M_thkqfbjda_LOD0_Aset_rock_assembly_M_thkqfbjda_LOD0");
-    // //std::cout << "here2.5" << std::endl;
-    // mainScene.addObject("Rock", r);
-    // //std::cout << "here3" << std::endl;
-    // mainScene.getObject("Rock").setRotation({30 * M_PI  / 180, 40 * M_PI  / 180, 0});
-    // mainScene.getObject("Rock").setPosition({0, -0.5, -1});
-    //std::cout << "here4" << std::endl;
-    // mainScene.addObject("Dragon", obj.toRenderObject("Dragon_Dragon_2"));
-    // //mainScene.addObject("Dragon", obj.toRenderObject("Suzanne"));
-    // //mainScene.addObject("Plane", obj.toRenderObject("Plane"));
-
-    // mainScene.getObject("Dragon").setPosition({.4, -.75, -3});
-    // //mainScene.getObject("Dragon").setPosition({0, 0, -1.5});
-    // mainScene.getObject("Dragon").setRotation({10 * M_PI  / 180, 20 * M_PI  / 180, 0});
-
-    //mainScene.getObject("Plane").setPosition({-5, 4, -10});
-
-    // RenderObject obj1;
-    // //obj1.addTriangle({-.2, -.2, 1}, {1, 0, -3}, {1, 1, -3});
-    // obj1.addTriangle({-2, 0, -3}, {1, 0, -3}, {1, 1, -3});
-
-    // mainScene.addObject("tri", obj1);
-
-    // auto v = mainScene.getObject("Rock").getMeshIndices();
-
-    // auto size = v.size() / 3;
-
-    //mainScene.getObject("Rock").getMeshIndices() = std::vector<int>(v.begin() + (287 * size / 1000) * 3, v.begin() + (288 * size / 1000) * 3);
+    //mainScene.getObject("Sphere").setRotation({25 * M_PI / 180, 2 * M_PI / 60 * 35, 0});
 
     mainScene.addLight("Ambient", {LightType::Ambient, {0.55, 0.55, 0.55}});
+    //mainScene.addLight("Ambient", {LightType::Ambient, {1, 1, 1}});
     // //mainScene.addLight("Ambient", {LightType::Ambient, {1, 1, 1}});
     // //mainScene.addLight("Point", {LightType::Point, {}, {6, 6, 6}, {6, 6, 6}, {2, 2, -1}});
     mainScene.addLight("Directional", {LightType::Directional, {}, {.65, .65, .65}, {.65, .65, .65}, {-1, -1, -1}});
     //mainScene.addLight("Glow", {LightType::Directional, {}, {0, 0, 1}, {0, 0, 1}, {2, 2, 1}});
     mainScene.renderToScreen(cam, screen);
+
+    screen.display();
+
+    // for (int i = 0; i < 60; i++)
+    // {
+    //     std::cout << i << std::endl;
+    //     Vec4 rot = mainScene.getObject("Sphere").getRotation();
+    //     rot.setY(2 * M_PI / 60 * i);
+    //     mainScene.getObject("Sphere").setRotation(rot);
+
+    //     screen.clear({0, 0, 0, 255});
+    //     screen.clearZbuf();
+
+    //     mainScene.renderToScreen(cam, screen);
+
+    //     std::string s = std::to_string(i);
+    //     s.insert(s.begin(), 3 - s.size(), '0');
+
+    //     screen.toFileExtension("img" + s + ".png");
+    // }
 
     // std::vector<Vec4> positions;
 
@@ -102,26 +119,6 @@ int main()
     // }
 
     // mat->kdMap.value().display();
-
-    for (int i = 0; i < 60; i++)
-    {
-        std::cout << i << std::endl;
-        Vec4 rot = mainScene.getObject("Sphere").getRotation();
-        rot.setY(2 * M_PI / 60 * i);
-        mainScene.getObject("Sphere").setRotation(rot);
-
-        screen.clear({0, 0, 0, 255});
-        screen.clearZbuf();
-
-        mainScene.renderToScreen(cam, screen);
-
-        std::string s = std::to_string(i);
-        s.insert(s.begin(), 3 - s.size(), '0');
-
-        screen.toFileExtension("img" + s + ".png");
-    }
-
-    //screen.display();
 
     //Material::materials.at("Material").kdMap.value().display();
     //Material::materials.at("Material").kdMap.value().toFileExtension("thingy1.png");

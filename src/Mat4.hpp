@@ -32,6 +32,12 @@ public:
     void addCircle(Vec4 const &v, double r, int steps);
     void addCurve(double x0, double y0, double x1, double y1, double rx0, double ry0, double rx1, double ry1, int steps, CurveType curveType);
 
+    Mat4 transpose() const;
+    void swapRows(int r0, int r1);
+    void multiplyRow(int r, double val);
+    void multiplyAdd(int src, int target, double multiple);
+    Mat4 invert() const;
+
     static Mat4 identity();
 
     static Mat4 rotX(double theta);

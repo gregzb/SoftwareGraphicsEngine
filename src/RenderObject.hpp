@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Mat4.hpp"
-#include "Vertex.hpp"
+#include "VertexPos.hpp"
 #include "PixelGrid.hpp"
 #include "OBJStructs.hpp"
 #include "Material.hpp"
@@ -13,21 +13,32 @@ class RenderObject
 {
 private:
     //Mat4 mesh; //object space verts
-    std::vector<Vertex> vertices;
-    std::vector<int> indices;
-    std::vector<Material*> triMats;
+    // std::vector<Vertex> vertices;
+    // std::vector<int> indices;
+    // std::vector<Material*> triMats;
 
-    std::unordered_map<Vertex, int> vertex_mappings;
+    std::unordered_map<Vec4, int> vertex_mappings;
+
+    bool smooth;
+
+    std::vector<Vec4> vertexPositions;
+    std::vector<Vec4> textureCoords;
+    std::vector<Vec4> normals;
+    std::vector<Material*> materials;
+    std::vector<std::tuple<int, int, int>> indices;
 
     //std::optional<Material> mat;
 
     Vec4 position, rotation, scale;
 
 public:
-    RenderObject();
+    RenderObject(bool smooth_ = true);
     Mat4 getModelMatrix() const;
-    std::vector<Vertex> &getMesh();
-    std::vector<int> &getMeshIndices();
+    std::vector<Vec4> &getMesh();
+    std::vector<Vec4> &getTexCoords();
+    std::vector<Vec4> &getNormals();
+    std::vector<std::tuple<int, int, int>> &getIndices();
+    std::vector<Material*> getFaceMaterials();
 
     void setPosition(Vec4 const &position);
     void setRotation(Vec4 const &rotation);
@@ -36,21 +47,18 @@ public:
     Vec4 const &getRotation() const;
     Vec4 const &getScale() const;
 
-    //make const
     Material const * getMat(unsigned int i) const;
 
-    // void setMaterial(Material *mat_);
-    // bool hasMaterial() const;
-    // Material const *getMaterial() const;
+    void addVertexPos(Vec4 const & pos);
+    void addTextureCoord(Vec4 const & pos);
+    void addNormal(Vec4 const & norm);
+    void addIndex(std::tuple<int, int, int> idx);
+    void addMaterial(Material * mat);
 
-    void generateVertexNormals();
+    void updateVertexNormals(bool smooth);
 
-    void addVertex(Vertex const &vert);
-    void addMatTri(Material * mat);
-
-    void addPoint(Vec4 const &v);
-    void addEdge(Vec4 const &v0, Vec4 const &v1);
-    void addTriangle(Vec4 const &v0, Vec4 const &v1, Vec4 const &v2);
+    void addPoint(Vec4 const &v, bool weld = false);
+    void addTriangle(Vec4 const &v0, Vec4 const &v1, Vec4 const &v2, bool weld = false, Material * mat = &Material::defaultMaterial);
     void addBox(Vec4 const &v, Vec4 const &dims);
     void addSphere(Vec4 const &v, double r, int thetaSteps, int phiSteps);
     void addTorus(Vec4 const &v, double r1, double r2, int thetaSteps, int phiSteps);

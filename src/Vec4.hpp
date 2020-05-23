@@ -62,6 +62,8 @@ public:
 
     Vec4 lerp(Vec4 const &other, double t) const;
 
+    Vec4 getNormal(Vec4 const& b, Vec4 const& c) const;
+
     bool inViewFrustum() const;
 
     bool operator==(const Vec4 &other) const;

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cmath>
 #include <tuple>
+#include <limits>
 
 #include "assert.h"
 
@@ -205,19 +206,152 @@ void Mat4::addCurve(double x0, double y0, double x1, double y1, double rx0, doub
         double t = step_size * step;
         Mat4 T({{t * t * t, t * t, t, 1}});
 
-        basisMatrix.multiplyMutate(T);
-        points.multiplyMutate(basisMatrix);
-        vertices.push_back(points); //havent tested if this works
-
-        // T = T.multiply(basisMatrix);
-        // T = T.multiply(points);
-        // vertices.push_back(T);
+        T = T.multiply(basisMatrix);
+        T = T.multiply(points);
+        vertices.push_back(T);
     }
 
     for (uint i = 0; i < vertices.size() - 1; i++)
     {
         addEdge({vertices[i][0][0], vertices[i][0][1], 0}, {vertices[i + 1][0][0], vertices[i + 1][0][1], 0});
     }
+}
+
+Mat4 Mat4::transpose() const
+{
+    Mat4 temp(4);
+    for (int col = 0; col < getCols(); col++)
+    {
+        for (int row = 0; row < getRows(); row++)
+        {
+            temp[col][row] = m[row][col];
+        }
+    }
+    return temp;
+}
+
+void Mat4::swapRows(int r0, int r1)
+{
+    std::swap(m[r0], m[r1]);
+}
+
+void Mat4::multiplyRow(int r, double val)
+{
+    for (auto &entry : m[r])
+    {
+        entry *= val;
+    }
+}
+
+void Mat4::multiplyAdd(int src, int target, double multiple)
+{
+    for (unsigned int i = 0; i < m[target].size(); i++)
+    {
+        m[target][i] += m[src][i] * multiple;
+    }
+}
+
+Mat4 Mat4::invert() const
+{
+    if (getRows() != getCols())
+    {
+        std::cout << "Only square matrices please >:(" << std::endl;
+        exit(1);
+    }
+    // std::cout << "a" << std::endl;
+    Mat4 temp(getCols() * 2);
+
+    for (int col = 0; col < getCols(); col++)
+    {
+        for (int row = 0; row < getRows(); row++)
+        {
+            temp[row][col] = m[row][col];
+            if (row == col)
+            {
+                temp[row][col + getCols()] = 1;
+            }
+        }
+    }
+
+    // std::cout << "b" << std::endl;
+    // std::cout << temp.toString() << std::endl;
+
+    int row = 0;
+    for (int col = 0; col < getCols(); col++)
+    {
+        // std::cout << temp.toString() << std::endl;
+        int newPivotRow = -1;
+        double maxValInCol = 0;
+        ;
+        for (int r = row; r < getRows(); r++)
+        {
+            if (std::abs(temp[r][col]) > maxValInCol)
+            {
+                maxValInCol = std::abs(temp[r][col]);
+                newPivotRow = r;
+            }
+        }
+
+        // std::cout << "c" << std::endl;
+        // std::cout << temp.toString() << std::endl;
+
+        if (newPivotRow != -1)
+        {
+            temp.swapRows(row, newPivotRow);
+            for (int currRow = row + 1; currRow < getRows(); currRow++)
+            {
+                double t = temp[currRow][col] / temp[row][col];
+                // std::cout << t << std::endl;
+                temp.multiplyAdd(row, currRow, -t);
+                temp[currRow][col] = 0;
+            }
+            row++;
+        }
+        // std::cout << "d" << std::endl;
+    }
+    // std::cout << "e" << std::endl;
+    // std::cout << temp.toString() << std::endl;
+
+    for (int row = getRows() - 1; row >= 0; row--)
+    {
+        double val = temp[row][row];
+        for (int r2 = row - 1; r2 >= 0; r2--)
+        {
+            double upperVal = temp[r2][row];
+            temp.multiplyAdd(row, r2, -(upperVal / val));
+        }
+        temp.multiplyRow(row, 1 / val);
+    }
+
+    // std::cout << "f" << std::endl;
+    // std::cout << temp.toString() << std::endl;
+
+    Mat4 final(4);
+
+    for (int col = 0; col < getCols(); col++)
+    {
+        for (int row = 0; row < getRows(); row++)
+        {
+            final[row][col] = temp[row][col + getCols()];
+            //std::cout << temp[row][col + getCols()] << std::endl;
+            if (row == col)
+            {
+                if (std::abs(temp[row][col] - 1) > 0.000001) {
+                    std::cout << "inverse broke?" << std::endl;
+                    exit(1);
+                }
+            } else {
+                if (std::abs(temp[row][col]) > 0.000001) {
+                    std::cout << "inverse broke?" << std::endl;
+                    exit(1);
+                }
+            }
+        }
+    }
+
+    // std::cout << "g" << std::endl;
+
+    return final;
 }
 
 Mat4 Mat4::rotX(double theta)

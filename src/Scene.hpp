@@ -6,6 +6,7 @@
 #include "Camera.hpp"
 #include "Screen.hpp"
 #include "Light.hpp"
+#include "Vertex.hpp"
 
 class Scene
 {

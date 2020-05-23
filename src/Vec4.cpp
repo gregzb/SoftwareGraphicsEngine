@@ -248,6 +248,10 @@ Color Vec4::toColor() const
             static_cast<u_char>((*this)[3] * 255)};
 }
 
+Vec4 Vec4::getNormal(Vec4 const& b, Vec4 const& c) const {
+    return (b-*this).cross(c-b);
+}
+
 bool Vec4::inViewFrustum() const {
     double w_ = std::abs(w);
     return -w_ <= x && x <= w_ && -w_ <= y && y <= w_ && -w_ <= z && z <= w_;
