@@ -73,18 +73,6 @@ Material const *RenderObject::getMat(unsigned int i) const
     return materials[i];
 }
 
-// void RenderObject::setMaterial(Material *mat_)
-// {
-//     mat = *mat_;
-// }
-// bool RenderObject::hasMaterial() const {
-//     return mat.has_value();
-// }
-// Material const *RenderObject::getMaterial() const
-// {
-//     return &mat.value();
-// }
-
 void RenderObject::addVertexPos(Vec4 const &pos)
 {
     vertexPositions.push_back(pos);
@@ -129,8 +117,6 @@ void RenderObject::updateVertexNormals(bool smooth)
     }
     else
     {
-        //std::cout << "smooth" << std::endl;
-        //std::vector<Vec4> tempNormals(indices.size());
         std::unordered_map<int, Vec4> tempNormals;
         for (unsigned int i = 0; i < indices.size(); i += 3)
         {
@@ -151,31 +137,6 @@ void RenderObject::updateVertexNormals(bool smooth)
         }
     }
 }
-
-// void RenderObject::generateVertexNormals()
-// {
-//     for (auto &vert : vertices)
-//     {
-//         vert.setNormal({});
-//     }
-//     for (uint i = 0; i < indices.size(); i += 3)
-//     {
-//         Vec4 faceNormal = vertices[indices[i]].getFaceNormal(vertices[indices[i + 1]], vertices[indices[i + 2]]);
-//         for (int j = 0; j < 3; j++)
-//         {
-//             vertices[indices[i + j]].setNormal(vertices[indices[i + j]].getNormal() + faceNormal);
-//         }
-//     }
-//     for (auto &vert : vertices)
-//     {
-//         //std::cout << vert.getNormal() << std::endl;
-//         vert.setNormal(vert.getNormal().normalize());
-//         //std::cout << vert.getNormal() << std::endl;
-//     }
-//     // int i = 0;
-//     //std::cout << vertices[0].getWorldPos() << vertices[1].getWorldPos() << vertices[2].getWorldPos() << std::endl;
-//     //std::cout << vertices[indices[i]].getFaceNormal(vertices[indices[i + 1]], vertices[indices[i + 2]]) << std::endl;
-// }
 
 void RenderObject::addPoint(Vec4 const &v, bool weld)
 {

@@ -7,15 +7,15 @@ By: Greg Zborovsky
   * Correct/ensure that texture loading works fine - Done
   * Support multiple texture coordinates per vertex - Done
   * Bilinear filtering during texture read  - Done
-  * Support quadrilaterals and other convex shapes in OBJ loading
+  * Support quadrilaterals and other convex shapes in OBJ loading - Done
 * Normal mapping
   * Will combine texture mapping and normals to alter light calculations as if triangle wasn't perfectly flat
 * Orthographic Camera - Done
-* Cube Map
+* Sky Map
   * Essentially a regular cube, but normals are inverted and texture is available on the inside.
   * (Maybe allow using normals from OBJ file?) - Done
 * Gamma correction
-  * Gamma correct all values related to user input and light except for non color data. (To power of 1/2.2, and to power of 2.2 at end) - Half done
+  * Gamma correct all values related to user input and light except for non color data. (To power of 1/2.2, and to power of 2.2 at end) - Done I think?
 
 ### Features I might want to add for final project:
 * MDL Support

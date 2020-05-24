@@ -23,11 +23,6 @@ void Scene::clipTriangle(std::vector<Vertex> &triangle, int dimension, int side,
             double t = (pos1.getW() - pos1[dimension] * side) / ((pos2[dimension] * side - pos2.getW()) - (pos1[dimension] * side - pos1.getW()));
             out.push_back(triangle[i].lerp(triangle[(i + 1) % triangle.size()], t));
         }
-
-        // if (inside2)
-        // {
-        //     out.push_back(triangle[(i + 1) % triangle.size()]);
-        // }
     }
 }
 
@@ -54,11 +49,6 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
     std::vector<Vertex> clipping2;
     clipping2.reserve(32);
 
-    //std::cout << "biy after" << std::endl;
-    // std::cout << std::endl;
-    //             std::cout << transposed.toString() << std::endl;
-    //             std::cout << inverted.toString() << std::endl;
-
     for (unsigned int i = 0; i < indices.size(); i += 3)
     {
         //std::cout << i << " " << indices.size() << std::endl;
@@ -76,40 +66,19 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
             BEFORE THAT, SET W TO 0 - NORMALS ARE A DIRECTION, NOT A POSITION
             */
 
-            //std::cout << "de" << std::endl;
-
             Vec4 no;
             if (std::get<2>(index) >= 0)
             {
-                //std::cout << "1" << std::endl;
                 no = norms[std::get<2>(index)];
                 no.setW(0);
-                // std::cout << "normal: " << std::endl;
-                // std::cout << mvMat.toString() << std::endl;
-                //std::cout << "2" << std::endl;
-                // Mat4 one = mvMat.transpose();
-                // // std::cout << "transposed: " << std::endl;
-                // // std::cout << one.toString() << std::endl;
-                // //std::cout << "3" << std::endl;
-                // Mat4 two = one.invert();
-                // // std::cout << "inverted: " << std::endl;
-                //std::cout << "4" << std::endl;
                 no = no.transform(inverted).normalize();
             }
 
-            //std::cout << "pee" << std::endl;
-
             //Vec4 const &no = std::get<2>(index) >= 0 ? norms[std::get<2>(index)].transform(mvMat.transpose().invert()) : Vec4();
             baseTri[j] = Vertex(po, te, no.normalize());
-            //std::cout << "asdads" << std::endl;
             baseTri[j].getVertexPos().updateWorldPos(baseTri[j].getPos().transform(mvMat));
-            //std::cout << "rasdasdp" << std::endl;
             baseTri[j].getVertexPos().updateProjPos(baseTri[j].getWorldPos().transform(pMat));
         }
-
-        //std::cout << " donk" << std::endl;
-
-        //std::cout << "points: " << baseTri.size() << std::endl;
 
         int pointsInside = 0;
         for (int j = 0; j < 3; j++)
@@ -118,10 +87,6 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
         }
 
         Material const *currMat = object.getMat(i / 3);
-
-        //std::cout << "some" << std::endl;
-
-        //if (i/3 != 3) continue;
 
         switch (pointsInside)
         {
@@ -140,7 +105,6 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
             /*
         Cohen Sutherland(?) - might help speed this up
         */
-            //std::cout << "we choppin " << pointsInside << std::endl;
             clipping1.clear();
             clipping2.clear();
 
@@ -150,27 +114,6 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
                 clipping1.push_back(baseTri[j]);
                 //std::cout << baseTri[j].getProjPos() << std::endl;
             }
-            //clipping1 = baseTri;
-
-            // for (unsigned int j = 0; j < 3; j++)
-            // {
-            //     clipping1[j].getVertexPos().updateProjPos(clipping1[j].getProjPos().perspectiveDivision());
-            //     clipping1[j].getVertexPos().updateProjPos({Utils::map(clipping1[j].getProjPos().getX(), -1, 1, 0, screen.getWidth()), Utils::map(clipping1[j].getProjPos().getY(), -1, 1, 0, screen.getHeight()), clipping1[j].getProjPos().getZ(), clipping1[j].getProjPos().getW()});
-            // }
-
-            // // for (unsigned int j = 0; j < 3; j++)
-            // // {
-            // //     screen.drawLine(clipping1[j].getProjPos(), clipping1[(j+1)%3].getProjPos(), {255, 0, 0, 0});
-            // // }
-            // //std::cout << clipping1[0].getProjPos().getNormal(clipping1[1].getProjPos(), clipping1[2].getProjPos()) << std::endl;
-            // //exit(1);
-
-            // //clipping1 = baseTri;
-
-            // //std::cout << clipping1.size() << std::endl;
-
-            // clipping1 = baseTri;
-            //std::cout << clipping1.size() << " " << baseTri.size() << std::endl;
 
             for (unsigned int j = 0; j < 3; j++)
             {
@@ -187,18 +130,6 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
                 clipping1[j].getVertexPos().updateProjPos({Utils::map(clipping1[j].getProjPos().getX(), -1, 1, 0, screen.getWidth()), Utils::map(clipping1[j].getProjPos().getY(), -1, 1, 0, screen.getHeight()), clipping1[j].getProjPos().getZ(), clipping1[j].getProjPos().getW()});
             }
 
-            // for (unsigned int j = 0; j < 3; j++)
-            // {
-            //     screen.drawLine(clipping1[j].getProjPos(), clipping1[(j+1)%3].getProjPos(), {255, 0, 0, 0});
-            // }
-            // for (unsigned int j = 1; j < 4; j++)
-            // {
-            //     screen.drawLine(clipping1[j].getProjPos(), clipping1[(j)%3+1].getProjPos(), {0, 255, 0, 0});
-            // }
-            // return;
-
-            //std::cout << clipping1.size() << std::endl;
-
             triangle[0] = clipping1[0];
             for (int j = 1; j < ((int)clipping1.size() - 1); j++)
             {
@@ -211,7 +142,6 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
             break;
         }
     }
-    //std::cout << "Rendered obj" << std::endl;
 }
 
 void Scene::drawTriangle(Screen &screen, std::vector<Vertex> vertices, RenderObject const &object, Material const *mat)
@@ -243,8 +173,6 @@ struct LineInfo
 
 void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObject const &object, Material const *mat)
 {
-    //std::cout << "a " << std::endl;
-    //Vec4 NO = verts[0].getFaceNormal(verts[1], verts[2]);
     if (verts[0].getProjPos().getY() > verts[1].getProjPos().getY())
         std::swap(verts[0], verts[1]);
     if (verts[1].getProjPos().getY() > verts[2].getProjPos().getY())
@@ -252,13 +180,10 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
     if (verts[0].getProjPos().getY() > verts[1].getProjPos().getY())
         std::swap(verts[0], verts[1]);
 
-    //std::cout << verts[0].getTexCoords() << " " << verts[1].getTexCoords() << " " << verts[2].getTexCoords() << std::endl;
-
     Vec4 const &vert20 = verts[2].getProjPos() - verts[0].getProjPos();
     Vec4 const &vert10 = verts[1].getProjPos() - verts[0].getProjPos();
     Vec4 const &vert21 = verts[2].getProjPos() - verts[1].getProjPos();
 
-    //Vec4 const &zs = Vec4(vert20[2], vert10[2], vert21[2]);
     Vec4 const &z2 = Vec4(verts[0].getProjPos()[3], verts[0].getProjPos()[3], verts[1].getProjPos()[3]);
 
     Vec4 xVerts = {vert20[0], vert10[0], vert21[0]};
@@ -336,8 +261,6 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
     if (!side)
         std::swap(left, right);
 
-    //std::cout << verts[0].getProjPos()[1] << " " << verts[1].getProjPos()[1] << " " << verts[2].getProjPos()[1] << std::endl;
-
     for (int i = 1; i < 3; i++)
     {
         int goal = std::ceil(verts[i].getProjPos()[1]);
@@ -373,8 +296,6 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
                     Vec4 pos = posX * regZ;
 
                     Vec4 normal = (normX * regZ).normalize();
-                    //std::cout << normal << std::endl;
-                    //normal = NO.normalize();
 
                     Vec4 texAdjust = texX * regZ;
 
@@ -387,15 +308,6 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
 
                     texAdjust.setY(1 - texAdjust.getY());
 
-                    // int yr = std::lround((texAdjust.getY()) * (mat->kdMap.value().getWidth() - 1));
-                    // int xr = std::lround(texAdjust.getX() * (mat->kdMap.value().getHeight() - 1));
-                    //std::cout << yr << " " << xr << std::endl;
-                    //mat->kdMap.value().pixelAt(yr, xr) = {0, 255, 0, 0};
-
-                    // Vec4 Ka = mat->getAmbient({texAdjust.getY(), texAdjust.getX()});
-                    // Vec4 Kd = mat->getDiffuse({texAdjust.getY(), texAdjust.getX()});
-                    // Vec4 Ks = mat->getSpecular({texAdjust.getY(), texAdjust.getX()});
-                    // double Ns = mat->getShininess({texAdjust.getY(), texAdjust.getX()});
                     Vec4 Ka = mat->getAmbient(texAdjust);
                     Vec4 Kd = mat->getDiffuse(texAdjust);
                     Vec4 Ks = mat->getSpecular(texAdjust);
@@ -461,13 +373,11 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
                     illum.set(2, Utils::clamp(illum[2], 0.0, 1.0));
 
                     //gamma correct right here by raising to 1/2.2 power
-                    illum.set(0, std::pow(illum[0], 2.2));
-                    illum.set(1, std::pow(illum[1], 2.2));
-                    illum.set(2, std::pow(illum[2], 2.2));
+                    illum = illum.pow(1/2.2);
 
-                    illum.set(0, Utils::clamp(illum[0], 0.0, 1.0));
-                    illum.set(1, Utils::clamp(illum[1], 0.0, 1.0));
-                    illum.set(2, Utils::clamp(illum[2], 0.0, 1.0));
+                    // illum.set(0, Utils::clamp(illum[0], 0.0, 1.0));
+                    // illum.set(1, Utils::clamp(illum[1], 0.0, 1.0));
+                    // illum.set(2, Utils::clamp(illum[2], 0.0, 1.0));
 
                     screen(y, x) = illum.toColor();
                 }

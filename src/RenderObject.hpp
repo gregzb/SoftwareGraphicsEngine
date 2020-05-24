@@ -12,11 +12,6 @@
 class RenderObject
 {
 private:
-    //Mat4 mesh; //object space verts
-    // std::vector<Vertex> vertices;
-    // std::vector<int> indices;
-    // std::vector<Material*> triMats;
-
     std::unordered_map<Vec4, int> vertex_mappings;
 
     bool smooth;

@@ -175,19 +175,27 @@ OBJLoader::OBJLoader(std::string const &fileName)
         }
         else if (infoType == "f")
         {
-            std::vector<std::string> verts(3);
-            iss >> verts[0] >> verts[1] >> verts[2];
+            std::vector<std::string> verts;
+            std::string tempStr;
+
+            while (iss >> tempStr)
+            {
+                verts.push_back(tempStr);
+            }
+
+            //iss >> verts[0] >> verts[1] >> verts[2];
 
             std::vector<std::vector<int>> indices(3);
 
             for (int i = 0; i < 3; i++)
             {
-                indices[i].push_back(-1);
-                indices[i].push_back(-1);
-                indices[i].push_back(-1);
+                for (unsigned int j = 0; j < verts.size(); j++)
+                {
+                    indices[i].push_back(-1);
+                }
             }
 
-            for (int i = 0; i < 3; i++)
+            for (unsigned int i = 0; i < verts.size(); i++)
             {
                 int counter = 0;
                 std::istringstream vertStream(verts[i]);
@@ -202,11 +210,13 @@ OBJLoader::OBJLoader(std::string const &fileName)
 
             // std::cout << indices[0][0] << " " << indices[1][0] << " " << indices[2][0] << std::endl;
             // exit(1);
-
-            currentObject->vertexIndices.push_back(indices[0]);
-            currentObject->vertexTexIndices.push_back(indices[1]);
-            currentObject->vertexNormalIndices.push_back(indices[2]);
-            currentObject->triMats.push_back(currentMaterial);
+            for (unsigned int i = 2; i < verts.size(); i++)
+            {
+                currentObject->vertexIndices.push_back({indices[0][0], indices[0][i-1], indices[0][i]});
+                currentObject->vertexTexIndices.push_back({indices[1][0], indices[1][i-1], indices[1][i]});
+                currentObject->vertexNormalIndices.push_back({indices[2][0], indices[2][i-1], indices[2][i]});
+                currentObject->triMats.push_back(currentMaterial);
+            }
         }
         else if (infoType == "usemtl")
         {
@@ -227,8 +237,6 @@ OBJLoader::OBJLoader(std::string const &fileName)
 
 RenderObject OBJLoader::toRenderObject(std::string name) const
 {
-
-    RenderObject temp;
     std::unordered_map<int, int> vertMap;
     vertMap.insert({-2, -1});
     std::unordered_map<int, int> texMap;
@@ -241,9 +249,11 @@ RenderObject OBJLoader::toRenderObject(std::string name) const
         std::cout << "Could not find object: " << name << " in an OBJ file." << std::endl;
         exit(1);
     }
-    
+
     // std::cout << objects.count(name) << std::endl;
     OBJObject const &obj = objects.at(name);
+
+    RenderObject temp(obj.smoothShading);
 
     for (uint i = 0; i < obj.vertexIndices.size(); i++)
     {
@@ -262,15 +272,18 @@ RenderObject OBJLoader::toRenderObject(std::string name) const
             // std::cout << obj.vertexIndices.size() << " " << obj.vertexIndices.size() << " " << obj.vertexNormalIndices.size() << std::endl;
             // std::cout << vertIdx << " " << texIdx << " " << normIdx << std::endl;
 
-            if (vertMap.count(vertIdx) == 0) {
+            if (vertMap.count(vertIdx) == 0)
+            {
                 vertMap.insert({vertIdx, temp.getMesh().size()});
                 temp.addVertexPos(v[vertIdx]);
             }
-            if (texMap.count(texIdx) == 0) {
+            if (texMap.count(texIdx) == 0)
+            {
                 texMap.insert({texIdx, temp.getTexCoords().size()});
                 temp.addTextureCoord(vt[texIdx]);
             }
-            if (normMap.count(normIdx) == 0) {
+            if (normMap.count(normIdx) == 0)
+            {
                 normMap.insert({normIdx, temp.getNormals().size()});
                 temp.addNormal(vn[normIdx]);
             }
@@ -280,54 +293,5 @@ RenderObject OBJLoader::toRenderObject(std::string name) const
 
         temp.addMaterial(obj.triMats[i]);
     }
-
-    // RenderObject temp;
-    // std::unordered_set<int> inserted;
-    // // std::cout << objects.size() << std::endl;
-    // // for (auto thing : objects) {
-    // //     std::cout << thing.first << std::endl;
-    // // }
-
-    // OBJObject const &obj = objects.at(name);
-    // // for (auto const & face : obj.getVertexIndices()) {
-    // //     for (auto const & vertex : face) {
-    // //         auto pos = v[vertex-1];
-    // //         auto tex = vt[vertex-1];
-
-    // //         temp.addVertex({pos, tex});
-    // //     }
-    // // }
-    // // std::cout << obj.getVertexIndices().size() << std::endl;
-    // // std::cout << obj.getVertexTexIndices().size() << std::endl;
-    // for (uint i = 0; i < obj.vertexIndices.size(); i++)
-    // {
-    //     assert(obj.vertexIndices[i].size() == 3);
-    //     for (uint j = 0; j < obj.vertexIndices[i].size(); j++)
-    //     {
-    //         //std::cout << obj.vertexIndices[i][j] << " " << obj.vertexTexIndices[i][j] << std::endl;
-    //         //std::cout << v[obj.vertexIndices[i][j] - 1] << " " << vt[obj.vertexTexIndices[i][j] - 1] << std::endl;
-    //         auto pos = v[obj.vertexIndices[i][j] - 1];
-    //         auto tex = vt[obj.vertexTexIndices[i][j] - 1];
-    //         //std::cout << pos << tex << std::endl;
-
-    //         //std::cout << obj.getVertexIndices()[i][j]-1 << " " << obj.getVertexTexIndices()[i][j]-1 << std::endl;
-
-    //         temp.addVertex({pos, tex});
-    //     }
-    //     temp.addMatTri(obj.triMats[i]);
-    // }
-    //temp.setMaterial(obj.);
-    //temp.setMaterial(obj.mat);
-    //temp.setTexture(obj.mat->mapKd);
-    //std::cout << obj.getMat()->getTexture().getWidth() << " " << obj.getMat()->getTexture().getHeight() << std::endl;
-    //exit(0);
-    //obj.getMat()->getTexture().display();
-    // for (auto face : obj.getVertexIndices())
-    // {
-    //     // if (face[0] > v.size() || face[1] > v.size() || face[2] > v.size())
-    //     // std::cout << v.size() << " " << face[0] << " " << face[1] << " " << face[2] << std::endl;
-    //     //its 1-indexed
-    //     temp.addTriangle(v[face[0] - 1], v[face[1] - 1], v[face[2] - 1]);
-    // }
     return temp;
 }

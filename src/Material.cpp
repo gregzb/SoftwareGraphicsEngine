@@ -79,27 +79,18 @@ Vec4 const Material::getDiffuse(Vec4 const &pos) const
         if (Material::TexFiltering == TextureFiltering::CLOSEST)
         {
             Vec4 corrected = kdMap.value().rawRead(pos);
-            corrected.set(0, std::pow(corrected[0], 1 / 2.2));
-            corrected.set(1, std::pow(corrected[1], 1 / 2.2));
-            corrected.set(2, std::pow(corrected[2], 1 / 2.2));
-            return corrected;
+            return corrected.pow(2.2);
         }
         else
         {
             Vec4 corrected = kdMap.value().linRead(pos);
-            corrected.set(0, std::pow(corrected[0], 1 / 2.2));
-            corrected.set(1, std::pow(corrected[1], 1 / 2.2));
-            corrected.set(2, std::pow(corrected[2], 1 / 2.2));
-            return corrected;
+            return corrected.pow(2.2);
         }
     }
     else
     {
         Vec4 corrected = kd;
-        corrected.set(0, std::pow(corrected[0], 1 / 2.2));
-        corrected.set(1, std::pow(corrected[1], 1 / 2.2));
-        corrected.set(2, std::pow(corrected[2], 1 / 2.2));
-        return corrected;
+        return corrected.pow(2.2);
     }
 }
 Vec4 const Material::getSpecular(Vec4 const &pos) const
@@ -108,16 +99,18 @@ Vec4 const Material::getSpecular(Vec4 const &pos) const
     {
         if (Material::TexFiltering == TextureFiltering::CLOSEST)
         {
-            return ksMap.value().rawRead(pos);
+            Vec4 corrected = ksMap.value().rawRead(pos);
+            return corrected.pow(2.2);
         }
         else
         {
-            return ksMap.value().linRead(pos);
+            Vec4 corrected = ksMap.value().rawRead(pos);
+            return corrected.pow(2.2);
         }
     }
     else
     {
-        return ks;
+        return ks.pow(2.2);
     }
 }
 Vec4 const Material::getEmissive(Vec4 const &pos) const

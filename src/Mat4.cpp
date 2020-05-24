@@ -89,12 +89,7 @@ void Mat4::clear()
 
 Mat4 Mat4::multiply(const Mat4 &matrix) const
 {
-    //std::cout << getRows() << " " << getCols() << " " << matrix.getRows() << " " << matrix.getCols() << std::endl;
     assert(getCols() == matrix.getRows());
-    //std::cout << m[0][1] << std::endl;
-    //std::cout << matrix.m[1][0] << std::endl;
-
-    //std::cout << matrix.m;
 
     Mat4 result(matrix.getCols());
 
@@ -273,13 +268,9 @@ Mat4 Mat4::invert() const
         }
     }
 
-    // std::cout << "b" << std::endl;
-    // std::cout << temp.toString() << std::endl;
-
     int row = 0;
     for (int col = 0; col < getCols(); col++)
     {
-        // std::cout << temp.toString() << std::endl;
         int newPivotRow = -1;
         double maxValInCol = 0;
         ;
@@ -292,25 +283,18 @@ Mat4 Mat4::invert() const
             }
         }
 
-        // std::cout << "c" << std::endl;
-        // std::cout << temp.toString() << std::endl;
-
         if (newPivotRow != -1)
         {
             temp.swapRows(row, newPivotRow);
             for (int currRow = row + 1; currRow < getRows(); currRow++)
             {
                 double t = temp[currRow][col] / temp[row][col];
-                // std::cout << t << std::endl;
                 temp.multiplyAdd(row, currRow, -t);
                 temp[currRow][col] = 0;
             }
             row++;
         }
-        // std::cout << "d" << std::endl;
     }
-    // std::cout << "e" << std::endl;
-    // std::cout << temp.toString() << std::endl;
 
     for (int row = getRows() - 1; row >= 0; row--)
     {
@@ -322,9 +306,6 @@ Mat4 Mat4::invert() const
         }
         temp.multiplyRow(row, 1 / val);
     }
-
-    // std::cout << "f" << std::endl;
-    // std::cout << temp.toString() << std::endl;
 
     Mat4 final(4);
 
