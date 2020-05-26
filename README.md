@@ -15,7 +15,7 @@ By: Greg Zborovsky
   * Essentially a regular cube, but normals are inverted and texture is available on the inside.
   * (Maybe allow using normals from OBJ file?) - Done
 * Gamma correction
-  * Gamma correct all values related to user input and light except for non color data. (To power of 1/2.2, and to power of 2.2 at end) - Done I think?
+  * Gamma correct all values related to user input and light except for non color data. (To power of 2.2, and to power of 1/2.2 at end) - Done I think?
 
 ### Features I might want to add for final project:
 * MDL Support
