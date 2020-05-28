@@ -313,6 +313,9 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
                     Vec4 Ks = mat->getSpecular(texAdjust);
                     double Ns = mat->getShininess(texAdjust);
 
+                    //std::cout << Ka << " " << Kd << " " << Ks << " " << Ns << std::endl;
+                    //std::cout << normal << std::endl;
+
                     //Ks = {};
 
                     Vec4 illum;

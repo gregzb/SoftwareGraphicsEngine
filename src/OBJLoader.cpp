@@ -222,6 +222,10 @@ OBJLoader::OBJLoader(std::string const &fileName)
         {
             std::string matName;
             iss >> matName;
+            if (Material::materials.count(matName) == 0) {
+                std::cout << "Could not find a material named " << matName << std::endl;
+                exit(1);
+            }
             currentMaterial = &Material::materials.at(matName);
             //currentObject->geometryMaterialMap.insert({matName, {}});
         }
@@ -253,7 +257,12 @@ RenderObject OBJLoader::toRenderObject(std::string name) const
     // std::cout << objects.count(name) << std::endl;
     OBJObject const &obj = objects.at(name);
 
+    //std::cout << obj.vertexIndices.size() << std::endl;
+    //std::cout << obj.name << std::endl;
+
     RenderObject temp(obj.smoothShading);
+
+    bool recalc = false;
 
     for (uint i = 0; i < obj.vertexIndices.size(); i++)
     {
@@ -282,6 +291,9 @@ RenderObject OBJLoader::toRenderObject(std::string name) const
                 texMap.insert({texIdx, temp.getTexCoords().size()});
                 temp.addTextureCoord(vt[texIdx]);
             }
+            if (normIdx == -2) {
+                recalc = true;
+            }
             if (normMap.count(normIdx) == 0)
             {
                 normMap.insert({normIdx, temp.getNormals().size()});
@@ -293,5 +305,10 @@ RenderObject OBJLoader::toRenderObject(std::string name) const
 
         temp.addMaterial(obj.triMats[i]);
     }
+
+    if (recalc) {
+        temp.updateVertexNormals(obj.smoothShading);
+    }
+
     return temp;
 }
