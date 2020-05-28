@@ -26,7 +26,8 @@ int main()
     // std::cout << "here0" << std::endl;
     //OBJLoader obj("resources/table.obj");
     //OBJLoader obj("resources/onetest.obj");
-    OBJLoader obj("resources/airboat.obj");
+    //OBJLoader obj("resources/airboat.obj");
+    OBJLoader obj("resources/monkey.obj");
     //std::cout << "here" << std::endl;
     //OBJLoader obj("resources/cube.obj");
     // OBJLoader obj("resources/sword.obj");
@@ -39,12 +40,13 @@ int main()
     //RenderObject r = obj.toRenderObject("zAset_rock_assembly_M_thkqfbjda_LOD0_Aset_rock_assembly_M_thkqfbjda_LOD0");
     // RenderObject r = obj.toRenderObject("sword_Plane");
     //RenderObject r = obj.toRenderObject("Cube");
-    RenderObject r = obj.toRenderObject("boat");
+    //RenderObject r = obj.toRenderObject("boat");
+    RenderObject r = obj.toRenderObject("Suzanne");
     //RenderObject r = obj.toRenderObject("Aset_wood_misc_M_tl1xfcbfa_LOD2");
     // RenderObject r(false);
     // r.addSphere({}, 1, 30, 15);
     mainScene.addObject("Sphere", r);
-    mainScene.getObject("Sphere").setPosition({0, 0.8, -15});
+    mainScene.getObject("Sphere").setPosition({0, 0, -3});
     //mainScene.getObject("Sphere").setPosition({0, -.5, -2});
     mainScene.getObject("Sphere").setRotation({20 * M_PI / 180, -60 * M_PI / 180, 0});
     //mainScene.getObject("Sphere").setRotation({25 * M_PI / 180, 2 * M_PI / 60 * 35, 0});

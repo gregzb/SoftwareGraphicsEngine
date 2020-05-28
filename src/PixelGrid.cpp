@@ -75,14 +75,14 @@ Vec4 PixelGrid<Color>::linRead(Vec4 const &pos) const
     if (r0 >= getHeight()) r0 = 0;
     int c0 = std::floor(x);
     if (c0 < 0) c0 = getWidth();
-    if (c0 >= getHeight()) c0 = 0;
+    if (c0 >= getWidth()) c0 = 0;
 
     int r1 = std::ceil(y);
     if (r1 < 0) r1 = getHeight();
     if (r1 >= getHeight()) r1 = 0;
     int c1 = std::ceil(x);
     if (c1 < 0) c1 = getWidth();
-    if (c1 >= getHeight()) c1 = 0;
+    if (c1 >= getWidth()) c1 = 0;
 
     Vec4 v00 = read(r0, c0);
     Vec4 v10 = read(r1, c0);
