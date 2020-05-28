@@ -71,28 +71,34 @@ Vec4 PixelGrid<Color>::linRead(Vec4 const &pos) const
     x-=0.5;
 
     int r0 = std::floor(y);
-    if (r0 < 0) r0 = getHeight();
-    if (r0 >= getHeight()) r0 = 0;
+    if (r0 < 0) r0 = getHeight()-1;
+    else if (r0 >= getHeight()) r0 = 0;
     int c0 = std::floor(x);
-    if (c0 < 0) c0 = getWidth();
-    if (c0 >= getWidth()) c0 = 0;
+    if (c0 < 0) c0 = getWidth()-1;
+    else if (c0 >= getWidth()) c0 = 0;
 
     int r1 = std::ceil(y);
-    if (r1 < 0) r1 = getHeight();
-    if (r1 >= getHeight()) r1 = 0;
+    if (r1 < 0) r1 = getHeight()-1;
+    else if (r1 >= getHeight()) r1 = 0;
     int c1 = std::ceil(x);
-    if (c1 < 0) c1 = getWidth();
-    if (c1 >= getWidth()) c1 = 0;
+    if (c1 < 0) c1 = getWidth()-1;
+    else if (c1 >= getWidth()) c1 = 0;
+
+    //std::cout << r0 << " " << c0 << " " << r1 << " " << c1 << std::endl;
 
     Vec4 v00 = read(r0, c0);
     Vec4 v10 = read(r1, c0);
     Vec4 v01 = read(r0, c1);
     Vec4 v11 = read(r1, c1);
 
-    Vec4 vb = v00 * (1 - (x - c0)) + v01 * (x - c0);
-    Vec4 vt = v10 * (1 - (x - c0)) + v11 * (x - c0);
+    Vec4 vb = v00 * (1 - (x - std::floor(x))) + v01 * (x - std::floor(x));
+    Vec4 vt = v10 * (1 - (x - std::floor(x))) + v11 * (x - std::floor(x));
 
-    Vec4 final = vb * (1 - (y - r0)) + vt * (y - r0);
+    Vec4 final = vb * (1 - (y - std::floor(y))) + vt * (y - std::floor(y));
+    // if (final[0] < 0.1 && final[1] < 0.1 && final[2] < 0.1) {
+    //     std::cout << r0 << " " << c0 << " " << r1 << " " << c1 << std::endl;
+    //     std::cout << final << pos << std::endl;
+    // }
     return final;
 }
 
