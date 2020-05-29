@@ -142,7 +142,7 @@ void Mat4::addPoint(Vec4 const &v)
     m[0][getCols() - 1] = v.getX();
     m[1][getCols() - 1] = v.getY();
     m[2][getCols() - 1] = v.getZ();
-    m[2][getCols() - 1] = v.getW();
+    m[3][getCols() - 1] = v.getW();
 }
 
 void Mat4::addEdge(Vec4 const &v0, Vec4 v1)

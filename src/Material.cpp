@@ -146,9 +146,10 @@ Vec4 const Material::getBump(Vec4 const &pos) const
     }
     else
     {
-        std::cout << "No bump map!" << std::endl;
-        exit(0);
-        return bumpMap.value().read(0, 0);
+        //std::cout << "No bump map!" << std::endl;
+        //exit(0);
+        //return bumpMap.value().read(0, 0);
+        return {0.5, 0.5, 1};
     }
 }
 double Material::getShininess(Vec4 const &pos) const

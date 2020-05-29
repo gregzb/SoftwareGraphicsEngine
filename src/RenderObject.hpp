@@ -19,8 +19,9 @@ private:
     std::vector<Vec4> vertexPositions;
     std::vector<Vec4> textureCoords;
     std::vector<Vec4> normals;
+    std::vector<Vec4> tangents;
     std::vector<Material*> materials;
-    std::vector<std::tuple<int, int, int>> indices;
+    std::vector<std::tuple<int, int, int, int>> indices;
 
     //std::optional<Material> mat;
 
@@ -32,7 +33,8 @@ public:
     std::vector<Vec4> &getMesh();
     std::vector<Vec4> &getTexCoords();
     std::vector<Vec4> &getNormals();
-    std::vector<std::tuple<int, int, int>> &getIndices();
+    std::vector<Vec4> &getTangents();
+    std::vector<std::tuple<int, int, int, int>> &getIndices();
     std::vector<Material*> getFaceMaterials();
 
     void setPosition(Vec4 const &position);
@@ -47,7 +49,8 @@ public:
     void addVertexPos(Vec4 const & pos);
     void addTextureCoord(Vec4 const & pos);
     void addNormal(Vec4 const & norm);
-    void addIndex(std::tuple<int, int, int> idx);
+    void addTangent(Vec4 const & tangent);
+    void addIndex(std::tuple<int, int, int, int> idx);
     void addMaterial(Material * mat);
 
     void updateVertexNormals(bool smooth);

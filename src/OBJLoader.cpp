@@ -263,6 +263,7 @@ RenderObject OBJLoader::toRenderObject(std::string name) const
     RenderObject temp(obj.smoothShading);
 
     bool recalc = false;
+    recalc = true; // ALWAYS RECALCING FOR NOW FOR TANGENTS
 
     for (uint i = 0; i < obj.vertexIndices.size(); i++)
     {
@@ -300,7 +301,7 @@ RenderObject OBJLoader::toRenderObject(std::string name) const
                 temp.addNormal(vn[normIdx]);
             }
             // std::cout << "bye! " << std::endl;
-            temp.addIndex({vertMap[vertIdx], texMap[texIdx], normMap[normIdx]});
+            temp.addIndex({vertMap[vertIdx], texMap[texIdx], normMap[normIdx], -1});
         }
 
         temp.addMaterial(obj.triMats[i]);

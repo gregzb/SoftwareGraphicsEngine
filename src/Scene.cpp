@@ -28,6 +28,7 @@ void Scene::clipTriangle(std::vector<Vertex> &triangle, int dimension, int side,
 
 void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object)
 {
+    Mat4 const &mMat = object.getModelMatrix();
     Mat4 const &mvMat = cam.getViewMatrix().multiply(object.getModelMatrix());
     Mat4 const &pMat = cam.isPerspective() ? cam.getPerspectiveProjectionMatrix() : cam.getOrthographicProjectionMatrix();
 
@@ -39,11 +40,12 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
     std::vector<Vec4> &positions = object.getMesh();
     std::vector<Vec4> &texes = object.getTexCoords();
     std::vector<Vec4> &norms = object.getNormals();
-    std::vector<std::tuple<int, int, int>> const &indices = object.getIndices();
+    std::vector<Vec4> &tans = object.getTangents();
+    std::vector<std::tuple<int, int, int, int>> const &indices = object.getIndices();
 
-    std::vector<Vertex> baseTri = {Vertex({}, {}, {}), Vertex({}, {}, {}), Vertex({}, {}, {})};
+    std::vector<Vertex> baseTri = {Vertex({}, {}, {}, {}), Vertex({}, {}, {}, {}), Vertex({}, {}, {}, {})};
 
-    std::vector<Vertex> triangle = {Vertex({}, {}, {}), Vertex({}, {}, {}), Vertex({}, {}, {})};
+    std::vector<Vertex> triangle = {Vertex({}, {}, {}, {}), Vertex({}, {}, {}, {}), Vertex({}, {}, {}, {})};
     std::vector<Vertex> clipping1;
     clipping1.reserve(32);
     std::vector<Vertex> clipping2;
@@ -60,22 +62,34 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
             Vec4 const &po = std::get<0>(index) >= 0 ? positions[std::get<0>(index)] : Vec4();
             Vec4 const &te = std::get<1>(index) >= 0 ? texes[std::get<1>(index)] : Vec4();
 
-            /*
-            TRANSFORMING NORMAL BY THE MV MATRIX IS WRONG.
-            YOU MUST TRANSFORM BY TRANSPOSE OF INVERSE OF MATRIX
-            BEFORE THAT, SET W TO 0 - NORMALS ARE A DIRECTION, NOT A POSITION
-            */
+            // normal and tangent - if they dont exist, throw error?
 
-            Vec4 no;
-            if (std::get<2>(index) >= 0)
-            {
-                no = norms[std::get<2>(index)];
-                no.setW(0);
-                no = no.transform(inverted).normalize();
-            }
+            Vec4 no = std::get<2>(index) >= 0 ? norms[std::get<2>(index)] : Vec4();
+            Vec4 ta = std::get<3>(index) >= 0 ? tans[std::get<3>(index)] : Vec4();
+
+            no.setW(0);
+            no = no.transform(mMat);
+            ta.setW(0);
+            ta = ta.transform(mMat);
+
+        //     /*
+        //     TRANSFORMING NORMAL BY THE MV MATRIX IS WRONG.
+        //     YOU MUST TRANSFORM BY TRANSPOSE OF INVERSE OF MATRIX
+        //     BEFORE THAT, SET W TO 0 - NORMALS ARE A DIRECTION, NOT A POSITION
+        //     */
+
+        //    // TRANSFORM NORMAL AND TANGENT BY mvMAT, SET W TO 0
+
+            // Vec4 no;
+            // if (std::get<2>(index) >= 0)
+            // {
+            //     no = norms[std::get<2>(index)];
+            //     no.setW(0);
+            //     no = no.transform(inverted).normalize();
+            // }
 
             //Vec4 const &no = std::get<2>(index) >= 0 ? norms[std::get<2>(index)].transform(mvMat.transpose().invert()) : Vec4();
-            baseTri[j] = Vertex(po, te, no.normalize());
+            baseTri[j] = Vertex(po, te, no.normalize(), ta.normalize());
             baseTri[j].getVertexPos().updateWorldPos(baseTri[j].getPos().transform(mvMat));
             baseTri[j].getVertexPos().updateProjPos(baseTri[j].getWorldPos().transform(pMat));
         }
@@ -168,6 +182,7 @@ struct LineInfo
     double overZ, overZStepY;
     Vec4 tex, texStepY;
     Vec4 normal, normalStepY;
+    Vec4 tangent, tangentStepY;
     Vec4 position, positionStepY;
 };
 
@@ -198,6 +213,10 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
     Vec4 yNormalVerts = {verts[2].getNormal()[1] / verts[2].getProjPos()[3] - verts[0].getNormal()[1] / verts[0].getProjPos()[3], verts[1].getNormal()[1] / verts[1].getProjPos()[3] - verts[0].getNormal()[1] / verts[0].getProjPos()[3], verts[2].getNormal()[1] / verts[2].getProjPos()[3] - verts[1].getNormal()[1] / verts[1].getProjPos()[3]};
     Vec4 zNormalVerts = {verts[2].getNormal()[2] / verts[2].getProjPos()[3] - verts[0].getNormal()[2] / verts[0].getProjPos()[3], verts[1].getNormal()[2] / verts[1].getProjPos()[3] - verts[0].getNormal()[2] / verts[0].getProjPos()[3], verts[2].getNormal()[2] / verts[2].getProjPos()[3] - verts[1].getNormal()[2] / verts[1].getProjPos()[3]};
 
+    Vec4 xTangentVerts = {verts[2].getTangent()[0] / verts[2].getProjPos()[3] - verts[0].getTangent()[0] / verts[0].getProjPos()[3], verts[1].getTangent()[0] / verts[1].getProjPos()[3] - verts[0].getTangent()[0] / verts[0].getProjPos()[3], verts[2].getTangent()[0] / verts[2].getProjPos()[3] - verts[1].getTangent()[0] / verts[1].getProjPos()[3]};
+    Vec4 yTangentVerts = {verts[2].getTangent()[1] / verts[2].getProjPos()[3] - verts[0].getTangent()[1] / verts[0].getProjPos()[3], verts[1].getTangent()[1] / verts[1].getProjPos()[3] - verts[0].getTangent()[1] / verts[0].getProjPos()[3], verts[2].getTangent()[1] / verts[2].getProjPos()[3] - verts[1].getTangent()[1] / verts[1].getProjPos()[3]};
+    Vec4 zTangentVerts = {verts[2].getTangent()[2] / verts[2].getProjPos()[3] - verts[0].getTangent()[2] / verts[0].getProjPos()[3], verts[1].getTangent()[2] / verts[1].getProjPos()[3] - verts[0].getTangent()[2] / verts[0].getProjPos()[3], verts[2].getTangent()[2] / verts[2].getProjPos()[3] - verts[1].getTangent()[2] / verts[1].getProjPos()[3]};
+
     Vec4 xPosVerts = {verts[2].getWorldPos()[0] / verts[2].getProjPos()[3] - verts[0].getWorldPos()[0] / verts[0].getProjPos()[3], verts[1].getWorldPos()[0] / verts[1].getProjPos()[3] - verts[0].getWorldPos()[0] / verts[0].getProjPos()[3], verts[2].getWorldPos()[0] / verts[2].getProjPos()[3] - verts[1].getWorldPos()[0] / verts[1].getProjPos()[3]};
     Vec4 yPosVerts = {verts[2].getWorldPos()[1] / verts[2].getProjPos()[3] - verts[0].getWorldPos()[1] / verts[0].getProjPos()[3], verts[1].getWorldPos()[1] / verts[1].getProjPos()[3] - verts[0].getWorldPos()[1] / verts[0].getProjPos()[3], verts[2].getWorldPos()[1] / verts[2].getProjPos()[3] - verts[1].getWorldPos()[1] / verts[1].getProjPos()[3]};
     Vec4 zPosVerts = {verts[2].getWorldPos()[2] / verts[2].getProjPos()[3] - verts[0].getWorldPos()[2] / verts[0].getProjPos()[3], verts[1].getWorldPos()[2] / verts[1].getProjPos()[3] - verts[0].getWorldPos()[2] / verts[0].getProjPos()[3], verts[2].getWorldPos()[2] / verts[2].getProjPos()[3] - verts[1].getWorldPos()[2] / verts[1].getProjPos()[3]};
@@ -212,6 +231,10 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
     Vec4 xNormalStepY = xNormalVerts / yVerts;
     Vec4 yNormalStepY = yNormalVerts / yVerts;
     Vec4 zNormalStepY = zNormalVerts / yVerts;
+
+    Vec4 xTangentStepY = xTangentVerts / yVerts;
+    Vec4 yTangentStepY = yTangentVerts / yVerts;
+    Vec4 zTangentStepY = zTangentVerts / yVerts;
 
     Vec4 xPosStepY = xPosVerts / yVerts;
     Vec4 yPosStepY = yPosVerts / yVerts;
@@ -245,6 +268,13 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
     Vec4 zNormal = {verts[0].getNormal()[2], verts[0].getNormal()[2], verts[1].getNormal()[2]};
     zNormal = zNormal / z2 + offs * zNormalStepY;
 
+    Vec4 xTangent = {verts[0].getTangent()[0], verts[0].getTangent()[0], verts[1].getTangent()[0]};
+    xTangent = xTangent / z2 + offs * xTangentStepY;
+    Vec4 yTangent = {verts[0].getTangent()[1], verts[0].getTangent()[1], verts[1].getTangent()[1]};
+    yTangent = yTangent / z2 + offs * yTangentStepY;
+    Vec4 zTangent = {verts[0].getTangent()[2], verts[0].getTangent()[2], verts[1].getTangent()[2]};
+    zTangent = zTangent / z2 + offs * zTangentStepY;
+
     Vec4 xPos = {verts[0].getWorldPos()[0], verts[0].getWorldPos()[0], verts[1].getWorldPos()[0]};
     xPos = xPos / z2 + offs * xPosStepY;
     Vec4 yPos = {verts[0].getWorldPos()[1], verts[0].getWorldPos()[1], verts[1].getWorldPos()[1]};
@@ -252,9 +282,9 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
     Vec4 zPos = {verts[0].getWorldPos()[2], verts[0].getWorldPos()[2], verts[1].getWorldPos()[2]};
     zPos = zPos / z2 + offs * zPosStepY;
 
-    LineInfo left{x[0], xStepY[0], z[0], zStepY[0], overZ[0], overZStepY[0], {xTex[0], yTex[0]}, {xTexStepY[0], yTexStepY[0]}, {xNormal[0], yNormal[0], zNormal[0]}, {xNormalStepY[0], yNormalStepY[0], zNormalStepY[0]}, {xPos[0], yPos[0], zPos[0]}, {xPosStepY[0], yPosStepY[0], zPosStepY[0]}};
-    LineInfo right{x[1], xStepY[1], z[1], zStepY[1], overZ[1], overZStepY[1], {xTex[1], yTex[1]}, {xTexStepY[1], yTexStepY[1]}, {xNormal[1], yNormal[1], zNormal[1]}, {xNormalStepY[1], yNormalStepY[1], zNormalStepY[1]}, {xPos[0], yPos[0], zPos[0]}, {xPosStepY[0], yPosStepY[0], zPosStepY[0]}};
-    LineInfo temp{x[2], xStepY[2], z[2], zStepY[2], overZ[2], overZStepY[2], {xTex[2], yTex[2]}, {xTexStepY[2], yTexStepY[2]}, {xNormal[2], yNormal[2], zNormal[2]}, {xNormalStepY[2], yNormalStepY[2], zNormalStepY[2]}, {xPos[0], yPos[0], zPos[0]}, {xPosStepY[0], yPosStepY[0], zPosStepY[0]}};
+    LineInfo left{x[0], xStepY[0], z[0], zStepY[0], overZ[0], overZStepY[0], {xTex[0], yTex[0]}, {xTexStepY[0], yTexStepY[0]}, {xNormal[0], yNormal[0], zNormal[0]}, {xNormalStepY[0], yNormalStepY[0], zNormalStepY[0]}, {xTangent[0], yTangent[0], zTangent[0]}, {xTangentStepY[0], yTangentStepY[0], zTangentStepY[0]}, {xPos[0], yPos[0], zPos[0]}, {xPosStepY[0], yPosStepY[0], zPosStepY[0]}};
+    LineInfo right{x[1], xStepY[1], z[1], zStepY[1], overZ[1], overZStepY[1], {xTex[1], yTex[1]}, {xTexStepY[1], yTexStepY[1]}, {xNormal[1], yNormal[1], zNormal[1]}, {xNormalStepY[1], yNormalStepY[1], zNormalStepY[1]}, {xTangent[1], yTangent[1], zTangent[1]}, {xTangentStepY[1], yTangentStepY[1], zTangentStepY[1]}, {xPos[0], yPos[0], zPos[0]}, {xPosStepY[0], yPosStepY[0], zPosStepY[0]}};
+    LineInfo temp{x[2], xStepY[2], z[2], zStepY[2], overZ[2], overZStepY[2], {xTex[2], yTex[2]}, {xTexStepY[2], yTexStepY[2]}, {xNormal[2], yNormal[2], zNormal[2]}, {xNormalStepY[2], yNormalStepY[2], zNormalStepY[2]}, {xTangent[2], yTangent[2], zTangent[2]}, {xTangentStepY[2], yTangentStepY[2], zTangentStepY[2]}, {xPos[0], yPos[0], zPos[0]}, {xPosStepY[0], yPosStepY[0], zPosStepY[0]}};
 
     bool side = vert10.cross(vert20).getZ() >= 0;
 
@@ -280,6 +310,9 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
             Vec4 normStepX = (right.normal - left.normal) / (right.x - left.x);
             Vec4 normX = left.normal + normStepX * xOffset;
 
+            Vec4 tanStepX = (right.tangent - left.tangent) / (right.x - left.x);
+            Vec4 tanX = left.tangent + tanStepX * xOffset;
+
             Vec4 posStepX = (right.position - left.position) / (right.x - left.x);
             Vec4 posX = left.position + posStepX * xOffset;
 
@@ -295,7 +328,16 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
 
                     Vec4 pos = posX * regZ;
 
-                    Vec4 normal = (normX * regZ).normalize();
+                    Vec4 norma = (normX * regZ).normalize();
+                    Vec4 tangent = (tanX * regZ).normalize();
+                    tangent = (tangent - norma * tangent.dot(norma)).normalize();
+                    Vec4 bitangent = tangent.cross(norma);
+
+                    //std::cout << tangent << bitangent << norma << std::endl;
+
+                    norma.setW(0);
+                    tangent.setW(0);
+                    bitangent.setW(0);
 
                     Vec4 texAdjust = texX * regZ;
 
@@ -307,6 +349,21 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
                         texAdjust.setY(1 + texAdjust.getY());
 
                     texAdjust.setY(1 - texAdjust.getY());
+
+                    Vec4 bump = mat->getBump(texAdjust);
+                    bump = bump * 2 - 1;
+
+                    Mat4 TBN;
+                    TBN.addPoint(tangent);
+                    TBN.addPoint(bitangent);
+                    TBN.addPoint(norma);
+                    TBN.addPoint({0, 0, 0, 1});
+                    //TBN = TBN.transpose();
+                    //std::cout << TBN.toString() << std::endl << std::endl;
+
+                    Vec4 normal = TBN.multiply( Mat4({{bump[0]}, {bump[1]}, {bump[2]}, {0}}) ).getPoint(0).normalize();
+
+                    //normal = norma;
 
                     Vec4 Ka = mat->getAmbient(texAdjust);
                     Vec4 Kd = mat->getDiffuse(texAdjust);
@@ -388,6 +445,7 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
                 overZX += overZStepX;
                 texX = texX + texStepX;
                 normX = normX + normStepX;
+                tanX = tanX + tanStepX;
                 posX = posX + posStepX;
             }
 
@@ -396,12 +454,14 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
             left.overZ += left.overZStepY;
             left.tex = left.tex + left.texStepY;
             left.normal = left.normal + left.normalStepY;
+            left.tangent = left.tangent + left.tangentStepY;
             left.position = left.position + left.positionStepY;
             right.x += right.xStepY;
             right.z += right.zStepY;
             right.overZ += right.overZStepY;
             right.tex = right.tex + right.texStepY;
             right.normal = right.normal + right.normalStepY;
+            right.tangent = right.tangent + right.tangentStepY;
             right.position = right.position + right.positionStepY;
 
             y++;

@@ -33,7 +33,13 @@ std::vector<Vec4> &RenderObject::getNormals()
     return normals;
 }
 
-std::vector<std::tuple<int, int, int>> &RenderObject::getIndices()
+
+std::vector<Vec4> &RenderObject::getTangents()
+{
+    return tangents;
+}
+
+std::vector<std::tuple<int, int, int, int>> &RenderObject::getIndices()
 {
     return indices;
 }
@@ -88,7 +94,13 @@ void RenderObject::addNormal(Vec4 const &norm)
     normals.push_back(norm);
 }
 
-void RenderObject::addIndex(std::tuple<int, int, int> idx)
+void RenderObject::addTangent(Vec4 const & tangent)
+{
+    tangents.push_back(tangent);
+}
+
+
+void RenderObject::addIndex(std::tuple<int, int, int, int> idx)
 {
     indices.push_back(idx);
 }
@@ -101,6 +113,19 @@ void RenderObject::addMaterial(Material *mat)
 void RenderObject::updateVertexNormals(bool smooth)
 {
     normals.clear();
+
+    bool calcTangents = true;
+
+    tangents.clear();
+    //loop thru tex coords, if any are missing, do not calc tangents
+    for (auto const & idx : indices) {
+        if (std::get<1>(idx) < 0) {
+            calcTangents = false;
+            break;
+        }
+    }
+
+    //http://ogldev.org/www/tutorial26/tutorial26.html
     if (!smooth)
     {
         for (unsigned int i = 0; i < indices.size(); i += 3)
@@ -113,11 +138,25 @@ void RenderObject::updateVertexNormals(bool smooth)
             std::get<2>(indices[i + 1]) = normals.size();
             std::get<2>(indices[i + 2]) = normals.size();
             addNormal(norm);
+
+            if (calcTangents) {
+                Vec4 edge1 = p1-p0;
+                Vec4 edge2 = p2-p0;
+                Vec4 dTex1 = textureCoords[std::get<1>(indices[i+1])] - textureCoords[std::get<1>(indices[i])];
+                Vec4 dTex2 = textureCoords[std::get<1>(indices[i+2])] - textureCoords[std::get<1>(indices[i])];
+                double f = 1.0 / (dTex1[0]*dTex2[1]-dTex1[1]*dTex2[0]);
+                Vec4 const & tangent = (edge1 * dTex2[1] - edge2 * dTex1[1]) * f;
+                std::get<3>(indices[i]) = tangents.size();
+                std::get<3>(indices[i+1]) = tangents.size();
+                std::get<3>(indices[i+2]) = tangents.size();
+                addTangent(tangent);
+            }
         }
     }
     else
     {
         std::unordered_map<int, Vec4> tempNormals;
+        std::unordered_map<int, Vec4> tempTangents;
         for (unsigned int i = 0; i < indices.size(); i += 3)
         {
             Vec4 const &p0 = vertexPositions[std::get<0>(indices[i])];
@@ -127,6 +166,18 @@ void RenderObject::updateVertexNormals(bool smooth)
             tempNormals[std::get<0>(indices[i])] = tempNormals[std::get<0>(indices[i])] + norm;
             tempNormals[std::get<0>(indices[i + 1])] = tempNormals[std::get<0>(indices[i + 1])] + norm;
             tempNormals[std::get<0>(indices[i + 2])] = tempNormals[std::get<0>(indices[i + 2])] + norm;
+
+            if (calcTangents) {
+                Vec4 edge1 = p1-p0;
+                Vec4 edge2 = p2-p0;
+                Vec4 dTex1 = textureCoords[std::get<1>(indices[i+1])] - textureCoords[std::get<1>(indices[i])];
+                Vec4 dTex2 = textureCoords[std::get<1>(indices[i+2])] - textureCoords[std::get<1>(indices[i])];
+                double f = 1.0 / (dTex1[0]*dTex2[1]-dTex1[1]*dTex2[0]);
+                Vec4 const & tangent = (edge1 * dTex2[1] - edge2 * dTex1[1]) * f;
+                tempTangents[std::get<0>(indices[i])] = tempTangents[std::get<0>(indices[i])] + tangent;
+                tempTangents[std::get<0>(indices[i+1])] = tempTangents[std::get<0>(indices[i+1])] + tangent;
+                tempTangents[std::get<0>(indices[i+2])] = tempTangents[std::get<0>(indices[i+2])] + tangent;
+            }
         }
         for (unsigned int i = 0; i < indices.size(); i++)
         {
@@ -134,6 +185,17 @@ void RenderObject::updateVertexNormals(bool smooth)
             //tempNormals[i] = tempNormals[i].normalize();
             std::get<2>(indices[i]) = normals.size();
             addNormal(calculated);
+
+            Vec4 const &calculatedTangent = tempTangents[std::get<0>(indices[i])].normalize();
+            std::get<3>(indices[i]) = tangents.size();
+            addTangent(calculatedTangent);
+
+
+
+
+// DO TANGENTS CALCS
+
+
         }
     }
 }
@@ -142,7 +204,7 @@ void RenderObject::addPoint(Vec4 const &v, bool weld)
 {
     if (!weld)
     {
-        indices.push_back({vertexPositions.size(), -1, -1});
+        indices.push_back({vertexPositions.size(), -1, -1, -1});
         vertexPositions.push_back(v);
     }
     else
@@ -151,14 +213,14 @@ void RenderObject::addPoint(Vec4 const &v, bool weld)
         //std::cout << v0 << std::endl;
         if (vertex_mappings.count(v0) == 0)
         {
-            indices.push_back({vertexPositions.size(), -1, -1});
+            indices.push_back({vertexPositions.size(), -1, -1, -1});
             vertex_mappings.insert({v0, vertexPositions.size()});
             vertexPositions.push_back(v0);
         }
         else
         {
             //std::cout << "welded" << std::endl;
-            indices.push_back({vertex_mappings.at(v0), -1, -1});
+            indices.push_back({vertex_mappings.at(v0), -1, -1, -1});
         }
     }
 }
