@@ -2,7 +2,7 @@
 By: Greg Zborovsky
 
 ## Greg Zborovsky pd. 4
-### Features I want to implement for final project:
+### Features I want to implement for final project: [All base features added!]
 * Finish texture loading/OBJ Loading
   * Correct/ensure that texture loading works fine - Done
   * Support multiple texture coordinates per vertex - Done
@@ -12,7 +12,7 @@ By: Greg Zborovsky
   * Will combine texture mapping and normals to alter light calculations as if triangle wasn't perfectly flat - Done
 * Orthographic Camera - Done
 * Sky Map
-  * Essentially a regular cube, but normals are inverted and texture is available on the inside.
+  * Essentially a regular cube, but normals are inverted and texture is available on the inside. - Done
   * (Maybe allow using normals from OBJ file?) - Done
 * Gamma correction
   * Gamma correct all values related to user input and light except for non color data. (To power of 2.2, and to power of 1/2.2 at end) - Done I think?
