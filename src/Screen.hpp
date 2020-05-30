@@ -11,23 +11,27 @@ class Screen : public PixelGrid<Color>
 {
 private:
     void drawLine(Vec4 const &a, Vec4 const &b, Color color, bool flipped);
+    bool supersample;
 
 protected:
     PixelGrid<double> zbuffer;
+    PixelGrid<Color> downsampled;
 
 public:
-    Screen(int width, int height);
+    Screen(int width, int height, bool supersample_);
 
-    void toFileAscii(std::string fileName);
-    void toFile(std::string fileName);
-    void toFileExtension(std::string fileName);
-    void display();
+    PixelGrid<Color>* updateTrueScreen();
 
     void plot(Vec4 const &point, Color color);
 
     void drawLine(Vec4 const &a, Vec4 const &b, Color color);
     void drawEdges(Mat4 const &matrix, Color color);
     void clear(Color color);
+
+    void toFileAscii(std::string fileName);
+    void toFile(std::string fileName);
+    void toFileExtension(std::string fileName);
+    void display();
 
     PixelGrid<double> &zbuf();
     double &zbuf(int row, int col);

@@ -29,8 +29,10 @@ public:
     int getHeight() const;
     int getWidth() const;
 
-    void display() const;
+    void toFileAscii(std::string fileName);
+    void toFile(std::string fileName);
     void toFileExtension(std::string fileName);
+    void display();
 
     static PixelGrid<Color> loadTexture(std::string texName);
 

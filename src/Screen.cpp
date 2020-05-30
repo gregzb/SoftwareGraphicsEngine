@@ -3,90 +3,34 @@
 #include "Screen.hpp"
 #include "PixelGrid.hpp"
 
-Screen::Screen(int width, int height) : PixelGrid(width, height), zbuffer(width, height)
+Screen::Screen(int width, int height, bool supersample_) : PixelGrid(width * (supersample_+1), height * (supersample_+1)), supersample(supersample_), zbuffer(width * (supersample_+1), height * (supersample_+1))
 {
     clearZbuf();
 }
 
-void Screen::toFileAscii(std::string fileName)
-{
-    std::ofstream myfile;
-    myfile.open(fileName);
-    myfile << "P3\n"
-           << width << " " << height << "\n255\n";
-
-    for (int row = getHeight() - 1; row >= 0; row--)
-    {
-        for (int col = 0; col < getWidth(); col++)
-        {
-            Color color = pixelAt(row, col);
-            myfile << " " << +color.r << " " << +color.g << " " << +color.b << "  ";
+PixelGrid<Color>* Screen::updateTrueScreen() {
+    if (supersample) {
+        downsampled = PixelGrid<Color>(getWidth()/2, getHeight()/2);
+        for (int row = 0; row < downsampled.getHeight(); row++) {
+            for (int col = 0; col < downsampled.getWidth(); col++) {
+                double equiRow = (row * 2.0 + 1) / getHeight();
+                double equiCol = (col * 2.0 + 1) / getWidth();
+                Color color = linRead({equiCol, equiRow}).toColor();
+                //std::cout << equiCol << " " << equiRow << std::endl;
+                //std::cout << row << " " << col << ": " << linRead({equiCol, equiRow}) << std::endl;
+                downsampled(row, col) = color;
+            }
         }
-        myfile << "\n";
+
+        return &downsampled;
+    } else {
+        return this;
     }
-    myfile.close();
-}
-
-void Screen::toFile(std::string fileName)
-{
-    std::ofstream myfile;
-    myfile.open(fileName);
-    myfile << "P6\n"
-           << width << " " << height << "\n255\n";
-
-    for (int row = getHeight() - 1; row >= 0; row--)
-    {
-        for (int col = 0; col < getWidth(); col++)
-        {
-            Color color = pixelAt(row, col);
-            myfile << color.r << color.g << color.b;
-        }
-    }
-    myfile.close();
-}
-
-void Screen::toFileExtension(std::string fileName)
-{
-    std::string command = "convert - ";
-    command.append(fileName);
-
-    FILE *f = popen(command.c_str(), "w");
-    fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
-    for (int y = height - 1; y >= 0; y--)
-    //for (int y = 0; y < height; y++)
-    {
-        for (int x = 0; x < width; x++)
-        {
-            Color color = pixelAt(y, x);
-            fprintf(f, "%d %d %d ", color.r, color.g, color.b);
-        }
-        fprintf(f, "\n");
-    }
-    pclose(f);
-}
-
-void Screen::display()
-{
-    FILE *f;
-
-    f = popen("display", "w");
-
-    fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
-    for (int y = height - 1; y >= 0; y--)
-    {
-        for (int x = 0; x < width; x++)
-        {
-            Color color = pixelAt(y, x);
-            fprintf(f, "%d %d %d ", color.r, color.g, color.b);
-        }
-        fprintf(f, "\n");
-    }
-    pclose(f);
 }
 
 void Screen::plot(Vec4 const & pixel, Color color)
 {
-    if (zbuf(pixel.getY(), pixel.getX() < pixel.getZ()))
+    if (zbuf(pixel.getY(), pixel.getX()) < pixel.getZ())
     {
         zbuf(pixel.getY(), pixel.getX()) = pixel.getZ();
         pixelAt(pixel.getY(), pixel.getX()) = color;
@@ -179,4 +123,21 @@ void Screen::clearZbuf(double value)
             zbuf(row, col) = value;
         }
     }
+}
+
+void Screen::toFileAscii(std::string fileName) {
+    auto displayScreen = updateTrueScreen();
+    displayScreen->toFileAscii(fileName);
+}
+void Screen::toFile(std::string fileName) {
+    auto displayScreen = updateTrueScreen();
+    displayScreen->toFile(fileName);
+}
+void Screen::toFileExtension(std::string fileName) {
+    auto displayScreen = updateTrueScreen();
+    displayScreen->toFileExtension(fileName);
+}
+void Screen::display() {
+    auto displayScreen = updateTrueScreen();
+    displayScreen->display();
 }

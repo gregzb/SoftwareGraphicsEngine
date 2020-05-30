@@ -126,34 +126,122 @@ int PixelGrid<T>::getWidth() const
     return width;
 }
 
-template <>
-void PixelGrid<Color>::display() const
+// template <>
+// void PixelGrid<Color>::display() const
+// {
+//     FILE *f;
+
+//     f = popen("display", "w");
+
+//     fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
+//     //for (int y = height - 1; y >= 0; y--)
+//     for (int y = 0; y < height; y++)
+//     {
+//         for (int x = 0; x < width; x++)
+//         {
+//             Color color = read(y, x);
+//             fprintf(f, "%d %d %d ", color.r, color.g, color.b);
+//         }
+//         fprintf(f, "\n");
+//     }
+//     // for (int x = 0; x < width; x++)
+//     // {
+//     //     for (int y = height - 1; y >= 0; y--)
+//     //     {
+//     //         Color color = pixelAt(y, x);
+//     //         fprintf(f, "%d %d %d ", color.r, color.g, color.b);
+//     //     }
+//     //     fprintf(f, "\n");
+//     // }
+//     pclose(f);
+// }
+
+// template <>
+// void PixelGrid<Color>::toFileExtension(std::string fileName)
+// {
+//     std::string command = "convert - ";
+//     command.append(fileName);
+
+//     FILE *f = popen(command.c_str(), "w");
+//     fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
+//     for (int y = height - 1; y >= 0; y--)
+//     //for (int y = 0; y < height; y++)
+//     {
+//         for (int x = 0; x < width; x++)
+//         {
+//             Color color = pixelAt(y, x);
+//             fprintf(f, "%d %d %d ", color.r, color.g, color.b);
+//         }
+//         fprintf(f, "\n");
+//     }
+//     pclose(f);
+// }
+
+template <class T>
+void PixelGrid<T>::toFileAscii(std::string fileName)
 {
-    FILE *f;
+    std::cout << "Not a color grid!" << std::endl;
+    exit(0);
+}
 
-    f = popen("display", "w");
+template <class T>
+void PixelGrid<T>::toFile(std::string fileName)
+{
+    std::cout << "Not a color grid!" << std::endl;
+    exit(0);
+}
 
-    fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
-    //for (int y = height - 1; y >= 0; y--)
-    for (int y = 0; y < height; y++)
+template <class T>
+void PixelGrid<T>::toFileExtension(std::string fileName)
+{
+    std::cout << "Not a color grid!" << std::endl;
+    exit(0);
+}
+
+template <class T>
+void PixelGrid<T>::display()
+{
+    std::cout << "Not a color grid!" << std::endl;
+    exit(0);
+}
+
+template <>
+void PixelGrid<Color>::toFileAscii(std::string fileName)
+{
+    std::ofstream myfile;
+    myfile.open(fileName);
+    myfile << "P3\n"
+           << width << " " << height << "\n255\n";
+
+    for (int row = getHeight() - 1; row >= 0; row--)
     {
-        for (int x = 0; x < width; x++)
+        for (int col = 0; col < getWidth(); col++)
         {
-            Color color = read(y, x);
-            fprintf(f, "%d %d %d ", color.r, color.g, color.b);
+            Color color = pixelAt(row, col);
+            myfile << " " << +color.r << " " << +color.g << " " << +color.b << "  ";
         }
-        fprintf(f, "\n");
+        myfile << "\n";
     }
-    // for (int x = 0; x < width; x++)
-    // {
-    //     for (int y = height - 1; y >= 0; y--)
-    //     {
-    //         Color color = pixelAt(y, x);
-    //         fprintf(f, "%d %d %d ", color.r, color.g, color.b);
-    //     }
-    //     fprintf(f, "\n");
-    // }
-    pclose(f);
+    myfile.close();
+}
+
+template <>
+void PixelGrid<Color>::toFile(std::string fileName)
+{
+    std::ofstream myfile;
+    myfile.open(fileName);
+    myfile << "P6\n"
+           << width << " " << height << "\n255\n";
+
+    for (int row = getHeight() - 1; row >= 0; row--)
+    {
+        for (int col = 0; col < getWidth(); col++)
+        {
+            Color color = pixelAt(row, col);
+            myfile << color.r << color.g << color.b;
+        }
+    }
+    myfile.close();
 }
 
 template <>
@@ -166,6 +254,26 @@ void PixelGrid<Color>::toFileExtension(std::string fileName)
     fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
     for (int y = height - 1; y >= 0; y--)
     //for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            Color color = pixelAt(y, x);
+            fprintf(f, "%d %d %d ", color.r, color.g, color.b);
+        }
+        fprintf(f, "\n");
+    }
+    pclose(f);
+}
+
+template <>
+void PixelGrid<Color>::display()
+{
+    FILE *f;
+
+    f = popen("display", "w");
+
+    fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
+    for (int y = height - 1; y >= 0; y--)
     {
         for (int x = 0; x < width; x++)
         {

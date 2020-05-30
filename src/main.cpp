@@ -34,7 +34,7 @@ int main()
     //OBJLoader obj("resources/cube.obj");
     // OBJLoader obj("resources/sword.obj");
     //OBJLoader obj("resources/smalltex.obj");
-    Screen screen(500, 500);
+    Screen screen(1600, 1600, false);
     //Camera cam(170, static_cast<double>(screen.getWidth()) / screen.getHeight(), .1, 1000, false);
     Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), .1, 1000, true);
     Scene mainScene;
@@ -65,37 +65,38 @@ int main()
     screen.clear({255, 255, 255, 255});
     mainScene.renderToScreen(cam, screen);
 
-    screen.display();
+    //screen.display();
+    screen.toFileExtension("big.png");
 
 
-    system("mkdir -p ./animation/");
-    system("rm ./animation/*");
+    // system("mkdir -p ./animation/");
+    // system("rm ./animation/*");
 
-    for (int i = 0; i < 60; i++)
-    {
-        std::cout << i << std::endl;
-        Vec4 rot = mainScene.getObject("Sphere").getRotation();
-        rot.setY(2 * M_PI / 60 * i);
-        mainScene.getObject("Sphere").setRotation(rot);
+    // for (int i = 0; i < 60; i++)
+    // {
+    //     std::cout << i << std::endl;
+    //     Vec4 rot = mainScene.getObject("Sphere").getRotation();
+    //     rot.setY(2 * M_PI / 60 * i);
+    //     mainScene.getObject("Sphere").setRotation(rot);
 
-        screen.clear({0, 0, 0, 255});
-        screen.clear({255, 255, 255, 255});
-        screen.clearZbuf();
+    //     screen.clear({0, 0, 0, 255});
+    //     screen.clear({255, 255, 255, 255});
+    //     screen.clearZbuf();
 
-        mainScene.renderToScreen(cam, screen);
+    //     mainScene.renderToScreen(cam, screen);
 
-        std::string s = std::to_string(i);
-        s.insert(s.begin(), 5 - s.size(), '0');
+    //     std::string s = std::to_string(i);
+    //     s.insert(s.begin(), 5 - s.size(), '0');
 
-        screen.toFileExtension("./animation/img" + s + ".png");
-    }
+    //     screen.toFileExtension("./animation/img" + s + ".png");
+    // }
 
-    int delay = 4;
-    std::string outputName = "animation.gif";
+    // int delay = 4;
+    // std::string outputName = "animation.gif";
 
-    system(("convert -delay " + std::to_string(delay) + " ./animation/* " + outputName).c_str());
-    std::cout << "The animation was rendered into " << outputName << std::endl;
-    system(("animate " + outputName).c_str());
+    // system(("convert -delay " + std::to_string(delay) + " ./animation/* " + outputName).c_str());
+    // std::cout << "The animation was rendered into " << outputName << std::endl;
+    // system(("animate " + outputName).c_str());
 
     return 0;
 }
