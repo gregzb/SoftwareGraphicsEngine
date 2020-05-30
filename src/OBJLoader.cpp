@@ -263,7 +263,7 @@ RenderObject OBJLoader::toRenderObject(std::string name) const
     RenderObject temp(obj.smoothShading);
 
     bool recalc = false;
-    recalc = true; // ALWAYS RECALCING FOR NOW FOR TANGENTS
+    //recalc = true; // ALWAYS RECALCING FOR NOW FOR TANGENTS
 
     for (uint i = 0; i < obj.vertexIndices.size(); i++)
     {
@@ -308,7 +308,7 @@ RenderObject OBJLoader::toRenderObject(std::string name) const
     }
 
     if (recalc) {
-        temp.updateVertexNormals(obj.smoothShading);
+        temp.updateVertexNormals();
     }
 
     return temp;

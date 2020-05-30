@@ -62,6 +62,7 @@ T const &PixelGrid<T>::rawRead(Vec4 const & pos) const {
 template <>
 Vec4 PixelGrid<Color>::linRead(Vec4 const &pos) const
 {
+    //std::cout << pos << std::endl;
     assert(pos[0] >= 0 && pos[0] < 1 && pos[1] >= 0 && pos[1] < 1);
     double y = pos[1] * getHeight();
     while (y >= getHeight()) y -= std::numeric_limits<double>::epsilon() * 10;

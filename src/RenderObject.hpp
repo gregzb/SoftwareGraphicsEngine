@@ -53,7 +53,7 @@ public:
     void addIndex(std::tuple<int, int, int, int> idx);
     void addMaterial(Material * mat);
 
-    void updateVertexNormals(bool smooth);
+    void updateVertexNormals();
 
     void addPoint(Vec4 const &v, bool weld = false);
     void addTriangle(Vec4 const &v0, Vec4 const &v1, Vec4 const &v2, bool weld = false, Material * mat = &Material::defaultMaterial);

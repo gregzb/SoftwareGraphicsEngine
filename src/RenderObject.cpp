@@ -110,7 +110,7 @@ void RenderObject::addMaterial(Material *mat)
     materials.push_back(mat);
 }
 
-void RenderObject::updateVertexNormals(bool smooth)
+void RenderObject::updateVertexNormals()
 {
     normals.clear();
 
@@ -270,7 +270,7 @@ void RenderObject::addBox(Vec4 const &v, Vec4 const &dims)
     // for (auto & vert : vertices) {
     //     vert.color = {rand() % 256, rand() % 256, rand() % 256, 255};
     // }
-    updateVertexNormals(smooth);
+    updateVertexNormals();
 }
 
 void RenderObject::addSphere(Vec4 const &v, double r, int thetaSteps, int phiSteps)
@@ -328,7 +328,7 @@ void RenderObject::addSphere(Vec4 const &v, double r, int thetaSteps, int phiSte
         }
     }
 
-    updateVertexNormals(smooth);
+    updateVertexNormals();
 }
 
 void RenderObject::addTorus(Vec4 const &v, double r1, double r2, int thetaSteps, int phiSteps)
@@ -375,5 +375,5 @@ void RenderObject::addTorus(Vec4 const &v, double r1, double r2, int thetaSteps,
             addTriangle(points[0], points[2], points[3], true);
         }
     }
-    updateVertexNormals(smooth);
+    updateVertexNormals();
 }

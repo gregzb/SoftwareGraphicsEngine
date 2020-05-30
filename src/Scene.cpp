@@ -5,13 +5,14 @@
 
 void Scene::clipTriangle(std::vector<Vertex> &triangle, int dimension, int side, std::vector<Vertex> &out)
 {
+    //add 0.00001 to get rid of pixel innaccuracies.
     for (uint i = 0; i < triangle.size(); i++)
     {
         Vec4 const &pos1 = triangle[i].getProjPos();
-        bool inside1 = pos1[dimension] * side <= pos1.getW();
+        bool inside1 = pos1[dimension] * side <= pos1.getW()*1.0001+0.00001;
 
         Vec4 const &pos2 = triangle[(i + 1) % triangle.size()].getProjPos();
-        bool inside2 = pos2[dimension] * side <= pos2.getW();
+        bool inside2 = pos2[dimension] * side <= pos2.getW()*1.0001+0.00001;
 
         if (inside1)
         {
@@ -20,20 +21,23 @@ void Scene::clipTriangle(std::vector<Vertex> &triangle, int dimension, int side,
 
         if (inside1 != inside2)
         {
-            double t = (pos1.getW() - pos1[dimension] * side) / ((pos2[dimension] * side - pos2.getW()) - (pos1[dimension] * side - pos1.getW()));
+            double t = (pos1.getW()*1.0001+0.00001 - pos1[dimension] * side) / ((pos2[dimension] * side - pos2.getW()*1.0001-0.00001) - (pos1[dimension] * side - pos1.getW()*1.0001-0.00001));
             out.push_back(triangle[i].lerp(triangle[(i + 1) % triangle.size()], t));
         }
     }
 }
 
-void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object)
+void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object, bool isSkybox)
 {
     Mat4 const &mMat = object.getModelMatrix();
-    Mat4 const &mvMat = cam.getViewMatrix().multiply(object.getModelMatrix());
+    // std::cout << cam.getViewMatrix().toString() << std::endl;
+    // std::cout << std::endl;
+    // std::cout << cam.getRotationMatrix().toString() << std::endl;
+    Mat4 const &mvMat = isSkybox ? cam.getRotationMatrix().multiply(object.getModelMatrix()) : cam.getViewMatrix().multiply(object.getModelMatrix());
     Mat4 const &pMat = cam.isPerspective() ? cam.getPerspectiveProjectionMatrix() : cam.getOrthographicProjectionMatrix();
 
-    Mat4 const & transposed = mvMat.transpose();
-    Mat4 const & inverted = transposed.invert();
+    Mat4 const &transposed = mvMat.transpose();
+    Mat4 const &inverted = transposed.invert();
 
     // std::vector<Vertex> &tris = object.getMesh(); // need to not make copy or smthing?
     // std::vector<int> const &indices = object.getMeshIndices();
@@ -72,13 +76,13 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
             ta.setW(0);
             ta = ta.transform(mMat);
 
-        //     /*
-        //     TRANSFORMING NORMAL BY THE MV MATRIX IS WRONG.
-        //     YOU MUST TRANSFORM BY TRANSPOSE OF INVERSE OF MATRIX
-        //     BEFORE THAT, SET W TO 0 - NORMALS ARE A DIRECTION, NOT A POSITION
-        //     */
+            //     /*
+            //     TRANSFORMING NORMAL BY THE MV MATRIX IS WRONG.
+            //     YOU MUST TRANSFORM BY TRANSPOSE OF INVERSE OF MATRIX
+            //     BEFORE THAT, SET W TO 0 - NORMALS ARE A DIRECTION, NOT A POSITION
+            //     */
 
-        //    // TRANSFORM NORMAL AND TANGENT BY mvMAT, SET W TO 0
+            //    // TRANSFORM NORMAL AND TANGENT BY mvMAT, SET W TO 0
 
             // Vec4 no;
             // if (std::get<2>(index) >= 0)
@@ -111,7 +115,7 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
                 triangle[j].getVertexPos().updateProjPos(triangle[j].getProjPos().perspectiveDivision());
                 triangle[j].getVertexPos().updateProjPos({Utils::map(triangle[j].getProjPos().getX(), -1, 1, 0, screen.getWidth()), Utils::map(triangle[j].getProjPos().getY(), -1, 1, 0, screen.getHeight()), triangle[j].getProjPos().getZ(), triangle[j].getProjPos().getW()});
             }
-            drawTriangle(screen, triangle, object, currMat);
+            drawTriangle(screen, triangle, object, currMat, isSkybox);
             break;
         case 2:
         case 1:
@@ -149,7 +153,7 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
             {
                 triangle[1] = clipping1[j];
                 triangle[2] = clipping1[j + 1];
-                drawTriangle(screen, triangle, object, currMat);
+                drawTriangle(screen, triangle, object, currMat, isSkybox);
             }
             break;
         default:
@@ -158,7 +162,7 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
     }
 }
 
-void Scene::drawTriangle(Screen &screen, std::vector<Vertex> vertices, RenderObject const &object, Material const *mat)
+void Scene::drawTriangle(Screen &screen, std::vector<Vertex> vertices, RenderObject const &object, Material const *mat, bool isSkybox)
 {
     Vec4 normal = vertices[0].getProjPos().getNormal(vertices[1].getProjPos(), vertices[2].getProjPos());
     if (normal.getZ() < std::numeric_limits<double>::epsilon() * 100) //this works in screen space :)
@@ -168,7 +172,7 @@ void Scene::drawTriangle(Screen &screen, std::vector<Vertex> vertices, RenderObj
 
     //std::cout << vertices[0].getNormal() << " " << vertices[1].getNormal() << " " << vertices[2].getNormal() << " " << std::endl;
 
-    fillTriangle(screen, vertices, object, mat);
+    fillTriangle(screen, vertices, object, mat, isSkybox);
 
     // for (int i = 0; i < 3; i++) {
     //     screen.drawLine(vertices[i].getProjPos(), vertices[(i+1)%3].getProjPos(), {255, 0, 255, 255});
@@ -186,7 +190,7 @@ struct LineInfo
     Vec4 position, positionStepY;
 };
 
-void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObject const &object, Material const *mat)
+void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObject const &object, Material const *mat, bool isSkybox)
 {
     if (verts[0].getProjPos().getY() > verts[1].getProjPos().getY())
         std::swap(verts[0], verts[1]);
@@ -318,7 +322,9 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
 
             for (int x = std::ceil(left.x); x < std::ceil(right.x); x++)
             {
-                if (screen.zbuf(y, x) > zX)
+                //2 is fine bc it gets normalized from 0 to 1
+                double depthTester = isSkybox ? 2 : zX;
+                if (screen.zbuf(y, x) > depthTester)
                 {
                     //std::cout << "drawing" << std::endl;
                     screen.zbuf(y, x) = zX;
@@ -349,6 +355,7 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
                         texAdjust.setY(1 + texAdjust.getY());
 
                     texAdjust.setY(1 - texAdjust.getY());
+                    texAdjust.setY(std::fmod(texAdjust.getY(), 1.0));
 
                     Vec4 bump = mat->getBump(texAdjust);
                     bump = bump * 2 - 1;
@@ -361,7 +368,7 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
                     //TBN = TBN.transpose();
                     //std::cout << TBN.toString() << std::endl << std::endl;
 
-                    Vec4 normal = TBN.multiply( Mat4({{bump[0]}, {bump[1]}, {bump[2]}, {0}}) ).getPoint(0).normalize();
+                    Vec4 normal = TBN.multiply(Mat4({{bump[0]}, {bump[1]}, {bump[2]}, {0}})).getPoint(0).normalize();
 
                     //normal = norma;
 
@@ -432,8 +439,13 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
                     illum.set(1, Utils::clamp(illum[1], 0.0, 1.0));
                     illum.set(2, Utils::clamp(illum[2], 0.0, 1.0));
 
+                    if (isSkybox) {
+                        illum = Kd;
+                        //illum = {1, 0, 0, 1};
+                    }
+
                     //gamma correct right here by raising to 1/2.2 power
-                    illum = illum.pow(1/2.2);
+                    illum = illum.pow(1 / 2.2);
 
                     // illum.set(0, Utils::clamp(illum[0], 0.0, 1.0));
                     // illum.set(1, Utils::clamp(illum[1], 0.0, 1.0));
@@ -726,6 +738,16 @@ void Scene::addObject(std::string const &name, RenderObject const &object)
     objects.insert({name, object});
 }
 
+void Scene::setSkybox(RenderObject const &object)
+{
+    skybox = object;
+}
+
+void Scene::removeSkybox()
+{
+    skybox.reset();
+}
+
 RenderObject &Scene::getObject(std::string const &name)
 {
     return objects.at(name);
@@ -761,5 +783,9 @@ void Scene::renderToScreen(Camera const &cam, Screen &screen)
     for (auto &obj : objects)
     {
         renderObject(cam, screen, obj.second);
+    }
+    if (skybox.has_value())
+    {
+        renderObject(cam, screen, skybox.value(), true);
     }
 }

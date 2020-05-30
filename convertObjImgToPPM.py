@@ -3,6 +3,8 @@ from PIL import Image
 
 from pathlib import Path
 
+Image.MAX_IMAGE_PIXELS = None
+
 for path in Path('.').rglob('*.mtl'):
     #print(path.parent)
     print(path)

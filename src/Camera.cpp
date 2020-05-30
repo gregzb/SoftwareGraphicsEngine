@@ -32,16 +32,16 @@ Mat4 Camera::getViewMatrix() const
 
     // Mat4 const &view = translateMat.multiply(rotXMat).multiply(rotYMat).multiply(rotZMat);
 
-    Mat4 const &view = translateMat.multiply(getRotationMatrix());
+    Mat4 const &rotationMat = getRotationMatrix();
 
-    return view;
+    return rotationMat.multiply(translateMat);
 }
 
 Mat4 Camera::getRotationMatrix() const
 {
     Mat4 const &rotXMat = Mat4::rotX(-rotation.getX());
-    Mat4 const &rotYMat = Mat4::rotX(-rotation.getY());
-    Mat4 const &rotZMat = Mat4::rotX(-rotation.getZ());
+    Mat4 const &rotYMat = Mat4::rotY(-rotation.getY());
+    Mat4 const &rotZMat = Mat4::rotZ(-rotation.getZ());
 
     Mat4 const &view = rotXMat.multiply(rotYMat).multiply(rotZMat);
 
