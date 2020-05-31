@@ -29,6 +29,7 @@ void Scene::clipTriangle(std::vector<Vertex> &triangle, int dimension, int side,
 
 void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object, bool isSkybox)
 {
+    // std::cout << "rendering!" << std::endl;
     Mat4 const &mMat = object.getModelMatrix();
     // std::cout << cam.getViewMatrix().toString() << std::endl;
     // std::cout << std::endl;

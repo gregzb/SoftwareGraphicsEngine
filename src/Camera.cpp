@@ -25,6 +25,7 @@ Vec4 const &Camera::getRotation() const
 
 Mat4 Camera::getViewMatrix() const
 {
+    // std::cout << " a" << std::endl;
     Mat4 const &translateMat = Mat4::translate(position.negate());
     // Mat4 const &rotXMat = Mat4::rotX(-rotation.getX());
     // Mat4 const &rotYMat = Mat4::rotX(-rotation.getY());
@@ -39,13 +40,41 @@ Mat4 Camera::getViewMatrix() const
 
 Mat4 Camera::getRotationMatrix() const
 {
-    Mat4 const &rotXMat = Mat4::rotX(-rotation.getX());
-    Mat4 const &rotYMat = Mat4::rotY(-rotation.getY());
-    Mat4 const &rotZMat = Mat4::rotZ(-rotation.getZ());
+    if (lookMode == LookMode::EULER)
+    {
+        Mat4 const &rotXMat = Mat4::rotX(-rotation.getX());
+        Mat4 const &rotYMat = Mat4::rotY(-rotation.getY());
+        Mat4 const &rotZMat = Mat4::rotZ(-rotation.getZ());
 
-    Mat4 const &view = rotXMat.multiply(rotYMat).multiply(rotZMat);
+        Mat4 const &view = rotXMat.multiply(rotYMat).multiply(rotZMat);
+        return view;
+    }
+    else if (lookMode == LookMode::LOOKAT || true)
+    {
+        Vec4 forward = (position - rotation).normalize();
 
-    return view;
+        Vec4 upDir = {0, 1, 0, 1};
+
+        // compute the left vector
+        Vec4 left = upDir.cross(forward).normalize();
+
+        // recompute the orthonormal up vector
+        Vec4 up = forward.cross(left);
+
+        forward.set(3, 0);
+        left.set(3, 0);
+        up.set(3, 0);
+
+        Mat4 temp;
+        temp.addPoint(left);
+        temp.addPoint(up);
+        temp.addPoint(forward);
+        temp.addPoint({0, 0, 0, 1});
+        temp = temp.transpose();
+        // std::cout << left << up << forward << std::endl;
+        // std::cout << temp.toString() << std::endl;
+        return temp;
+    }
 }
 
 Mat4 Camera::getPerspectiveProjectionMatrix() const
@@ -68,13 +97,29 @@ Mat4 Camera::getOrthographicProjectionMatrix() const
     double r = t * aspectRatio;
     double b = -2 / (far - near);
     double c = -(near + far) / (far - near);
-    Mat4 temp = {{{1/r, 0, 0, 0},
-                  {0, 1/t, 0, 0},
+    Mat4 temp = {{{1 / r, 0, 0, 0},
+                  {0, 1 / t, 0, 0},
                   {0, 0, b, c},
                   {0, 0, 0, 1}}};
     return temp;
 }
 
-bool Camera::isPerspective() const {
+bool Camera::isPerspective() const
+{
     return perspective;
+}
+
+void Camera::setLookMode(LookMode lookMode_)
+{
+    lookMode = lookMode_;
+}
+
+void Camera::lookAt(Vec4 const &target)
+{
+    rotation = target;
+}
+
+LookMode Camera::getLookMode()
+{
+    return lookMode;
 }

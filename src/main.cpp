@@ -34,7 +34,7 @@ int main()
     //OBJLoader obj("resources/cube.obj");
     // OBJLoader obj("resources/sword.obj");
     //OBJLoader obj("resources/smalltex.obj");
-    Screen screen(600, 600, true);
+    Screen screen(600, 600, false);
     //Camera cam(170, static_cast<double>(screen.getWidth()) / screen.getHeight(), .1, 1000, false);
     Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), .1, 1000, true);
     Scene mainScene;
@@ -62,14 +62,14 @@ int main()
     //mainScene.addLight("Ambient", {LightType::Ambient, {1, 1, 1}});
     // //mainScene.addLight("Ambient", {LightType::Ambient, {1, 1, 1}});
     // //mainScene.addLight("Point", {LightType::Point, {}, {6, 6, 6}, {6, 6, 6}, {2, 2, -1}});
-    mainScene.addLight("Directional", {LightType::Directional, {}, {.95, .95, .95}, {.95, .95, .95}, {-1, -1, -1}});
+    mainScene.addLight("Directional", {LightType::Directional, {}, {1, 1, 1}, {1, 1, 1}, {-1, -1, -1}});
     //mainScene.addLight("Glow", {LightType::Directional, {}, {0, 0, 1}, {0, 0, 1}, {2, 2, 1}});
 
-    OBJLoader obj2("resources/skybox.obj");
-    RenderObject skyBox = obj2.toRenderObject("Cube");
-    skyBox.updateVertexNormals();
-    skyBox.setRotation({0, -180 * M_PI / 180, 0});
-    mainScene.setSkybox(skyBox);
+    // OBJLoader obj2("resources/skybox.obj");
+    // RenderObject skyBox = obj2.toRenderObject("Cube");
+    // skyBox.updateVertexNormals();
+    // skyBox.setRotation({0, -180 * M_PI / 180, 0});
+    // mainScene.setSkybox(skyBox);
 
 
 
@@ -77,10 +77,12 @@ int main()
     //     norm = norm * -1;
     // }
 
-    double dist = 2.1;
+    double dist = 2.2;
 
     cam.setPosition({0, 1.6, dist});
-    cam.setRotation({-20 * M_PI / 180, 0, 0});
+    cam.setLookMode(LookMode::LOOKAT);
+    cam.lookAt({0, .8, 0, 0});
+    //cam.setRotation({-20 * M_PI / 180, 0* M_PI/180, 0});
     //cam.setRotation({270 * M_PI / 180, 0 * M_PI / 180, 0});
 
     screen.clear({255, 255, 255, 255});
@@ -99,9 +101,9 @@ int main()
         // Vec4 rot = mainScene.getObject("Sphere").getRotation();
         // rot.setY(2 * M_PI / 60 * i);
         // mainScene.getObject("Sphere").setRotation(rot);
-        Vec4 rot = cam.getRotation();
-        rot.setY(2 * M_PI / 60 * i);
-        cam.setRotation(rot);
+        // Vec4 rot = cam.getRotation();
+        // rot.setY(2 * M_PI / 60 * i);
+        // cam.setRotation(rot);
 
         double x = std::sin(2 * M_PI / 60 * i) * dist;
         double y = cam.getPosition()[1];
