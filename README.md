@@ -33,17 +33,20 @@ By: Greg Zborovsky
 * Matrix transformations in 3d
 * Circle, hermite, and bezier curve drawing
 * Box, sphere, and torus primitives
-* ~Coordinate system stack~
 * Scanline triangle fill
 * Object-space transformations
-* Perspective Camera
+* Perspective/Orthographic Euler and LookAt Camera
 * Texture Mapping
+* Tangent Space Normal Mapping
+* Sky maps
 * Blinn-Phong Lighting, Phong Shading
+* Gamma Correction
+* OBJ/MTL Support
+* 2x Supersampling
 
 ## Todo:
 * MDL?
 * Better animation support
-* Gamma correction
 * Quaternions
 * Ray tracing
 * Shadow Mapping
