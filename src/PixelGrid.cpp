@@ -127,57 +127,6 @@ int PixelGrid<T>::getWidth() const
     return width;
 }
 
-// template <>
-// void PixelGrid<Color>::display() const
-// {
-//     FILE *f;
-
-//     f = popen("display", "w");
-
-//     fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
-//     //for (int y = height - 1; y >= 0; y--)
-//     for (int y = 0; y < height; y++)
-//     {
-//         for (int x = 0; x < width; x++)
-//         {
-//             Color color = read(y, x);
-//             fprintf(f, "%d %d %d ", color.r, color.g, color.b);
-//         }
-//         fprintf(f, "\n");
-//     }
-//     // for (int x = 0; x < width; x++)
-//     // {
-//     //     for (int y = height - 1; y >= 0; y--)
-//     //     {
-//     //         Color color = pixelAt(y, x);
-//     //         fprintf(f, "%d %d %d ", color.r, color.g, color.b);
-//     //     }
-//     //     fprintf(f, "\n");
-//     // }
-//     pclose(f);
-// }
-
-// template <>
-// void PixelGrid<Color>::toFileExtension(std::string fileName)
-// {
-//     std::string command = "convert - ";
-//     command.append(fileName);
-
-//     FILE *f = popen(command.c_str(), "w");
-//     fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
-//     for (int y = height - 1; y >= 0; y--)
-//     //for (int y = 0; y < height; y++)
-//     {
-//         for (int x = 0; x < width; x++)
-//         {
-//             Color color = pixelAt(y, x);
-//             fprintf(f, "%d %d %d ", color.r, color.g, color.b);
-//         }
-//         fprintf(f, "\n");
-//     }
-//     pclose(f);
-// }
-
 template <class T>
 void PixelGrid<T>::toFileAscii(std::string fileName)
 {
@@ -329,66 +278,11 @@ PixelGrid<Color> PixelGrid<Color>::loadTexture(std::string texName)
         if (counter == 0)
         {
             idx++;
-            //tempScreen.pixelAt(idx-1).b = temp
-            // if (idx < 1282)
-            // std::cout << idx-1 << ": " << (int) tempScreen.pixelAt(idx-1).r << " " << (int) tempScreen.pixelAt(idx-1).g << " " << (int) tempScreen.pixelAt(idx-1).b << std::endl;
         }
     }
 
-    //now read byte by byte, figure out why this changes background
-
     return tempScreen;
 }
-
-// template <class T>
-// void PixelGrid<T>::drawLine(Vec4 const & a, Vec4 const & b, T color)
-// {
-//     drawLine(a, b, color, false);
-// }
-
-// template <class T>
-// void PixelGrid<T>::drawLine(Vec4 const & a, Vec4 const & b, T color, bool flipped)
-// {
-//     if (b.getX() < a.getX())
-//     {
-//         return drawLine(b, a, color, flipped);
-//     }
-
-//     long x0r = std::lround(a.getX()), x1r = std::lround(b.getX()), y0r = std::lround(a.getY()), y1r = std::lround(b.getY());
-
-//     long dY = y1r - y0r, dX = x1r - x0r;
-
-//     if (std::abs(dY) > dX)
-//     {
-//         return drawLine({a.getY(), a.getX()}, {b.getY(), b.getX()}, color, !flipped);
-//     }
-
-//     int dir = Utils::sign(dY);
-
-//     dY = std::abs(dY) * 2;
-
-//     int d = dY - dX;
-
-//     dX *= 2;
-
-//     int y = y0r;
-//     for (int x = x0r; x <= x1r; x++)
-//     {
-//         if (!flipped)
-//             //screen.plot({x, y}, color);
-//             pixelAt(y, x) = color;
-//         else
-//             //screen.plot({y, x}, color);
-//             pixelAt(x, y) = color;
-
-//         if (d > 0)
-//         {
-//             y += dir;
-//             d -= dX;
-//         }
-//         d += dY;
-//     }
-// }
 
 template class PixelGrid<Color>;
 template class PixelGrid<double>;

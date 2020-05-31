@@ -16,8 +16,6 @@ PixelGrid<Color>* Screen::updateTrueScreen() {
                 double equiRow = (row * 2.0 + 1) / getHeight();
                 double equiCol = (col * 2.0 + 1) / getWidth();
                 Color color = linRead({equiCol, equiRow}).toColor();
-                //std::cout << equiCol << " " << equiRow << std::endl;
-                //std::cout << row << " " << col << ": " << linRead({equiCol, equiRow}) << std::endl;
                 downsampled(row, col) = color;
             }
         }
