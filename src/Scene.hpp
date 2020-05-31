@@ -23,6 +23,7 @@ private:
     void drawTriangle(Screen &screen, std::vector<Vertex> vertices, RenderObject const &object, Material const * mat, bool isSkybox = false);
     void fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObject const &object, Material const * mat, bool isSkybox = false);
     void clipTriangle(std::vector<Vertex> & triangle, int dimension, int side, std::vector<Vertex> & out);
+    inline void fragment(Screen &screen, bool isSkybox, double zX, int y, int x, double overZX, Vec4 const & posX, Vec4 const & normX, Vec4 const & tanX, Vec4 const & texX, Material const * mat);
 
 public:
     void removeObject(std::string const &name);

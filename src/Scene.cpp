@@ -9,10 +9,10 @@ void Scene::clipTriangle(std::vector<Vertex> &triangle, int dimension, int side,
     for (uint i = 0; i < triangle.size(); i++)
     {
         Vec4 const &pos1 = triangle[i].getProjPos();
-        bool inside1 = pos1[dimension] * side <= pos1.getW()*1.0001+0.00001;
+        bool inside1 = pos1[dimension] * side <= pos1.getW() * 1.0001 + 0.00001;
 
         Vec4 const &pos2 = triangle[(i + 1) % triangle.size()].getProjPos();
-        bool inside2 = pos2[dimension] * side <= pos2.getW()*1.0001+0.00001;
+        bool inside2 = pos2[dimension] * side <= pos2.getW() * 1.0001 + 0.00001;
 
         if (inside1)
         {
@@ -21,7 +21,7 @@ void Scene::clipTriangle(std::vector<Vertex> &triangle, int dimension, int side,
 
         if (inside1 != inside2)
         {
-            double t = (pos1.getW()*1.0001+0.00001 - pos1[dimension] * side) / ((pos2[dimension] * side - pos2.getW()*1.0001-0.00001) - (pos1[dimension] * side - pos1.getW()*1.0001-0.00001));
+            double t = (pos1.getW() * 1.0001 + 0.00001 - pos1[dimension] * side) / ((pos2[dimension] * side - pos2.getW() * 1.0001 - 0.00001) - (pos1[dimension] * side - pos1.getW() * 1.0001 - 0.00001));
             out.push_back(triangle[i].lerp(triangle[(i + 1) % triangle.size()], t));
         }
     }
@@ -191,6 +191,52 @@ struct LineInfo
     Vec4 position, positionStepY;
 };
 
+template <class T>
+class InterpolatedValue
+{
+    std::vector<T> values;
+    std::vector<T> steps;
+
+public:
+    InterpolatedValue(std::vector<Vertex> &verts, std::function<T(Vertex *)> func, bool overZ)
+    {
+        Vec4 const &vert20 = verts[2].getProjPos() - verts[0].getProjPos();
+        Vec4 const &vert10 = verts[1].getProjPos() - verts[0].getProjPos();
+        Vec4 const &vert21 = verts[2].getProjPos() - verts[1].getProjPos();
+
+        Vec4 const &z = Vec4(verts[0].getProjPos()[3], verts[0].getProjPos()[3], verts[1].getProjPos()[3]);
+        Vec4 yVerts = {vert20[1], vert10[1], vert21[1]};
+
+        int y = std::ceil(verts[0].getProjPos()[1]);
+
+        double yOffset0 = y - verts[0].getProjPos()[1];
+        double yOffset1 = std::ceil(verts[1].getProjPos()[1]) - verts[1].getProjPos()[1];
+
+        Vec4 offs = {yOffset0, yOffset0, yOffset1};
+
+        auto f0 = std::bind(func, &verts[0]);
+        auto f1 = std::bind(func, &verts[1]);
+        auto f2 = std::bind(func, &verts[2]);
+
+        std::vector<T> valVerts = {f2() / (overZ ? verts[2].getProjPos()[3] : 1) - f0() / (overZ ? verts[0].getProjPos()[3] : 1), f1() / (overZ ? verts[1].getProjPos()[3] : 1) - f0() / (overZ ? verts[0].getProjPos()[3] : 1), f2() / (overZ ? verts[2].getProjPos()[3] : 1) - f1() / (overZ ? verts[1].getProjPos()[3] : 1)};
+        steps = {valVerts[0] / yVerts[0], valVerts[1] / yVerts[1], valVerts[2] / yVerts[2]};
+        values = {f0() / (overZ ? z[0] : 1) + steps[0] * offs[0], f0() / (overZ ? z[1] : 1) + steps[1] * offs[1], f1() / (overZ ? z[2] : 1) + steps[2] * offs[2]};
+    }
+
+    T val(int i)
+    {
+        return values[i];
+    }
+
+    T step(int i)
+    {
+        return steps[i];
+    }
+};
+
+template class InterpolatedValue<double>;
+template class InterpolatedValue<Vec4>;
+
 void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObject const &object, Material const *mat, bool isSkybox)
 {
     if (verts[0].getProjPos().getY() > verts[1].getProjPos().getY())
@@ -200,96 +246,39 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
     if (verts[0].getProjPos().getY() > verts[1].getProjPos().getY())
         std::swap(verts[0], verts[1]);
 
+    InterpolatedValue<double> xVal(
+        verts, [](Vertex *vert) { return vert->getProjPos()[0]; }, false);
+    InterpolatedValue<double> zVal(
+        verts, [](Vertex *vert) { return vert->getProjPos()[2]; }, false);
+    InterpolatedValue<double> overZVal(
+        verts, [](Vertex *vert) { return 1; }, true);
+    InterpolatedValue<Vec4> texVal(
+        verts, [](Vertex *vert) { return vert->getTexCoords(); }, true);
+    InterpolatedValue<Vec4> normalVal(
+        verts, [](Vertex *vert) { return vert->getNormal(); }, true);
+    InterpolatedValue<Vec4> tangentVal(
+        verts, [](Vertex *vert) { return vert->getTangent(); }, true);
+    InterpolatedValue<Vec4> posVal(
+        verts, [](Vertex *vert) { return vert->getWorldPos(); }, true);
+
+    std::vector<LineInfo> infos(3);
+    for (int i = 0; i < 3; i++)
+    {
+        infos[i] = {
+            xVal.val(i), xVal.step(i),
+            zVal.val(i), zVal.step(i),
+            overZVal.val(i), overZVal.step(i),
+            texVal.val(i), texVal.step(i),
+            normalVal.val(i), normalVal.step(i),
+            tangentVal.val(i), tangentVal.step(i),
+            posVal.val(i), posVal.step(i)};
+    }
+    LineInfo left = infos[0], right = infos[1], temp = infos[2];
+
     Vec4 const &vert20 = verts[2].getProjPos() - verts[0].getProjPos();
     Vec4 const &vert10 = verts[1].getProjPos() - verts[0].getProjPos();
-    Vec4 const &vert21 = verts[2].getProjPos() - verts[1].getProjPos();
-
-    Vec4 const &z2 = Vec4(verts[0].getProjPos()[3], verts[0].getProjPos()[3], verts[1].getProjPos()[3]);
-
-    Vec4 xVerts = {vert20[0], vert10[0], vert21[0]};
-    Vec4 yVerts = {vert20[1], vert10[1], vert21[1]};
-    Vec4 zVerts = {vert20[2], vert10[2], vert21[2]};
-    Vec4 overZVerts = {1 / verts[2].getProjPos()[3] - 1 / verts[0].getProjPos()[3], 1 / verts[1].getProjPos()[3] - 1 / verts[0].getProjPos()[3], 1 / verts[2].getProjPos()[3] - 1 / verts[1].getProjPos()[3]};
-
-    Vec4 xTexVerts = {verts[2].getTexCoords()[0] / verts[2].getProjPos()[3] - verts[0].getTexCoords()[0] / verts[0].getProjPos()[3], verts[1].getTexCoords()[0] / verts[1].getProjPos()[3] - verts[0].getTexCoords()[0] / verts[0].getProjPos()[3], verts[2].getTexCoords()[0] / verts[2].getProjPos()[3] - verts[1].getTexCoords()[0] / verts[1].getProjPos()[3]};
-    Vec4 yTexVerts = {verts[2].getTexCoords()[1] / verts[2].getProjPos()[3] - verts[0].getTexCoords()[1] / verts[0].getProjPos()[3], verts[1].getTexCoords()[1] / verts[1].getProjPos()[3] - verts[0].getTexCoords()[1] / verts[0].getProjPos()[3], verts[2].getTexCoords()[1] / verts[2].getProjPos()[3] - verts[1].getTexCoords()[1] / verts[1].getProjPos()[3]};
-
-    Vec4 xNormalVerts = {verts[2].getNormal()[0] / verts[2].getProjPos()[3] - verts[0].getNormal()[0] / verts[0].getProjPos()[3], verts[1].getNormal()[0] / verts[1].getProjPos()[3] - verts[0].getNormal()[0] / verts[0].getProjPos()[3], verts[2].getNormal()[0] / verts[2].getProjPos()[3] - verts[1].getNormal()[0] / verts[1].getProjPos()[3]};
-    Vec4 yNormalVerts = {verts[2].getNormal()[1] / verts[2].getProjPos()[3] - verts[0].getNormal()[1] / verts[0].getProjPos()[3], verts[1].getNormal()[1] / verts[1].getProjPos()[3] - verts[0].getNormal()[1] / verts[0].getProjPos()[3], verts[2].getNormal()[1] / verts[2].getProjPos()[3] - verts[1].getNormal()[1] / verts[1].getProjPos()[3]};
-    Vec4 zNormalVerts = {verts[2].getNormal()[2] / verts[2].getProjPos()[3] - verts[0].getNormal()[2] / verts[0].getProjPos()[3], verts[1].getNormal()[2] / verts[1].getProjPos()[3] - verts[0].getNormal()[2] / verts[0].getProjPos()[3], verts[2].getNormal()[2] / verts[2].getProjPos()[3] - verts[1].getNormal()[2] / verts[1].getProjPos()[3]};
-
-    Vec4 xTangentVerts = {verts[2].getTangent()[0] / verts[2].getProjPos()[3] - verts[0].getTangent()[0] / verts[0].getProjPos()[3], verts[1].getTangent()[0] / verts[1].getProjPos()[3] - verts[0].getTangent()[0] / verts[0].getProjPos()[3], verts[2].getTangent()[0] / verts[2].getProjPos()[3] - verts[1].getTangent()[0] / verts[1].getProjPos()[3]};
-    Vec4 yTangentVerts = {verts[2].getTangent()[1] / verts[2].getProjPos()[3] - verts[0].getTangent()[1] / verts[0].getProjPos()[3], verts[1].getTangent()[1] / verts[1].getProjPos()[3] - verts[0].getTangent()[1] / verts[0].getProjPos()[3], verts[2].getTangent()[1] / verts[2].getProjPos()[3] - verts[1].getTangent()[1] / verts[1].getProjPos()[3]};
-    Vec4 zTangentVerts = {verts[2].getTangent()[2] / verts[2].getProjPos()[3] - verts[0].getTangent()[2] / verts[0].getProjPos()[3], verts[1].getTangent()[2] / verts[1].getProjPos()[3] - verts[0].getTangent()[2] / verts[0].getProjPos()[3], verts[2].getTangent()[2] / verts[2].getProjPos()[3] - verts[1].getTangent()[2] / verts[1].getProjPos()[3]};
-
-    Vec4 xPosVerts = {verts[2].getWorldPos()[0] / verts[2].getProjPos()[3] - verts[0].getWorldPos()[0] / verts[0].getProjPos()[3], verts[1].getWorldPos()[0] / verts[1].getProjPos()[3] - verts[0].getWorldPos()[0] / verts[0].getProjPos()[3], verts[2].getWorldPos()[0] / verts[2].getProjPos()[3] - verts[1].getWorldPos()[0] / verts[1].getProjPos()[3]};
-    Vec4 yPosVerts = {verts[2].getWorldPos()[1] / verts[2].getProjPos()[3] - verts[0].getWorldPos()[1] / verts[0].getProjPos()[3], verts[1].getWorldPos()[1] / verts[1].getProjPos()[3] - verts[0].getWorldPos()[1] / verts[0].getProjPos()[3], verts[2].getWorldPos()[1] / verts[2].getProjPos()[3] - verts[1].getWorldPos()[1] / verts[1].getProjPos()[3]};
-    Vec4 zPosVerts = {verts[2].getWorldPos()[2] / verts[2].getProjPos()[3] - verts[0].getWorldPos()[2] / verts[0].getProjPos()[3], verts[1].getWorldPos()[2] / verts[1].getProjPos()[3] - verts[0].getWorldPos()[2] / verts[0].getProjPos()[3], verts[2].getWorldPos()[2] / verts[2].getProjPos()[3] - verts[1].getWorldPos()[2] / verts[1].getProjPos()[3]};
-
-    Vec4 xStepY = xVerts / yVerts;
-    Vec4 zStepY = zVerts / yVerts;
-    Vec4 overZStepY = overZVerts / yVerts;
-
-    Vec4 xTexStepY = xTexVerts / yVerts;
-    Vec4 yTexStepY = yTexVerts / yVerts;
-
-    Vec4 xNormalStepY = xNormalVerts / yVerts;
-    Vec4 yNormalStepY = yNormalVerts / yVerts;
-    Vec4 zNormalStepY = zNormalVerts / yVerts;
-
-    Vec4 xTangentStepY = xTangentVerts / yVerts;
-    Vec4 yTangentStepY = yTangentVerts / yVerts;
-    Vec4 zTangentStepY = zTangentVerts / yVerts;
-
-    Vec4 xPosStepY = xPosVerts / yVerts;
-    Vec4 yPosStepY = yPosVerts / yVerts;
-    Vec4 zPosStepY = zPosVerts / yVerts;
 
     int y = std::ceil(verts[0].getProjPos()[1]);
-
-    double yOffset0 = y - verts[0].getProjPos()[1];
-    double yOffset1 = std::ceil(verts[1].getProjPos()[1]) - verts[1].getProjPos()[1];
-
-    Vec4 offs = {yOffset0, yOffset0, yOffset1};
-
-    Vec4 x = {verts[0].getProjPos()[0], verts[0].getProjPos()[0], verts[1].getProjPos()[0]};
-    x = x + offs * xStepY;
-
-    Vec4 z = {verts[0].getProjPos()[2], verts[0].getProjPos()[2], verts[1].getProjPos()[2]};
-    z = z + offs * zStepY;
-
-    Vec4 overZ = {1 / verts[0].getProjPos()[3], 1 / verts[0].getProjPos()[3], 1 / verts[1].getProjPos()[3]};
-    overZ = overZ + offs * overZStepY;
-
-    Vec4 xTex = {verts[0].getTexCoords()[0], verts[0].getTexCoords()[0], verts[1].getTexCoords()[0]};
-    xTex = xTex / z2 + offs * xTexStepY;
-    Vec4 yTex = {verts[0].getTexCoords()[1], verts[0].getTexCoords()[1], verts[1].getTexCoords()[1]};
-    yTex = yTex / z2 + offs * yTexStepY;
-
-    Vec4 xNormal = {verts[0].getNormal()[0], verts[0].getNormal()[0], verts[1].getNormal()[0]};
-    xNormal = xNormal / z2 + offs * xNormalStepY;
-    Vec4 yNormal = {verts[0].getNormal()[1], verts[0].getNormal()[1], verts[1].getNormal()[1]};
-    yNormal = yNormal / z2 + offs * yNormalStepY;
-    Vec4 zNormal = {verts[0].getNormal()[2], verts[0].getNormal()[2], verts[1].getNormal()[2]};
-    zNormal = zNormal / z2 + offs * zNormalStepY;
-
-    Vec4 xTangent = {verts[0].getTangent()[0], verts[0].getTangent()[0], verts[1].getTangent()[0]};
-    xTangent = xTangent / z2 + offs * xTangentStepY;
-    Vec4 yTangent = {verts[0].getTangent()[1], verts[0].getTangent()[1], verts[1].getTangent()[1]};
-    yTangent = yTangent / z2 + offs * yTangentStepY;
-    Vec4 zTangent = {verts[0].getTangent()[2], verts[0].getTangent()[2], verts[1].getTangent()[2]};
-    zTangent = zTangent / z2 + offs * zTangentStepY;
-
-    Vec4 xPos = {verts[0].getWorldPos()[0], verts[0].getWorldPos()[0], verts[1].getWorldPos()[0]};
-    xPos = xPos / z2 + offs * xPosStepY;
-    Vec4 yPos = {verts[0].getWorldPos()[1], verts[0].getWorldPos()[1], verts[1].getWorldPos()[1]};
-    yPos = yPos / z2 + offs * yPosStepY;
-    Vec4 zPos = {verts[0].getWorldPos()[2], verts[0].getWorldPos()[2], verts[1].getWorldPos()[2]};
-    zPos = zPos / z2 + offs * zPosStepY;
-
-    LineInfo left{x[0], xStepY[0], z[0], zStepY[0], overZ[0], overZStepY[0], {xTex[0], yTex[0]}, {xTexStepY[0], yTexStepY[0]}, {xNormal[0], yNormal[0], zNormal[0]}, {xNormalStepY[0], yNormalStepY[0], zNormalStepY[0]}, {xTangent[0], yTangent[0], zTangent[0]}, {xTangentStepY[0], yTangentStepY[0], zTangentStepY[0]}, {xPos[0], yPos[0], zPos[0]}, {xPosStepY[0], yPosStepY[0], zPosStepY[0]}};
-    LineInfo right{x[1], xStepY[1], z[1], zStepY[1], overZ[1], overZStepY[1], {xTex[1], yTex[1]}, {xTexStepY[1], yTexStepY[1]}, {xNormal[1], yNormal[1], zNormal[1]}, {xNormalStepY[1], yNormalStepY[1], zNormalStepY[1]}, {xTangent[1], yTangent[1], zTangent[1]}, {xTangentStepY[1], yTangentStepY[1], zTangentStepY[1]}, {xPos[0], yPos[0], zPos[0]}, {xPosStepY[0], yPosStepY[0], zPosStepY[0]}};
-    LineInfo temp{x[2], xStepY[2], z[2], zStepY[2], overZ[2], overZStepY[2], {xTex[2], yTex[2]}, {xTexStepY[2], yTexStepY[2]}, {xNormal[2], yNormal[2], zNormal[2]}, {xNormalStepY[2], yNormalStepY[2], zNormalStepY[2]}, {xTangent[2], yTangent[2], zTangent[2]}, {xTangentStepY[2], yTangentStepY[2], zTangentStepY[2]}, {xPos[0], yPos[0], zPos[0]}, {xPosStepY[0], yPosStepY[0], zPosStepY[0]}};
 
     bool side = vert10.cross(vert20).getZ() >= 0;
 
@@ -323,137 +312,8 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
 
             for (int x = std::ceil(left.x); x < std::ceil(right.x); x++)
             {
-                //2 is fine bc it gets normalized from 0 to 1
-                double depthTester = isSkybox ? 2 : zX;
-                if (screen.zbuf(y, x) > depthTester)
-                {
-                    //std::cout << "drawing" << std::endl;
-                    screen.zbuf(y, x) = zX;
-                    // screen.pixelAt(y, x) = color;
-
-                    double regZ = 1.0 / overZX;
-
-                    Vec4 pos = posX * regZ;
-
-                    Vec4 norma = (normX * regZ).normalize();
-                    Vec4 tangent = (tanX * regZ).normalize();
-                    tangent = (tangent - norma * tangent.dot(norma)).normalize();
-                    Vec4 bitangent = tangent.cross(norma);
-
-                    //std::cout << tangent << bitangent << norma << std::endl;
-
-                    norma.setW(0);
-                    tangent.setW(0);
-                    bitangent.setW(0);
-
-                    Vec4 texAdjust = texX * regZ;
-
-                    texAdjust.setX(std::fmod(texAdjust.getX(), 1.0));
-                    if (texAdjust.getX() < 0)
-                        texAdjust.setX(1 + texAdjust.getX());
-                    texAdjust.setY(std::fmod(texAdjust.getY(), 1.0));
-                    if (texAdjust.getY() < 0)
-                        texAdjust.setY(1 + texAdjust.getY());
-
-                    texAdjust.setY(1 - texAdjust.getY());
-                    texAdjust.setY(std::fmod(texAdjust.getY(), 1.0));
-
-                    Vec4 bump = mat->getBump(texAdjust);
-                    bump = bump * 2 - 1;
-
-                    Mat4 TBN;
-                    TBN.addPoint(tangent);
-                    TBN.addPoint(bitangent);
-                    TBN.addPoint(norma);
-                    TBN.addPoint({0, 0, 0, 1});
-                    //TBN = TBN.transpose();
-                    //std::cout << TBN.toString() << std::endl << std::endl;
-
-                    Vec4 normal = TBN.multiply(Mat4({{bump[0]}, {bump[1]}, {bump[2]}, {0}})).getPoint(0).normalize();
-
-                    //normal = norma;
-
-                    Vec4 Ka = mat->getAmbient(texAdjust);
-                    Vec4 Kd = mat->getDiffuse(texAdjust);
-                    Vec4 Ks = mat->getSpecular(texAdjust);
-                    double Ns = mat->getShininess(texAdjust);
-
-                    //std::cout << Ka << " " << Kd << " " << Ks << " " << Ns << std::endl;
-                    //std::cout << normal << std::endl;
-
-                    //Ks = {};
-
-                    Vec4 illum;
-
-                    for (auto const &entries : transformedLights)
-                    {
-                        auto const &light = entries.second;
-                        if (light.type == LightType::Ambient)
-                        {
-                            illum = illum + Ka * light.Ia;
-                        }
-                        else if (light.type == LightType::Directional)
-                        {
-                            Vec4 const &L = light.pos.negate().normalize();
-                            Vec4 const &V = pos.negate().normalize();
-                            Vec4 const &H = (L).normalize();
-                            double NL = normal.dot(L);
-                            int B = NL > 0 ? 1 : 0;
-                            //std::cout << normal << std::endl;
-                            //std::cout << NL << std::endl;
-                            Vec4 const &diffuse = Kd * light.Id * B * (NL);
-                            //Vec4 diffuse = {};
-                            //std::cout << B * normal.dot(H) << std::endl;
-                            //double v = std::pow(normal.dot(H), 20);
-                            //Vec4 const &specular = {v, v, v};
-                            Vec4 const &specular = Ks * light.Is * B * std::pow(B * normal.dot(H), Ns);
-                            //Vec4 const & specular = {};
-                            //Vec4 specular = {};
-                            //std::cout << Kd << " " << light.Id << " " << NL << " " << diffuse << " " << specular << std::endl;
-                            // Vec4 combo = diffuse + specular;
-                            // if (combo[0] < 0 || combo[1] < 0 || combo[2] < 0) {
-                            //     std::cout << "hmm" << std::endl;
-                            // }
-                            //std::cout << normal.dot(H) << " " << Ns << std::endl;
-                            illum = illum + diffuse + specular;
-                            //illum = illum + diffuse;
-                        }
-                        else if (light.type == LightType::Point)
-                        {
-                            Vec4 const &lDist = light.pos - pos;
-                            double dist = lDist.magnitude();
-                            Vec4 const &L = lDist.normalize();
-                            Vec4 const &V = pos.negate().normalize();
-                            Vec4 const &H = (L + V).normalize();
-                            double NL = normal.dot(L);
-                            int B = NL > 0 ? 1 : 0;
-                            Vec4 const &diffuse = Kd * light.Id * B * (NL);
-                            Vec4 const &specular = Ks * light.Is * B * std::pow(normal.dot(H), Ns);
-                            illum = illum + diffuse / (dist * dist) + specular / (dist * dist);
-                        }
-                    }
-
-                    // if (illum[0] <= 0 && illum[1] <= 0 && illum[2] <= 0)
-                    // std::cout << illum << " " << Ks << " " << texAdjust << std::endl;
-
-                    illum.set(0, Utils::clamp(illum[0], 0.0, 1.0));
-                    illum.set(1, Utils::clamp(illum[1], 0.0, 1.0));
-                    illum.set(2, Utils::clamp(illum[2], 0.0, 1.0));
-
-                    if (isSkybox) {
-                        illum = Kd;
-                        //illum = {1, 0, 0, 1};
-                    }
-
-                    //gamma correct right here by raising to 1/2.2 power
-                    illum = illum.pow(1 / 2.2);
-
-                    // illum.set(0, Utils::clamp(illum[0], 0.0, 1.0));
-                    // illum.set(1, Utils::clamp(illum[1], 0.0, 1.0));
-                    // illum.set(2, Utils::clamp(illum[2], 0.0, 1.0));
-
-                    screen(y, x) = illum.toColor();
-                }
+                fragment(screen, isSkybox, zX, y, x, overZX, posX, normX, tanX, texX, mat);
+                
                 zX += zStepX;
                 overZX += overZStepX;
                 texX = texX + texStepX;
@@ -483,6 +343,105 @@ void Scene::fillTriangle(Screen &screen, std::vector<Vertex> &verts, RenderObjec
             left = temp;
         else
             right = temp;
+    }
+}
+
+inline void Scene::fragment(Screen &screen, bool isSkybox, double zX, int y, int x, double overZX, Vec4 const & posX, Vec4 const & normX, Vec4 const & tanX, Vec4 const & texX, Material const * mat)
+{
+    //2 is fine bc it gets normalized from 0 to 1
+    double depthTester = isSkybox ? 2 : zX;
+    if (screen.zbuf(y, x) > depthTester)
+    {
+        screen.zbuf(y, x) = zX;
+
+        double regZ = 1.0 / overZX;
+
+        Vec4 pos = posX * regZ;
+
+        Vec4 norma = (normX * regZ).normalize();
+        Vec4 tangent = (tanX * regZ).normalize();
+        tangent = (tangent - norma * tangent.dot(norma)).normalize();
+        Vec4 bitangent = tangent.cross(norma);
+
+        norma.setW(0);
+        tangent.setW(0);
+        bitangent.setW(0);
+
+        Vec4 texAdjust = texX * regZ;
+
+        texAdjust.setX(std::fmod(texAdjust.getX(), 1.0));
+        if (texAdjust.getX() < 0)
+            texAdjust.setX(1 + texAdjust.getX());
+        texAdjust.setY(std::fmod(texAdjust.getY(), 1.0));
+        if (texAdjust.getY() < 0)
+            texAdjust.setY(1 + texAdjust.getY());
+
+        texAdjust.setY(1 - texAdjust.getY());
+        texAdjust.setY(std::fmod(texAdjust.getY(), 1.0));
+
+        Vec4 bump = mat->getBump(texAdjust);
+        bump = bump * 2 - 1;
+
+        Mat4 TBN;
+        TBN.addPoint(tangent);
+        TBN.addPoint(bitangent);
+        TBN.addPoint(norma);
+        TBN.addPoint({0, 0, 0, 1});
+
+        Vec4 normal = TBN.multiply(Mat4({{bump[0]}, {bump[1]}, {bump[2]}, {0}})).getPoint(0).normalize();
+
+        Vec4 Ka = mat->getAmbient(texAdjust);
+        Vec4 Kd = mat->getDiffuse(texAdjust);
+        Vec4 Ks = mat->getSpecular(texAdjust);
+        double Ns = mat->getShininess(texAdjust);
+
+        Vec4 illum;
+
+        for (auto const &entries : transformedLights)
+        {
+            auto const &light = entries.second;
+            if (light.type == LightType::Ambient)
+            {
+                illum = illum + Ka * light.Ia;
+            }
+            else if (light.type == LightType::Directional)
+            {
+                Vec4 const &L = light.pos.negate().normalize();
+                Vec4 const &H = L.normalize();
+                double NL = normal.dot(L);
+                int B = NL > 0 ? 1 : 0;
+                Vec4 const &diffuse = Kd * light.Id * B * (NL);
+                Vec4 const &specular = Ks * light.Is * B * std::pow(B * normal.dot(H), Ns);
+                illum = illum + diffuse + specular;
+            }
+            else if (light.type == LightType::Point)
+            {
+                Vec4 const &lDist = light.pos - pos;
+                double dist = lDist.magnitude();
+                Vec4 const &L = lDist.normalize();
+                Vec4 const &V = pos.negate().normalize();
+                Vec4 const &H = (L + V).normalize();
+                double NL = normal.dot(L);
+                int B = NL > 0 ? 1 : 0;
+                Vec4 const &diffuse = Kd * light.Id * B * (NL);
+                Vec4 const &specular = Ks * light.Is * B * std::pow(normal.dot(H), Ns);
+                illum = illum + diffuse / (dist * dist) + specular / (dist * dist);
+            }
+        }
+
+        illum.set(0, Utils::clamp(illum[0], 0.0, 1.0));
+        illum.set(1, Utils::clamp(illum[1], 0.0, 1.0));
+        illum.set(2, Utils::clamp(illum[2], 0.0, 1.0));
+
+        if (isSkybox)
+        {
+            illum = Kd;
+        }
+
+        //gamma correct right here by raising to 1/2.2 power
+        illum = illum.pow(1 / 2.2);
+
+        screen(y, x) = illum.toColor();
     }
 }
 

@@ -24,7 +24,7 @@ int main()
     Material::TexFiltering = TextureFiltering::BILINEAR;
 
     OBJLoader obj("resources/towerthing.obj");
-    Screen screen(600, 600, false);
+    Screen screen(600, 600, true);
     //Camera cam(170, static_cast<double>(screen.getWidth()) / screen.getHeight(), .1, 1000, false);
     Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), .1, 1000, true);
     Scene mainScene;
@@ -35,14 +35,14 @@ int main()
     mainScene.getObject("Sphere").setPosition({0, 0, 0});
     mainScene.getObject("Sphere").setRotation({0 * M_PI / 180, -60 * M_PI / 180, 0});
 
-    mainScene.addLight("Ambient", {LightType::Ambient, {0.05, 0.05, 0.05}});
+    mainScene.addLight("Ambient", {LightType::Ambient, {0.125, 0.125, 0.125}});
     mainScene.addLight("Directional", {LightType::Directional, {}, {1, 1, 1}, {1, 1, 1}, {-1, -1, -1}});
 
-    // OBJLoader obj2("resources/skybox.obj");
-    // RenderObject skyBox = obj2.toRenderObject("Cube");
-    // skyBox.updateVertexNormals();
-    // skyBox.setRotation({0, -180 * M_PI / 180, 0});
-    // mainScene.setSkybox(skyBox);
+    OBJLoader obj2("resources/skybox.obj");
+    RenderObject skyBox = obj2.toRenderObject("Cube");
+    skyBox.updateVertexNormals();
+    skyBox.setRotation({0, -180 * M_PI / 180, 0});
+    mainScene.setSkybox(skyBox);
 
     double dist = 2.2;
 
