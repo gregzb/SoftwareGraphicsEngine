@@ -29,4 +29,5 @@ private:
 public:
     OBJLoader(std::string const &fileName);
     RenderObject toRenderObject(std::string name) const;
+    std::vector<std::pair<std::string, RenderObject>> toRenderObjects() const;
 };

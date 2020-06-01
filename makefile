@@ -13,10 +13,13 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 #$(pkg-config --cflags --libs sdl2)
 #-Wall
-LDFLAGS ?= -lm -std=c++17 -O3
+# -ffast-math -funsafe-math-optimizations -ffinite-math-only
+#-fprofile-generate
+#-fprofile-use
+LDFLAGS ?= -lm -std=c++17 -Ofast -frename-registers -funroll-loops
 CFLAGS = -Wall
 #CXXFLAGS = -Wall -Wextra -Werror
-CXXFLAGS = -Wall -std=c++17 -O3
+CXXFLAGS = -Wall -std=c++17 -Ofast -frename-registers -funroll-loops
 CC = g++
 CXX = g++
 
@@ -30,7 +33,7 @@ $(BUILD_DIR)/%.s.o: %.s
 	$(AS) $(ASFLAGS) -c $< -o $@
 
 # c source
-$(BUILD_DIR)/%.c.o: %.c clean
+$(BUILD_DIR)/%.c.o: %.c
 	$(MKDIR_P) $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 

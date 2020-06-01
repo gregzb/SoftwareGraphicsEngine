@@ -24,36 +24,53 @@ int main()
     Material::TexFiltering = TextureFiltering::BILINEAR;
 
     OBJLoader obj("resources/towerthing.obj");
-    Screen screen(600, 600, true);
+    Screen screen(500, 500, false);
     //Camera cam(170, static_cast<double>(screen.getWidth()) / screen.getHeight(), .1, 1000, false);
     Camera cam(60, static_cast<double>(screen.getWidth()) / screen.getHeight(), .1, 1000, true);
     Scene mainScene;
 
-    RenderObject r = obj.toRenderObject("Aset_other__L_ufnscjdga_LOD2");
-    r.updateVertexNormals();
-    mainScene.addObject("Sphere", r);
-    mainScene.getObject("Sphere").setPosition({0, 0, 0});
-    mainScene.getObject("Sphere").setRotation({0 * M_PI / 180, -60 * M_PI / 180, 0});
+    // RenderObject r = obj.toRenderObject("Aset_other__L_ufnscjdga_LOD2");
+    // r.updateVertexNormals();
+    // mainScene.addObject("Sphere", r);
+    // mainScene.getObject("Sphere").setPosition({0, 0, 0});
+    // mainScene.getObject("Sphere").setRotation({0 * M_PI / 180, -60 * M_PI / 180, 0});
+
+    auto objects = obj.toRenderObjects();
+    for (auto & object : objects) {
+        object.second.updateVertexNormals();
+        mainScene.addObject(object.first, object.second);
+    }
 
     mainScene.addLight("Ambient", {LightType::Ambient, {0.125, 0.125, 0.125}});
     mainScene.addLight("Directional", {LightType::Directional, {}, {1, 1, 1}, {1, 1, 1}, {-1, -1, -1}});
 
-    OBJLoader obj2("resources/skybox.obj");
-    RenderObject skyBox = obj2.toRenderObject("Cube");
-    skyBox.updateVertexNormals();
-    skyBox.setRotation({0, -180 * M_PI / 180, 0});
-    mainScene.setSkybox(skyBox);
+    // OBJLoader obj2("resources/skybox.obj");
+    // RenderObject skyBox = obj2.toRenderObject("Cube");
+    // skyBox.updateVertexNormals();
+    // skyBox.setRotation({0, -180 * M_PI / 180, 0});
+    // mainScene.setSkybox(skyBox);
 
     double dist = 2.2;
 
-    cam.setPosition({0, 1.6, dist});
+    cam.setPosition({0, 1.6, -dist});
     cam.setLookMode(LookMode::LOOKAT);
     cam.lookAt({0, .8, 0, 0});
     //cam.setRotation({-20 * M_PI / 180, 0* M_PI/180, 0});
     //cam.setRotation({270 * M_PI / 180, 0 * M_PI / 180, 0});
 
     screen.clear({255, 255, 255, 255});
+    screen.clearZbuf();
+
+    // mainScene.renderToScreen(cam, screen);
+
+    // screen.display();
+
+    auto t1 = std::chrono::high_resolution_clock::now();
     mainScene.renderToScreen(cam, screen);
+    auto t2 = std::chrono::high_resolution_clock::now();
+    auto microTimeToRender = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+    auto renderTime = microTimeToRender / (1000000.0);
+    std::cout << renderTime << " s" << std::endl;
 
     screen.display();
 

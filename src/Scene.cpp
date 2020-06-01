@@ -200,19 +200,13 @@ class InterpolatedValue
 public:
     InterpolatedValue(std::vector<Vertex> &verts, std::function<T(Vertex *)> func, bool overZ)
     {
-        Vec4 const &vert20 = verts[2].getProjPos() - verts[0].getProjPos();
-        Vec4 const &vert10 = verts[1].getProjPos() - verts[0].getProjPos();
-        Vec4 const &vert21 = verts[2].getProjPos() - verts[1].getProjPos();
-
         Vec4 const &z = Vec4(verts[0].getProjPos()[3], verts[0].getProjPos()[3], verts[1].getProjPos()[3]);
-        Vec4 yVerts = {vert20[1], vert10[1], vert21[1]};
+        Vec4 yVerts = {(verts[2].getProjPos() - verts[0].getProjPos())[1], (verts[1].getProjPos() - verts[0].getProjPos())[1], (verts[2].getProjPos() - verts[1].getProjPos())[1]};
 
         int y = std::ceil(verts[0].getProjPos()[1]);
 
         double yOffset0 = y - verts[0].getProjPos()[1];
         double yOffset1 = std::ceil(verts[1].getProjPos()[1]) - verts[1].getProjPos()[1];
-
-        Vec4 offs = {yOffset0, yOffset0, yOffset1};
 
         auto f0 = std::bind(func, &verts[0]);
         auto f1 = std::bind(func, &verts[1]);
@@ -220,7 +214,7 @@ public:
 
         std::vector<T> valVerts = {f2() / (overZ ? verts[2].getProjPos()[3] : 1) - f0() / (overZ ? verts[0].getProjPos()[3] : 1), f1() / (overZ ? verts[1].getProjPos()[3] : 1) - f0() / (overZ ? verts[0].getProjPos()[3] : 1), f2() / (overZ ? verts[2].getProjPos()[3] : 1) - f1() / (overZ ? verts[1].getProjPos()[3] : 1)};
         steps = {valVerts[0] / yVerts[0], valVerts[1] / yVerts[1], valVerts[2] / yVerts[2]};
-        values = {f0() / (overZ ? z[0] : 1) + steps[0] * offs[0], f0() / (overZ ? z[1] : 1) + steps[1] * offs[1], f1() / (overZ ? z[2] : 1) + steps[2] * offs[2]};
+        values = {f0() / (overZ ? z[0] : 1) + steps[0] * yOffset0, f0() / (overZ ? z[1] : 1) + steps[1] * yOffset0, f1() / (overZ ? z[2] : 1) + steps[2] * yOffset1};
     }
 
     T val(int i)

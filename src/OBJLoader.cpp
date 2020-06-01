@@ -313,3 +313,11 @@ RenderObject OBJLoader::toRenderObject(std::string name) const
 
     return temp;
 }
+
+std::vector<std::pair<std::string, RenderObject>> OBJLoader::toRenderObjects() const {
+    std::vector<std::pair<std::string, RenderObject>> temp;
+    for (auto const & entry : objects) {
+        temp.push_back({entry.first, toRenderObject(entry.first)});
+    }
+    return temp;
+}
