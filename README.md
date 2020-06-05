@@ -1,6 +1,11 @@
 # Software Graphics Engine
 By: Greg Zborovsky
 
+To run the default example:
+Extract the resources folder from the zip in the link below:
+https://drive.google.com/file/d/1hIbpT2HYk75rIr8vw1dUWTZyL2GzMVXF/view?usp=sharing
+And drop the resources folder into the root folder of this project
+
 ## Greg Zborovsky pd. 4
 ### Features I want to implement for final project: [All base features added!]
 * Finish texture loading/OBJ Loading
