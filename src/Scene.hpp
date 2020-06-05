@@ -36,6 +36,8 @@ public:
     void removeLight(std::string const &name);
     void addLight(std::string const &name, Light const &light);
     Light &getLight(std::string const &name);
+    
+    void clear();
 
     void renderToScreen(Camera const &cam, Screen &screen);
 };

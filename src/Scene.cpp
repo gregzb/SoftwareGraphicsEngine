@@ -508,3 +508,9 @@ void Scene::renderToScreen(Camera const &cam, Screen &screen)
         renderObject(cam, screen, skybox.value(), true);
     }
 }
+
+void Scene::clear() {
+    lights.clear();
+    objects.clear();
+    removeSkybox();
+}
