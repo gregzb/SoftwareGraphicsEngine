@@ -15,7 +15,7 @@
 #include "PixelGrid.hpp"
 #include "Material.hpp"
 
-void OBJLoader::parseMTL(std::string base, std::string mtlFileName)
+void OBJLoader::parseMTL(std::string const & base, std::string const & mtlFileName)
 {
     //resources is temporary!!!
     std::string totalName = base + "/" + mtlFileName;
@@ -125,12 +125,12 @@ void OBJLoader::parseMTL(std::string base, std::string mtlFileName)
     mtlFile.close();
 }
 
-OBJLoader::OBJLoader(std::string const &fileName)
+OBJLoader::OBJLoader(std::string const & base, std::string const &fileName)
 {
     currentObject = nullptr;
     currentMaterial = nullptr;
 
-    std::ifstream objFile(fileName);
+    std::ifstream objFile(base + "/" + fileName);
     std::string line;
     while (std::getline(objFile, line))
     {
@@ -144,7 +144,7 @@ OBJLoader::OBJLoader(std::string const &fileName)
         {
             std::string mtlFileName;
             iss >> mtlFileName;
-            parseMTL("resources", mtlFileName);
+            parseMTL(base, mtlFileName);
         }
         else if (infoType == "o")
         {

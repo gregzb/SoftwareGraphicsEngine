@@ -23,7 +23,7 @@ int main()
 {
     Material::TexFiltering = TextureFiltering::BILINEAR;
 
-    OBJLoader obj("resources/testscene.obj");
+    OBJLoader obj("resources", "testscene.obj");
     Screen screen(500, 500, true);
     Camera cam(40, static_cast<double>(screen.getWidth()) / screen.getHeight(), .1, 1000, true);
     Scene mainScene;
@@ -42,7 +42,7 @@ int main()
     mainScene.addLight("Point6", {LightType::Point, {}, Vec4(1.3, 0.9, 0.9) * 7, Vec4(1.3, 0.9, 0.9) * 7, {17, 2.35, -3.75}});
     mainScene.addLight("Directional", {LightType::Directional, {}, Vec4(0.2, 0.2, 0.4)*0.67, Vec4(0.2, 0.2, 0.4)*0.67, {-0.8, -0.7, -1.7}});
 
-    OBJLoader obj2("resources/skybox.obj");
+    OBJLoader obj2("resources", "skybox.obj");
     RenderObject skyBox = obj2.toRenderObject("Cube");
     skyBox.updateVertexNormals();
     skyBox.setRotation({0, (-24 + 90) * M_PI / 180, 0});
@@ -63,7 +63,7 @@ int main()
 
     mainScene.clear();
 
-    OBJLoader otherObj("resources/towerthing.obj");
+    OBJLoader otherObj("resources", "towerthing.obj");
 
     auto newObjects = otherObj.toRenderObjects();
     for (auto & object : newObjects) {

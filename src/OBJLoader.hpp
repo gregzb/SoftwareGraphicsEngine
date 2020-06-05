@@ -24,10 +24,10 @@ private:
     std::vector<Vec4> vt;
     std::vector<Vec4> vn;
 
-    void parseMTL(std::string base, std::string mtlFileName);
+    void parseMTL(std::string const & base, std::string const & mtlFileName);
 
 public:
-    OBJLoader(std::string const &fileName);
+    OBJLoader(std::string const & base, std::string const &fileName);
     RenderObject toRenderObject(std::string name) const;
     std::vector<std::pair<std::string, RenderObject>> toRenderObjects() const;
 };
