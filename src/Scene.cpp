@@ -34,11 +34,13 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
     // std::cout << cam.getViewMatrix().toString() << std::endl;
     // std::cout << std::endl;
     // std::cout << cam.getRotationMatrix().toString() << std::endl;
-    Mat4 const &mvMat = isSkybox ? cam.getRotationMatrix().multiply(object.getModelMatrix()) : cam.getViewMatrix().multiply(object.getModelMatrix());
+    Mat4 const &vMat = isSkybox ? cam.getRotationMatrix() : cam.getViewMatrix();
+    //Mat4 const &mvMat = isSkybox ? cam.getRotationMatrix().multiply(object.getModelMatrix()) : cam.getViewMatrix().multiply(object.getModelMatrix());
     Mat4 const &pMat = cam.isPerspective() ? cam.getPerspectiveProjectionMatrix() : cam.getOrthographicProjectionMatrix();
+    Mat4 const &vpMat = pMat.multiply(vMat);
 
-    Mat4 const &transposed = mvMat.transpose();
-    Mat4 const &inverted = transposed.invert();
+    // Mat4 const &transposed = mvMat.transpose();
+    // Mat4 const &inverted = transposed.invert();
 
     // std::vector<Vertex> &tris = object.getMesh(); // need to not make copy or smthing?
     // std::vector<int> const &indices = object.getMeshIndices();
@@ -95,8 +97,8 @@ void Scene::renderObject(Camera const &cam, Screen &screen, RenderObject &object
 
             //Vec4 const &no = std::get<2>(index) >= 0 ? norms[std::get<2>(index)].transform(mvMat.transpose().invert()) : Vec4();
             baseTri[j] = Vertex(po, te, no.normalize(), ta.normalize());
-            baseTri[j].getVertexPos().updateWorldPos(baseTri[j].getPos().transform(mvMat));
-            baseTri[j].getVertexPos().updateProjPos(baseTri[j].getWorldPos().transform(pMat));
+            baseTri[j].getVertexPos().updateWorldPos(baseTri[j].getPos().transform(mMat));
+            baseTri[j].getVertexPos().updateProjPos(baseTri[j].getWorldPos().transform(vpMat));
         }
 
         int pointsInside = 0;
@@ -456,6 +458,10 @@ void Scene::setSkybox(RenderObject const &object)
     skybox = object;
 }
 
+RenderObject & Scene::getSkybox() {
+    return skybox.value();
+}
+
 void Scene::removeSkybox()
 {
     skybox.reset();
@@ -489,7 +495,7 @@ void Scene::renderToScreen(Camera const &cam, Screen &screen)
     for (auto const &light : lights)
     {
         Light temp = light.second;
-        temp.pos = temp.pos.transform(vMat);
+        //temp.pos = temp.pos.transform(vMat);
         //std::cout << temp.pos << std::endl;
         transformedLights.insert({light.first, temp});
     }

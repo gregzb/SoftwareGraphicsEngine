@@ -31,10 +31,3 @@ for path in Path('.').rglob('*.mtl'):
 
     with open(f_path, 'w') as f:
         f.write('\n'.join(lines))
-            #print(os.path.normpath(joined))
-            #pa = Path(joined)
-            #print(joined, pa.name)
-            #im = Image.open(joined)
-            #im.save("")
-            # 
-    print(lines)

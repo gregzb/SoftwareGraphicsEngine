@@ -29,6 +29,7 @@ public:
     void removeObject(std::string const &name);
     void addObject(std::string const &name, RenderObject const &object);
     void setSkybox(RenderObject const &object);
+    RenderObject & getSkybox();
     void removeSkybox();
     RenderObject &getObject(std::string const &name);
 
