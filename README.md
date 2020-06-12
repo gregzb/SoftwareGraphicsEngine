@@ -55,6 +55,8 @@ And drop the resources folder into the root folder of this project
     ├── ...
 </pre>
 
+Note - convertObjImgToPPM.py is primarily intended for developer use and requires using Python3 and having Pillow installed. Paths to images should also be absolute paths.
+
 ## Features:
 * Render to ppm/ImageMagick/png
 * Basic 3d command input
