@@ -1,6 +1,36 @@
 # Software Graphics Engine
 By: Greg Zborovsky
 
+## Greg Zborovsky Pd. 4
+
+## Implemented Features For Final Project:
+* Proper OBJ/MTL loading
+* Proper Texture Loading
+* Bilinear Filtering
+* Orthographic Camera
+* Normal Mapping
+* Gamma Correction
+* Anti-Aliasing
+
+## More Details:
+* Proper OBJ/MTL loading
+  * Supports triangles & quadrilaterals, UV texture coordinates, vertex normals, multiple objects, and different texture types
+* Proper Texture Loading
+  * Off by one errors have been eliminated, some code refactoring
+* Bilinear Filtering
+  * When reading from a texture, interpolate between the closest four colors to get an approximate "in-between" color
+* Orthographic Camera & LookAt mode
+  * Previously only had a Perspective Camera, an Orthographic Camera mirrors what we have done in class
+  * LookAt mode allows me to choose a position to point my camera at rather than explicitly use Euler angles
+* Normal Mapping
+  * Based on a texture, offset the direction of the normals of a surface, allows for highly detailed but low-poly surfaces
+* Gamma Correction
+  * Raise input colors to power of 2.2 (gamma), and output to 1/2.2 - Accounts for how humans perceive light
+* Anti-Aliasing
+  * Done using a basic super sampling by rendering to *2w* x *2h* dimensions and scaling down to *w* x *h* using bilinear filtering
+* MDL & Animation were not included, but had animation been included, I would have opted for a keyframe-based system
+* Other existing features include: Offscreen clipping, Per-object transforms, Perspective-Correct Interpolation
+
 To run the default example *(Warning: Uses around **2GB** of memory)*:
 Extract the resources folder from the zip in the link below:
 
@@ -24,31 +54,6 @@ And drop the resources folder into the root folder of this project
     ├── ...
 </pre>
 
-## Greg Zborovsky pd. 4
-### Features I want to implement for final project: [All base features added!]
-* Finish texture loading/OBJ Loading
-  * Correct/ensure that texture loading works fine - Done
-  * Support multiple texture coordinates per vertex - Done
-  * Bilinear filtering during texture read  - Done
-  * Support quadrilaterals and other convex shapes in OBJ loading - Done
-* Normal mapping
-  * Will combine texture mapping and normals to alter light calculations as if triangle wasn't perfectly flat - Done
-* Orthographic Camera - Done
-* Sky Map
-  * Essentially a regular cube, but normals are inverted and texture is available on the inside. - Done
-  * (Maybe allow using normals from OBJ file?) - Done
-* Gamma correction
-  * Gamma correct all values related to user input and light except for non color data. (To power of 2.2, and to power of 1/2.2 at end) - Done I think?
-* Basic Supersampling - Done
-
-### Features I might want to add for final project:
-* MDL Support
-* Animaton Support
-  * Based on keyframe animation
-  * Every object's/camera's/light's position/rotation/scale should be animatable, maybe special animatable features for each object type
-  * Multiple interpolation types - linear, quadratic, cubic, etc
-* Quaternion-based rotation
-
 ## Features:
 * Render to ppm/ImageMagick/png
 * Basic 3d command input
@@ -68,7 +73,6 @@ And drop the resources folder into the root folder of this project
 * 2x Supersampling
 
 ## Todo:
-* MDL?
 * Better animation support
 * Quaternions
 * Ray tracing
