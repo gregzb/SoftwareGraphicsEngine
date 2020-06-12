@@ -31,6 +31,7 @@ By: Greg Zborovsky
 * MDL & Animation were not included, but had animation been included, I would have opted for a keyframe-based system
 * Other existing features include: Offscreen clipping, Per-object transforms, Perspective-Correct Interpolation
 
+### Default Example:
 To run the default example *(Warning: Uses around **2GB** of memory)*:
 Extract the resources folder from the zip in the link below:
 
